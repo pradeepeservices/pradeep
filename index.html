@@ -19,17 +19,23 @@
         body { font-family: Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; color: #333; }
         header { background: linear-gradient(135deg, #1e3c72, #2a5298, #6b11ff); color: white; text-align: center; padding: 25px 20px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         
-        .logo-area { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 8px; }
-        .site-logo { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid white; background: white; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #1e3c72; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .logo-area { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 8px; flex-wrap: wrap; }
+        .site-logo { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid white; background: white; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #1e3c72; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); overflow: hidden; }
+        .site-logo img { width: 100%; height: 100%; object-fit: cover; }
         
         header h1 { margin: 0; font-size: 28px; letter-spacing: 0.5px; }
         header p { margin: 5px 0 0; font-size: 14px; opacity: 0.9; }
 
         /* Top Bar: Profile Login & Language Switcher */
         .top-bar { position: absolute; top: 15px; right: 20px; display: flex; align-items: center; gap: 12px; }
-        .profile-icon { background: rgba(255,255,255,0.2); color: white; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 18px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .profile-icon { background: rgba(255,255,255,0.2); color: white; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 18px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 5px rgba(0,0,0,0.2); overflow: hidden; }
+        .profile-icon img { width: 100%; height: 100%; object-fit: cover; }
         .profile-icon:hover { background: rgba(255,255,255,0.4); }
         .lang-select { padding: 5px 10px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; background: white; color: #1e3c72; }
+
+        /* Quick Upload Box inside Header */
+        .header-upload-box { background: rgba(255, 255, 255, 0.15); padding: 8px 12px; border-radius: 6px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; border: 1px dashed rgba(255,255,255,0.5); }
+        .header-upload-box input[type="file"] { color: white; font-size: 11px; cursor: pointer; }
 
         /* Social Media Banner */
         .social-banner { background: #1a1a2e; color: white; text-align: center; padding: 10px; font-size: 14px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; }
@@ -82,78 +88,31 @@
         .page-box button { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 6px; }
         .page-box button:hover { opacity: 0.9; }
 
-        /* ===== Professional UI Upgrade ===== */
-        :root{
-            --primary:#2457e6; --primary2:#6c3df5; --ink:#172033; --muted:#64748b;
-            --card:#ffffff; --soft:#f5f7fb; --line:#e6eaf2; --success:#16a34a;
-        }
-        *{box-sizing:border-box}
-        body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:linear-gradient(180deg,#f6f8fc 0,#eef2f9 100%);color:var(--ink)}
-        header{background:linear-gradient(135deg,#132a67 0%,#2457e6 52%,#7139f5 100%);padding:30px 20px 26px;border-radius:0 0 24px 24px}
-        .site-logo{width:64px;height:64px;border:3px solid rgba(255,255,255,.8);box-shadow:0 8px 25px rgba(0,0,0,.2)}
-        header h1{font-size:clamp(25px,4vw,36px);font-weight:800}
-        header p{font-size:15px}
-        .social-banner{background:#111827;padding:9px 12px;gap:8px}
-        .social-banner a{border-radius:999px;padding:7px 14px}
-        .dynamic-ad-container{margin:18px auto}
-        .ad-banner-box{border:1px solid var(--line);border-radius:18px;padding:8px;box-shadow:0 10px 30px rgba(31,41,55,.08)}
-        .container{gap:18px;margin:18px auto}
-        .box{width:350px;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 10px 28px rgba(31,41,55,.07);transition:.22s}
-        .box:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(31,41,55,.11)}
-        .box-header{padding:15px;font-size:16px;letter-spacing:.2px}
-        .box-content{padding:15px;min-height:185px;max-height:270px}
-        .box-content li{padding:11px 12px;margin-bottom:8px;border:1px solid #edf0f5;border-radius:10px;background:#fbfcfe;text-decoration:none;line-height:1.45;transition:.18s}
-        .box-content li:hover{background:#eef4ff;border-color:#cbd9ff}
-        .portals-section,.tools-section{border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 30px rgba(31,41,55,.06)}
-        .portal-badge,.tool-card{border-radius:12px}
-        .tool-card{padding:14px 18px}
-        footer{border-radius:24px 24px 0 0}
-        .page-modal{backdrop-filter:blur(7px);background:rgba(9,16,35,.65)}
-        .page-box{width:min(94%,820px);border-radius:20px;padding:24px;box-shadow:0 25px 80px rgba(0,0,0,.28)}
-        .page-box input,.page-box textarea,.page-box select{border:1px solid #d9dfeb;border-radius:10px;padding:11px 12px;outline:none}
-        .page-box input:focus,.page-box textarea:focus,.page-box select:focus{border-color:#6b8cff;box-shadow:0 0 0 3px rgba(36,87,230,.1)}
-        .page-box button{border-radius:10px;padding:11px 15px}
-        .admin-card{background:#fff;border:1px solid #e8edf5;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 5px 20px rgba(31,41,55,.04)}
-        .admin-title{font-size:18px;font-weight:800;margin:0 0 12px;color:#172554}
-        .upload-zone{border:2px dashed #b9c8f7;background:#f7f9ff;border-radius:14px;padding:18px;text-align:center;cursor:pointer}
-        .upload-zone:hover{background:#eef4ff}
-        .preview-thumb{width:100%;max-height:180px;object-fit:contain;border-radius:10px;background:#f1f5f9;margin-top:10px}
-        .editor-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
-        .editor-toolbar button{width:auto!important;margin:0!important}
-        .tool-btn{background:#eef4ff!important;color:#2447a8!important;border:1px solid #d7e1ff!important}
-        .download-btn{background:linear-gradient(135deg,#2457e6,#7139f5)!important}
-        .full-page{display:none;min-height:75vh;padding:26px 16px 50px}
-        .vacancy-shell{width:min(1120px,96%);margin:auto;background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(31,41,55,.1)}
-        .vacancy-hero{padding:30px;background:linear-gradient(135deg,#14265d,#2457e6,#7139f5);color:#fff}
-        .vacancy-hero h1{margin:8px 0;font-size:clamp(25px,4vw,40px)}
-        .vacancy-meta{display:flex;flex-wrap:wrap;gap:8px}
-        .vacancy-chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:7px 11px;border-radius:999px;font-size:12px}
-        .vacancy-body{padding:26px}
-        .vacancy-body .details{white-space:pre-line;line-height:1.8;color:#334155;font-size:15px;background:#f8fafc;border:1px solid #e7ebf2;border-radius:14px;padding:20px}
-        .back-home{display:inline-flex;align-items:center;gap:8px;border:0;background:#fff;color:#173a9c;padding:10px 15px;border-radius:10px;font-weight:800;cursor:pointer}
-        .vacancy-apply{display:inline-block;margin-top:18px;padding:13px 20px;border-radius:11px;background:#16a34a;color:#fff;text-decoration:none;font-weight:800}
-        .editor-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
-        .editor-preview{min-height:300px;background:repeating-conic-gradient(#f0f2f6 0 25%,#fff 0 50%) 50%/18px 18px;border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-        .editor-preview img{max-width:100%;max-height:360px;object-fit:contain;border-radius:8px}
-        .quality-row{display:grid;grid-template-columns:1fr 100px;gap:10px;align-items:center}
-        @media(max-width:760px){.top-bar{position:static;justify-content:flex-end;margin-bottom:12px}.logo-area{margin-top:4px}.editor-grid{grid-template-columns:1fr}.box{width:100%}.page-box{padding:17px}.vacancy-body{padding:18px}}
-        .vacancy-info-label{font-size:12px;color:#64748b}
-
+        .admin-card { background:#fff; border:1px solid #e8edf5; border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:0 5px 20px rgba(31,41,55,.04); }
+        .admin-title { font-size:18px; font-weight:800; margin:0 0 12px; color:#172554; }
+        .full-page { display:none; min-height:75vh; padding:26px 16px 50px; }
+        .vacancy-shell { width:min(1120px,96%); margin:auto; background:#fff; border:1px solid #e6eaf2; border-radius:24px; overflow:hidden; box-shadow:0 20px 60px rgba(31,41,55,.1); }
+        .vacancy-hero { padding:30px; background:linear-gradient(135deg,#14265d,#2457e6,#7139f5); color:#fff; }
+        .vacancy-hero h1 { margin:8px 0; font-size:clamp(25px,4vw,40px); }
+        .vacancy-meta { display:flex; flex-wrap:wrap; gap:8px; }
+        .vacancy-chip { background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25); padding:7px 11px; border-radius:999px; font-size:12px; }
+        .vacancy-body { padding:26px; }
+        .vacancy-body .details { white-space:pre-line; line-height:1.8; color:#334155; font-size:15px; background:#f8fafc; border:1px solid #e7ebf2; border-radius:14px; padding:20px; }
+        .back-home { display:inline-flex; align-items:center; gap:8px; border:0; background:#fff; color:#173a9c; padding:10px 15px; border-radius:10px; font-weight:800; cursor:pointer; }
+        .vacancy-apply { display:inline-block; margin-top:18px; padding:13px 20px; border-radius:11px; background:#16a34a; color:#fff; text-decoration:none; font-weight:800; }
+        
+        @media(max-width:760px){.top-bar{position:static;justify-content:flex-end;margin-bottom:12px}.logo-area{margin-top:4px}.box{width:100%}.page-box{padding:17px}.vacancy-body{padding:18px}}
     </style>
 </head>
 <body>
-<!-- Top CDN Injection Area -->
-<div id="top-ad-container" style="text-align:center; background:#fff; padding:8px 0; border-bottom:1px solid #e6eaf2;">
-    <!-- Add your Top Banner / AdScript CDN here -->
-</div>
 
 <div id="appHome">
 
     <header>
         <div class="top-bar">
-            <!-- Profile Login Icon with New Logo Integrated -->
-            <div class="profile-icon" onclick="openLoginModal()" title="Admin / User Login" style="overflow:hidden; padding:0;">
-                <img src="93da493e-387b-4805-b014-8f9c326a4326.png" alt="Profile Logo" style="width:100%; height:100%; object-fit:cover;">
+            <!-- Profile Login Icon -->
+            <div class="profile-icon" onclick="openLoginModal()" title="Admin / User Login" id="profileIconButton">
+                👤
             </div>
             <!-- Language Switcher -->
             <select class="lang-select" id="languageSwitcher" onchange="changeLanguage()">
@@ -164,13 +123,19 @@
         
         <div class="logo-area">
             <div class="site-logo" id="displayLogoBox">
-                <img src="93da493e-387b-4805-b014-8f9c326a4326.png" alt="Pradeep E Services Logo" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                PE
             </div>
             <div>
                 <h1 id="header-title">Pradeep E Services</h1>
             </div>
         </div>
         <p id="header-subtitle">Aapka Apna Cyber Cafe & Online Seva Kendra</p>
+
+        <!-- Direct Photo / Logo Upload Option for User -->
+        <div class="header-upload-box">
+            <span>📷 Upload Logo/Photo:</span>
+            <input type="file" id="siteLogoFileInput" accept="image/*" onchange="handleHeaderLogoUpload(event)">
+        </div>
     </header>
 
     <!-- Social Media Banner -->
@@ -182,7 +147,7 @@
         <a href="https://instagram.com" target="_blank" class="ig-btn">📸 Instagram</a>
     </div>
 
-    <!-- Active Advertisement Banner Display Area with New Logo Integrated -->
+    <!-- Active Advertisement Banner Display Area -->
     <div class="dynamic-ad-container" id="activeAdContainer">
         <div class="ad-banner-box" id="adBannerDisplay">
             <img src="93da493e-387b-4805-b014-8f9c326a4326.png" alt="Pradeep E Services Ad Banner" style="width:100%; max-height:160px; object-fit:contain; border-radius:6px;">
@@ -261,7 +226,7 @@
         </div>
     </div>
 
-    <!-- Footer with English Links -->
+    <!-- Footer -->
     <footer>
         <div class="footer-links">
             <span onclick="openPage('about')">About Us</span>
@@ -313,11 +278,6 @@
         </div>
     </div>
 
-<!-- Bottom CDN Injection Area -->
-<div id="bottom-ad-container" style="text-align:center; background:#16213e; padding:10px 0;">
-    <!-- Add your Footer / Bottom Banner Script CDN here -->
-</div>
-
     <script>
         // Firebase Initialization & Sync Setup
         const firebaseConfig = {
@@ -336,19 +296,14 @@
         const db = firebase.database();
 
         window.onload = function() {
-            let visits = localStorage.getItem('site_total_visits');
-            if(!visits) { visits = 1250; } else { visits = parseInt(visits) + 1; }
-            localStorage.setItem('site_total_visits', visits);
-
             if(!localStorage.getItem('admin_pass')) { localStorage.setItem('admin_pass', 'guru82'); }
-            if(!localStorage.getItem('admin_sec')) { localStorage.setItem('admin_sec', '8282'); }
 
             // Default Footer Page Contents
             if(!localStorage.getItem('page_about')) {
                 localStorage.setItem('page_about', 'Pradeep E Services is a trusted online portal providing accurate updates on MP Online, CSC services, Government Jobs, and various welfare schemes.');
             }
             if(!localStorage.getItem('page_terms')) {
-                localStorage.setItem('page_terms', 'Welcome to Pradeep E Services. All information provided on this website is for general informational purposes based on official notifications and online web sources. Users are advised to verify details from official portals before submitting any online application or financial transaction. We are not responsible for any clerical errors or server delays.');
+                localStorage.setItem('page_terms', 'Welcome to Pradeep E Services. All information provided on this website is for general informational purposes based on official notifications and online web sources.');
             }
             if(!localStorage.getItem('page_contact')) {
                 localStorage.setItem('page_contact', 'Mobile: 7869346045\nEmail: support@pradeepeservices.com\nLocation: Madhya Pradesh, India');
@@ -368,6 +323,21 @@
             syncPortalsFromFirebase();
         }
 
+        // Direct Header Logo Upload Handler
+        function handleHeaderLogoUpload(event) {
+            let file = event.target.files[0];
+            if(file) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let base64Image = e.target.result;
+                    localStorage.setItem('custom_site_logo', base64Image);
+                    applySavedSiteContent();
+                    alert('Logo / Photo updated successfully on the website!');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function applySavedSiteContent() {
             let savedDesc = localStorage.getItem('custom_site_desc');
             if(savedDesc) { document.getElementById('header-subtitle').innerText = savedDesc; }
@@ -375,10 +345,10 @@
             let savedLogo = localStorage.getItem('custom_site_logo');
             if(savedLogo) {
                 let logoBox = document.getElementById('displayLogoBox');
-                if(savedLogo.startsWith('http') || savedLogo.startsWith('data:image')) {
-                    logoBox.innerHTML = `<img src="${savedLogo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-                } else {
-                    logoBox.innerText = savedLogo;
+                let profileIcon = document.getElementById('profileIconButton');
+                logoBox.innerHTML = `<img src="${savedLogo}" alt="Logo">`;
+                if(profileIcon) {
+                    profileIcon.innerHTML = `<img src="${savedLogo}" alt="Profile">`;
                 }
             }
 
@@ -398,7 +368,6 @@
             }
         }
 
-        // Real-time synchronization with Firebase for all box items
         function syncDataFromFirebase() {
             const categories = ['jobs', 'admit', 'result', 'yojana', 'offline'];
             categories.forEach(cat => {
@@ -415,7 +384,6 @@
             });
         }
 
-        // Real-time synchronization for Social Media Links from Firebase
         function syncSocialLinksFromFirebase() {
             db.ref('social_links').on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -436,7 +404,6 @@
             });
         }
 
-        // Real-time synchronization for General Settings (Tagline & Logo) from Firebase
         function syncGeneralSettingsFromFirebase() {
             db.ref('general_settings').on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -448,7 +415,6 @@
             });
         }
 
-        // Real-time synchronization for Portals from Firebase
         function syncPortalsFromFirebase() {
             db.ref('custom_portals_list').on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -479,7 +445,6 @@
             }
         }
 
-        // Offline PDF storage (IndexedDB avoids localStorage size limits for PDF files)
         const OFFLINE_PDF_DB='PradeepEServicesPDFDB';
         function openOfflinePdfDB(){
             return new Promise((resolve,reject)=>{
@@ -506,7 +471,7 @@
         }
         async function openOfflinePdf(id){
             const blob=await getOfflinePdfBlob(id);
-            if(!blob){alert('PDF file not found in this browser. Please upload it again from Admin.');return;}
+            if(!blob){alert('PDF file not found in browser storage.');return;}
             const url=URL.createObjectURL(blob); window.open(url,'_blank'); setTimeout(()=>URL.revokeObjectURL(url),60000);
         }
         function updateOfflinePdfManager(){
@@ -595,7 +560,6 @@
                 bannerBox.innerHTML = `<img src="${savedAd}" alt="Advertisement" onclick="window.open('${savedAd}', '_blank')">`;
             } else {
                 container.style.display = 'block';
-                bannerBox.innerHTML = `<img src="93da493e-387b-4805-b014-8f9c326a4326.png" alt="Pradeep E Services Ad Banner" style="width:100%; max-height:160px; object-fit:contain; border-radius:6px;">`;
             }
         }
 
@@ -656,7 +620,7 @@
                 <hr style="margin:10px 0 15px 0;">
                 
                 <div class="admin-card">
-                    <div class="admin-title">📢 Add / Manage Box Items (Jobs, Admit Card, Results etc.)</div>
+                    <div class="admin-title">📢 Add / Manage Box Items</div>
                     <select id="selectBoxCategory" onchange="updateOfflinePdfManager()">
                         <option value="jobs">Latest Jobs</option>
                         <option value="admit">Admit Card</option>
@@ -664,11 +628,11 @@
                         <option value="yojana">Sarkari Yojana</option>
                         <option value="offline">Offline Forms</option>
                     </select>
-                    <input type="text" id="newItemTitle" placeholder="Post / Item Title (e.g. MP Police Constable Result 2026)">
-                    <textarea id="newItemDates" placeholder="Important Dates (e.g. Start: 01/01/2026, Last: 25/01/2026)" rows="2"></textarea>
-                    <textarea id="newItemFee" placeholder="Application Fee (e.g. Gen: ₹500, SC/ST: ₹250)" rows="2"></textarea>
-                    <input type="text" id="newItemAge" placeholder="Age Limit (e.g. 18-28 Years)">
-                    <input type="text" id="newItemTotal" placeholder="Total Posts (e.g. 1500 Posts)">
+                    <input type="text" id="newItemTitle" placeholder="Post / Item Title">
+                    <textarea id="newItemDates" placeholder="Important Dates" rows="2"></textarea>
+                    <textarea id="newItemFee" placeholder="Application Fee" rows="2"></textarea>
+                    <input type="text" id="newItemAge" placeholder="Age Limit">
+                    <input type="text" id="newItemTotal" placeholder="Total Posts">
                     <textarea id="newItemDetails" placeholder="Full Details / Description" rows="4"></textarea>
                     <input type="text" id="newItemApply" placeholder="Apply Online Link (URL)">
                     <input type="text" id="newItemOfficial" placeholder="Official Website Link (URL)">
@@ -682,16 +646,15 @@
                 </div>
 
                 <div class="admin-card">
-                    <div class="admin-title">🎨 Customize Site Logo & Tagline</div>
+                    <div class="admin-title">🎨 Customize Site Tagline</div>
                     <input type="text" id="adminTaglineInput" placeholder="New Subtitle / Tagline">
-                    <input type="text" id="adminLogoInput" placeholder="Logo Text or Image URL">
                     <button onclick="saveGeneralSettingsToFirebase()">Save General Settings</button>
                 </div>
 
                 <div class="admin-card">
                     <div class="admin-title">🌐 Manage Important Portals Links</div>
-                    <input type="text" id="adminPortalName" placeholder="Portal Name (e.g. MP Online)">
-                    <input type="text" id="adminPortalLink" placeholder="Portal URL (https://...)">
+                    <input type="text" id="adminPortalName" placeholder="Portal Name">
+                    <input type="text" id="adminPortalLink" placeholder="Portal URL">
                     <button onclick="addNewPortalToFirebase()">Add Portal Link</button>
                 </div>
 
@@ -749,13 +712,10 @@
 
         function saveGeneralSettingsToFirebase() {
             let desc = document.getElementById('adminTaglineInput').value;
-            let logo = document.getElementById('adminLogoInput').value;
-            
             let data = {};
             if(desc) data.desc = desc;
-            if(logo) data.logo = logo;
 
-            db.ref('general_settings').set(data, (error) => {
+            db.ref('general_settings').update(data, (error) => {
                 if(error) {
                     alert('Error saving settings');
                 } else {
@@ -831,7 +791,7 @@
             } else if(toolType === 'bg') {
                 html = `
                     <h2>✨ Background Remove / Change</h2>
-                    <p style="font-size:13px; color:#666;">Upload photo to change background color (White / Blue / Red).</p>
+                    <p style="font-size:13px; color:#666;">Upload photo to change background color.</p>
                     <input type="file" id="bgImageInput" accept="image/*">
                     <select id="bgColorSelect" style="margin-top:10px;">
                         <option value="#ffffff">White Background</option>
@@ -848,8 +808,8 @@
         function previewToolImage(event) {
             let reader = new FileReader();
             reader.onload = function(){
-                let output = document.getElementById('toolPreviewArea');
-                output.innerHTML = `<img src="${reader.result}" style="max-width:100%; max-height:200px; border-radius:6px; border:1px solid #ccc;">`;
+                let output = document.getElementById('toolPreviewImage');
+                if(output) output.src = reader.result;
             };
             reader.readAsDataURL(event.target.files[0]);
         }
@@ -891,7 +851,7 @@
                 document.getElementById('box-result').innerText = 'रिजल्ट्स (Results)';
                 document.getElementById('box-yojana').innerText = 'सरकारी योजना (संबल, ई-श्रम आदि)';
                 document.getElementById('box-offline').innerText = 'ऑफलाइन फॉर्म (PDF Download)';
-                document.getElementById('portals-heading').innerText = '🌐 महत्वपूर्ण पोर्टल लिंक्स (Important Portals)';
+                document.getElementById('portals-heading').innerText = '🌐 महत्वपूर्ण पोर्टल लिंक्स';
                 document.getElementById('tools-heading').innerText = '🛠️ ऑनलाइन यूटिलिटी टूल्स';
             } else {
                 document.getElementById('header-subtitle').innerText = 'Aapka Apna Cyber Cafe & Online Seva Kendra';
