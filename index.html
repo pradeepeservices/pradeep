@@ -54,7 +54,7 @@
         .box-content { padding: 12px; min-height: 180px; max-height: 250px; overflow-y: auto; }
         .box-content ul { padding-left: 20px; margin: 0; }
         .box-content li { margin-bottom: 10px; cursor: pointer; color: #2a5298; font-size: 13px; text-decoration: underline; font-weight: 500; }
-        .box-content li:hover { color: #6b11ff; }
+        .box-content li:hover { opacity: 0.8; }
 
         /* Important Portals Quick Access Section */
         .portals-section { width: 95%; max-width: 1200px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; border: 2px solid #6b11ff; box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
@@ -325,6 +325,7 @@
             syncGeneralSettingsFromFirebase();
             syncPortalsFromFirebase();
             syncFooterPagesFromFirebase();
+            applyBoxTypography();
         }
 
         function applySavedSiteContent() {
@@ -358,6 +359,24 @@
             }
         }
 
+        function applyBoxTypography() {
+            const categories = ['jobs', 'admit', 'result', 'yojana', 'offline', 'news'];
+            categories.forEach(cat => {
+                let font = localStorage.getItem('box_font_' + cat);
+                let color = localStorage.getItem('box_color_' + cat);
+                let contentBox = document.getElementById('content-' + cat);
+                if(contentBox) {
+                    if(font) contentBox.style.fontFamily = font;
+                    if(color) {
+                        contentBox.style.color = color;
+                        // Also update li items text color inside this box
+                        let lis = contentBox.querySelectorAll('li');
+                        lis.forEach(li => li.style.color = color);
+                    }
+                }
+            });
+        }
+
         function syncDataFromFirebase() {
             const categories = ['jobs', 'admit', 'result', 'yojana', 'offline', 'news'];
             categories.forEach(cat => {
@@ -370,7 +389,21 @@
                         localStorage.removeItem('box_items_' + cat);
                     }
                     loadBoxItemsIntoSite(cat);
+                    applyBoxTypography();
                 });
+            });
+
+            db.ref('box_typography').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    categories.forEach(cat => {
+                        if(data[cat]) {
+                            if(data[cat].font) localStorage.setItem('box_font_' + cat, data[cat].font);
+                            if(data[cat].color) localStorage.setItem('box_color_' + cat, data[cat].color);
+                        }
+                    });
+                    applyBoxTypography();
+                }
             });
         }
 
@@ -500,6 +533,7 @@
                 if(boxKey === 'yojana') contentBox.innerHTML = '<ul><li>Sambal Card Registration & Status</li></ul>';
                 if(boxKey === 'offline') contentBox.innerHTML = '<ul><li>Offline Vacancy Form PDF Download</li></ul>';
                 if(boxKey === 'news') contentBox.innerHTML = '<ul><li>Latest Important Updates & Notifications</li></ul>';
+                applyBoxTypography();
                 return;
             }
 
@@ -511,6 +545,7 @@
             });
             html += '</ul>';
             contentBox.innerHTML = html;
+            applyBoxTypography();
         }
 
         function openVacancyPage(cat, itemId) {
@@ -653,6 +688,34 @@
                 {key: 'news', name: 'News / सूचना'}
             ];
 
+            let typographyAdminHtml = '';
+            categories.forEach(cat => {
+                let curFont = localStorage.getItem('box_font_' + cat) || 'Arial, sans-serif';
+                let curColor = localStorage.getItem('box_color_' + cat) || '#2a5298';
+                typographyAdminHtml += `
+                    <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:10px; border-radius:6px; margin-bottom:10px;">
+                        <b style="color:#172554; font-size:14px;">${cat.toUpperCase()} Box Typography</b>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:6px;">
+                            <div>
+                                <label style="font-size:12px; font-weight:bold;">Font Family:</label>
+                                <select id="adminFont_${cat}" style="margin:4px 0 0 0;">
+                                    <option value="Arial, sans-serif" ${curFont.includes('Arial')?'selected':''}>Arial</option>
+                                    <option value="'Courier New', monospace" ${curFont.includes('Courier')?'selected':''}>Courier New</option>
+                                    <option value="Georgia, serif" ${curFont.includes('Georgia')?'selected':''}>Georgia</option>
+                                    <option value="'Times New Roman', serif" ${curFont.includes('Times')?'selected':''}>Times New Roman</option>
+                                    <option value="'Trebuchet MS', sans-serif" ${curFont.includes('Trebuchet')?'selected':''}>Trebuchet MS</option>
+                                    <option value="Verdana, sans-serif" ${curFont.includes('Verdana')?'selected':''}>Verdana</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size:12px; font-weight:bold;">Text Color:</label>
+                                <input type="color" id="adminColor_${cat}" value="${curColor}" style="height:38px; padding:2px; margin:4px 0 0 0; cursor:pointer;">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
             let manageItemsHtml = '';
             categories.forEach(catObj => {
                 let items = JSON.parse(localStorage.getItem('box_items_' + catObj.key)) || [];
@@ -705,6 +768,13 @@
                 </div>
                 <hr style="margin:10px 0 15px 0;">
                 
+                <div class="admin-card">
+                    <div class="admin-title">🎨 Text Font & Color Manager (Jobs, Admit Card, etc.)</div>
+                    <p style="font-size:12px; color:#666; margin-top:0;">Change text font style and text color for each section box:</p>
+                    ${typographyAdminHtml}
+                    <button type="button" onclick="saveTypographyToFirebase()">Save Font & Color Changes</button>
+                </div>
+
                 <div class="admin-card">
                     <div class="admin-title">📷 Upload Header Logo / Profile Photo</div>
                     <input type="file" id="adminLogoFileInput" accept="image/*" style="margin-bottom:8px;">
@@ -803,6 +873,26 @@
                 </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
+        }
+
+        function saveTypographyToFirebase() {
+            const categories = ['jobs', 'admit', 'result', 'yojana', 'offline', 'news'];
+            let typographyData = {};
+            categories.forEach(cat => {
+                let font = document.getElementById('adminFont_' + cat).value;
+                let color = document.getElementById('adminColor_' + cat).value;
+                localStorage.setItem('box_font_' + cat, font);
+                localStorage.setItem('box_color_' + cat, color);
+                typographyData[cat] = { font, color };
+            });
+
+            db.ref('box_typography').set(typographyData).then(() => {
+                applyBoxTypography();
+                alert('Text font and color successfully updated and synced!');
+                openAdminDashboard();
+            }).catch((error) => {
+                alert('Error saving typography: ' + error.message);
+            });
         }
 
         // Delete Item from Firebase
