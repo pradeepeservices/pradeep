@@ -192,6 +192,16 @@
                 </ul>
             </div>
         </div>
+
+        <!-- News / सूचना -->
+        <div class="box" style="border-color: #8b5cf6;">
+            <div class="box-header" style="background: linear-gradient(135deg, #6d28d9, #8b5cf6);" id="box-news">News / सूचना</div>
+            <div class="box-content" id="content-news">
+                <ul>
+                    <li>Latest Important Updates & Notifications</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <!-- Important Portals Quick Access Section -->
@@ -336,6 +346,7 @@
             loadBoxItemsIntoSite('result');
             loadBoxItemsIntoSite('yojana');
             loadBoxItemsIntoSite('offline');
+            loadBoxItemsIntoSite('news');
 
             let savedPortals = JSON.parse(localStorage.getItem('custom_portals_list'));
             if(savedPortals && savedPortals.length > 0) {
@@ -348,7 +359,7 @@
         }
 
         function syncDataFromFirebase() {
-            const categories = ['jobs', 'admit', 'result', 'yojana', 'offline'];
+            const categories = ['jobs', 'admit', 'result', 'yojana', 'offline', 'news'];
             categories.forEach(cat => {
                 db.ref('box_items_' + cat).on('value', (snapshot) => {
                     const data = snapshot.val();
@@ -488,6 +499,7 @@
                 if(boxKey === 'result') contentBox.innerHTML = '<ul><li>Check Exam Results & Merit Lists</li></ul>';
                 if(boxKey === 'yojana') contentBox.innerHTML = '<ul><li>Sambal Card Registration & Status</li></ul>';
                 if(boxKey === 'offline') contentBox.innerHTML = '<ul><li>Offline Vacancy Form PDF Download</li></ul>';
+                if(boxKey === 'news') contentBox.innerHTML = '<ul><li>Latest Important Updates & Notifications</li></ul>';
                 return;
             }
 
@@ -626,7 +638,8 @@
                 {key: 'admit', name: 'Admit Card'},
                 {key: 'result', name: 'Results'},
                 {key: 'yojana', name: 'Sarkari Yojana'},
-                {key: 'offline', name: 'Offline Forms'}
+                {key: 'offline', name: 'Offline Forms'},
+                {key: 'news', name: 'News / सूचना'}
             ];
 
             let manageItemsHtml = '';
@@ -730,6 +743,7 @@
                         <option value="result">Results</option>
                         <option value="yojana">Sarkari Yojana</option>
                         <option value="offline">Offline Forms</option>
+                        <option value="news">News / सूचना</option>
                     </select>
                     <input type="text" id="newItemTitle" placeholder="Post / Item Title">
                     <textarea id="newItemDates" placeholder="Important Dates" rows="2"></textarea>
@@ -779,7 +793,7 @@
 
         // Delete Item from Firebase
         function deleteItemFromFirebase(cat, itemId) {
-            if(confirm('Kya aap is post को delete karna chahte hain?')) {
+            if(confirm('Kya aap is post ko delete karna chahte hain?')) {
                 db.ref('box_items_' + cat + '/' + itemId).remove().then(() => {
                     alert('Post successfully delete ho gayi!');
                     openAdminDashboard();
@@ -1143,6 +1157,7 @@
                 document.getElementById('box-result').innerText = 'रिजल्ट्स (Results)';
                 document.getElementById('box-yojana').innerText = 'सरकारी योजना (संबल, ई-श्रम आदि)';
                 document.getElementById('box-offline').innerText = 'ऑफलाइन फॉर्म (PDF Download)';
+                document.getElementById('box-news').innerText = 'न्यूज़ / सूचना (News)';
                 document.getElementById('portals-heading').innerText = '🌐 महत्वपूर्ण पोर्टल लिंक्स';
                 document.getElementById('tools-heading').innerText = '🛠️ ऑनलाइन यूटिलिटी टूल्स';
             } else {
@@ -1152,6 +1167,7 @@
                 document.getElementById('box-result').innerText = 'Results';
                 document.getElementById('box-yojana').innerText = 'Sarkari Yojana (Sambal, e-Shram etc.)';
                 document.getElementById('box-offline').innerText = 'Offline Forms (PDF Download)';
+                document.getElementById('box-news').innerText = 'News / सूचना';
                 document.getElementById('portals-heading').innerText = '🌐 Important Portal Links';
                 document.getElementById('tools-heading').innerText = '🛠️ Online Utility Tools';
             }
