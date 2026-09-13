@@ -402,7 +402,7 @@
             db.ref('custom_portals_list').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
-                    const portalsArray = Object.values(data);
+                    const portalsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
                     localStorage.setItem('custom_portals_list', JSON.stringify(portalsArray));
                     applySavedSiteContent();
                 }
@@ -653,6 +653,27 @@
                 manageItemsHtml = `<p style="font-size:13px; color:#666;">No posts added yet.</p>`;
             }
 
+            // Portals Manage List Html
+            let portalsList = JSON.parse(localStorage.getItem('custom_portals_list')) || [];
+            let managePortalsHtml = '';
+            if(portalsList.length > 0) {
+                portalsList.forEach(portal => {
+                    let safeName = (portal.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                    let safeLink = (portal.link || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                    managePortalsHtml += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:6px; margin-bottom:6px; font-size:13px;">
+                            <span style="font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%;">${safeName}</span>
+                            <div style="display:flex; gap:6px;">
+                                <button type="button" onclick="editPortalPrompt('${portal.id}', '${safeName}', '${safeLink}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer; width:auto; margin:0;">Edit</button>
+                                <button type="button" onclick="deletePortalFromFirebase('${portal.id}')" style="background:#dc2626; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer; width:auto; margin:0;">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                managePortalsHtml = `<p style="font-size:13px; color:#666;">No portal links added yet.</p>`;
+            }
+
             let html = `
                 <h2>Admin Control Panel</h2>
                 <hr style="margin:10px 0 15px 0;">
@@ -735,6 +756,9 @@
 
                 <div class="admin-card">
                     <div class="admin-title">🌐 Manage Important Portals Links</div>
+                    <div style="max-height:180px; overflow-y:auto; border:1px solid #cbd5e1; padding:10px; border-radius:6px; background:#fff; margin-bottom:10px;">
+                        ${managePortalsHtml}
+                    </div>
                     <input type="text" id="adminPortalName" placeholder="Portal Name">
                     <input type="text" id="adminPortalLink" placeholder="Portal URL">
                     <button type="button" onclick="addNewPortalToFirebase()">Add Portal Link</button>
@@ -755,7 +779,7 @@
 
         // Delete Item from Firebase
         function deleteItemFromFirebase(cat, itemId) {
-            if(confirm('Kya aap is post ko delete karna chahte hain?')) {
+            if(confirm('Kya aap is post को delete karna chahte hain?')) {
                 db.ref('box_items_' + cat + '/' + itemId).remove().then(() => {
                     alert('Post successfully delete ho gayi!');
                     openAdminDashboard();
@@ -966,14 +990,60 @@
             let link = document.getElementById('adminPortalLink').value;
             if(!name || !link) { alert('Enter portal name and link'); return; }
 
-            let savedPortals = JSON.parse(localStorage.getItem('custom_portals_list')) || [];
-            savedPortals.push({ name, link });
-
-            db.ref('custom_portals_list').set(savedPortals).then(() => {
+            let newPortal = { name, link };
+            db.ref('custom_portals_list').push(newPortal).then(() => {
                 alert('Portal added successfully!');
-                closePageModal();
+                openAdminDashboard();
             }).catch((error) => {
                 alert('Error updating portals: ' + error.message);
+            });
+        }
+
+        // Delete Portal Link from Firebase
+        function deletePortalFromFirebase(portalId) {
+            if(confirm('Kya aap is portal link ko delete karna chahte hain?')) {
+                db.ref('custom_portals_list/' + portalId).remove().then(() => {
+                    alert('Portal successfully delete ho gaya!');
+                    openAdminDashboard();
+                }).catch((error) => {
+                    alert('Delete karne mein error aayi: ' + error.message);
+                });
+            }
+        }
+
+        // Edit Portal Link Prompt
+        function editPortalPrompt(portalId, currentName, currentLink) {
+            let html = `
+                <h2>✏️ Edit Portal Link</h2>
+                <hr style="margin:10px 0 15px 0;">
+                <input type="hidden" id="editPortalId" value="${portalId}">
+                
+                <label style="font-weight:bold; font-size:13px;">Portal Name:</label>
+                <input type="text" id="editPortalName" value="${currentName}">
+                
+                <label style="font-weight:bold; font-size:13px;">Portal URL:</label>
+                <input type="text" id="editPortalLink" value="${currentLink}">
+
+                <button type="button" onclick="saveEditedPortalToFirebase()">Update & Save Portal</button>
+                <button type="button" onclick="openAdminDashboard()" style="background:#64748b; margin-top:8px;">Back to Dashboard</button>
+            `;
+            document.getElementById('modalBodyContent').innerHTML = html;
+        }
+
+        // Save Edited Portal to Firebase
+        function saveEditedPortalToFirebase() {
+            let portalId = document.getElementById('editPortalId').value;
+            let name = document.getElementById('editPortalName').value;
+            let link = document.getElementById('editPortalLink').value;
+
+            if(!name || !link) { alert('Portal name aur link dono mandatory hain!'); return; }
+
+            let updatedPortal = { name, link };
+            db.ref('custom_portals_list/' + portalId).set(updatedPortal).then(() => {
+                alert('Portal successfully update ho gaya!');
+                openAdminDashboard();
+            }).catch((error) => {
+                alert('Update karne mein error aayi: ' + error.message);
             });
         }
 
