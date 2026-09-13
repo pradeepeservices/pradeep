@@ -473,7 +473,7 @@
         async function getOfflinePdfBlob(id){
             if(!id)return null;
             const dbRef=await openOfflinePdfDB();
-            const blob=await new Promise((resolve,reject)=>{const tx=dbRef.transaction('pdfs','readonly');const req=tx.objectStore('pdfs').get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});
+            const blob=await new Promise((resolve,reject)=>{const tx=dbRef.transaction('pdfs','readonly');const req=tx.objectStore('pdfs').get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(tx.error);});
             dbRef.close();
             return blob;
         }
@@ -605,6 +605,10 @@
         }
 
         function openLoginModal() {
+            if(localStorage.getItem('isAdminLoggedIn') === 'true') {
+                openAdminDashboard();
+                return;
+            }
             let html = `
                 <h2>Admin Login</h2>
                 <p style="font-size:13px; color:#666;">Enter admin password to manage posts and site settings.</p>
@@ -619,10 +623,17 @@
             let pass = document.getElementById('adminPasswordInput').value;
             let savedPass = localStorage.getItem('admin_pass') || 'guru82';
             if(pass === savedPass) {
+                localStorage.setItem('isAdminLoggedIn', 'true');
                 openAdminDashboard();
             } else {
                 alert('Incorrect Password!');
             }
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('isAdminLoggedIn');
+            alert('Admin successfully logged out!');
+            closePageModal();
         }
 
         function openAdminDashboard() {
@@ -688,7 +699,10 @@
             }
 
             let html = `
-                <h2>Admin Control Panel</h2>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2>Admin Control Panel</h2>
+                    <button type="button" onclick="adminLogout()" style="background:#dc2626; width:auto; padding:6px 14px; font-size:13px; margin:0;">Logout</button>
+                </div>
                 <hr style="margin:10px 0 15px 0;">
                 
                 <div class="admin-card">
@@ -900,7 +914,7 @@
 
                     applySavedSiteContent();
                     alert('Logo / Profile photo updated successfully from Admin Panel!');
-                    closePageModal();
+                    openAdminDashboard();
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
@@ -921,7 +935,7 @@
 
                     renderActiveAd();
                     alert('Ad Banner updated successfully from Admin Panel!');
-                    closePageModal();
+                    openAdminDashboard();
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
@@ -949,7 +963,7 @@
 
             db.ref('footer_pages').set(pageData).then(() => {
                 alert('All Footer Pages updated successfully and synced!');
-                closePageModal();
+                openAdminDashboard();
             }).catch((error) => {
                 alert('Error updating footer pages: ' + error.message);
             });
@@ -980,7 +994,7 @@
 
             db.ref('box_items_' + cat).push(newItem).then(() => {
                 alert('Successfully added and synced with Firebase!');
-                closePageModal();
+                openAdminDashboard();
             }).catch((error) => {
                 alert('Failed to add item: ' + error.message);
             });
@@ -993,7 +1007,7 @@
 
             db.ref('general_settings').update(data).then(() => {
                 alert('Settings updated successfully!');
-                closePageModal();
+                openAdminDashboard();
             }).catch((error) => {
                 alert('Error saving settings: ' + error.message);
             });
@@ -1071,7 +1085,7 @@
             let links = { wa, tg, yt, fb, ig };
             db.ref('social_links').set(links).then(() => {
                 alert('Social links updated successfully!');
-                closePageModal();
+                openAdminDashboard();
             }).catch((error) => {
                 alert('Error saving social links: ' + error.message);
             });
