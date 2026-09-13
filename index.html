@@ -353,18 +353,10 @@
                 db.ref('box_items_' + cat).on('value', (snapshot) => {
                     const data = snapshot.val();
                     if(data) {
-                        // Store with Firebase unique keys
-                        let itemsObj = {};
-                        Object.keys(data).forEach(key => {
-                            itemsObj[key] = data[key];
-                        });
-                        localStorage.setItem('box_items_map_' + cat, JSON.stringify(itemsObj));
-                        
                         const itemsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
                         localStorage.setItem('box_items_' + cat, JSON.stringify(itemsArray));
                     } else {
                         localStorage.removeItem('box_items_' + cat);
-                        localStorage.removeItem('box_items_map_' + cat);
                     }
                     loadBoxItemsIntoSite(cat);
                 });
@@ -513,10 +505,6 @@
             let items = JSON.parse(localStorage.getItem('box_items_' + cat));
             if(!items) return;
             let item = items.find(i => i.id === itemId);
-            if(!item) {
-                // Fallback by index if old structure
-                item = items[itemId];
-            }
             if(!item) return;
 
             document.getElementById('vacancyPageTitle').innerText = item.title || 'Update Details';
@@ -633,7 +621,6 @@
             let feedbackVal = localStorage.getItem('page_feedback') || '';
             let advertiseVal = localStorage.getItem('page_advertise') || '';
 
-            // Generate manage list for existing items across categories
             let categories = [
                 {key: 'jobs', name: 'Latest Jobs'},
                 {key: 'admit', name: 'Admit Card'},
@@ -648,13 +635,13 @@
                 if(items.length > 0) {
                     manageItemsHtml += `<h4 style="margin:10px 0 5px 0; color:#2a5298;">📁 ${catObj.name}</h4>`;
                     items.forEach(item => {
-                        let safeTitle = (item.title || '').replace(/'/g, "&apos;");
+                        let safeTitle = (item.title || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                         manageItemsHtml += `
                             <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:6px; margin-bottom:6px; font-size:13px;">
                                 <span style="font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%;">${safeTitle}</span>
                                 <div style="display:flex; gap:6px;">
-                                    <button onclick="editItemPrompt('${catObj.key}', '${item.id}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer; width:auto; margin:0;">Edit</button>
-                                    <button onclick="deleteItemFromFirebase('${catObj.key}', '${item.id}')" style="background:#dc2626; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer; width:auto; margin:0;">Delete</button>
+                                    <button type="button" onclick="editItemPrompt('${catObj.key}', '${item.id}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer; width:auto; margin:0;">Edit</button>
+                                    <button type="button" onclick="deleteItemFromFirebase('${catObj.key}', '${item.id}')" style="background:#dc2626; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer; width:auto; margin:0;">Delete</button>
                                 </div>
                             </div>
                         `;
@@ -673,13 +660,13 @@
                 <div class="admin-card">
                     <div class="admin-title">📷 Upload Header Logo / Profile Photo</div>
                     <input type="file" id="adminLogoFileInput" accept="image/*" style="margin-bottom:8px;">
-                    <button onclick="uploadLogoFromAdmin()">Update Website Logo</button>
+                    <button type="button" onclick="uploadLogoFromAdmin()">Update Website Logo</button>
                 </div>
 
                 <div class="admin-card">
                     <div class="admin-title">🖼️ Advertisement Banner Manager</div>
                     <input type="file" id="adminAdFileInput" accept="image/*" style="margin-bottom:8px;">
-                    <button onclick="uploadAdBannerFromAdmin()">Update Ad Banner Photo</button>
+                    <button type="button" onclick="uploadAdBannerFromAdmin()">Update Ad Banner Photo</button>
                 </div>
 
                 <div class="admin-card">
@@ -711,7 +698,7 @@
                     <label style="font-weight:bold; font-size:13px;">Advertise With Us Content:</label>
                     <textarea id="editPageAdvertise" rows="3">${advertiseVal}</textarea>
 
-                    <button onclick="saveFooterPagesToFirebase()">Save All Footer Pages</button>
+                    <button type="button" onclick="saveFooterPagesToFirebase()">Save All Footer Pages</button>
                 </div>
 
                 <div class="admin-card">
@@ -737,20 +724,20 @@
                         <input type="file" id="offlinePdfFileInput" accept="application/pdf" style="margin-top:5px;">
                     </div>
 
-                    <button onclick="addBoxItemToFirebase()">Add Item to Site</button>
+                    <button type="button" onclick="addBoxItemToFirebase()">Add Item to Site</button>
                 </div>
 
                 <div class="admin-card">
                     <div class="admin-title">🎨 Customize Site Tagline</div>
                     <input type="text" id="adminTaglineInput" placeholder="New Subtitle / Tagline">
-                    <button onclick="saveGeneralSettingsToFirebase()">Save General Settings</button>
+                    <button type="button" onclick="saveGeneralSettingsToFirebase()">Save General Settings</button>
                 </div>
 
                 <div class="admin-card">
                     <div class="admin-title">🌐 Manage Important Portals Links</div>
                     <input type="text" id="adminPortalName" placeholder="Portal Name">
                     <input type="text" id="adminPortalLink" placeholder="Portal URL">
-                    <button onclick="addNewPortalToFirebase()">Add Portal Link</button>
+                    <button type="button" onclick="addNewPortalToFirebase()">Add Portal Link</button>
                 </div>
 
                 <div class="admin-card">
@@ -760,7 +747,7 @@
                     <input type="text" id="adminYtLink" placeholder="YouTube URL">
                     <input type="text" id="adminFbLink" placeholder="Facebook URL">
                     <input type="text" id="adminIgLink" placeholder="Instagram URL">
-                    <button onclick="saveSocialLinksToFirebase()">Save Social Links</button>
+                    <button type="button" onclick="saveSocialLinksToFirebase()">Save Social Links</button>
                 </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
@@ -769,13 +756,11 @@
         // Delete Item from Firebase
         function deleteItemFromFirebase(cat, itemId) {
             if(confirm('Kya aap is post ko delete karna chahte hain?')) {
-                db.ref('box_items_' + cat + '/' + itemId).remove((error) => {
-                    if(error) {
-                        alert('Delete karne mein error aayi: ' + error.message);
-                    } else {
-                        alert('Post successfully delete ho gayi!');
-                        openAdminDashboard(); // Refresh admin modal list
-                    }
+                db.ref('box_items_' + cat + '/' + itemId).remove().then(() => {
+                    alert('Post successfully delete ho gayi!');
+                    openAdminDashboard();
+                }).catch((error) => {
+                    alert('Delete karne mein error aayi: ' + error.message);
                 });
             }
         }
@@ -784,7 +769,10 @@
         function editItemPrompt(cat, itemId) {
             let items = JSON.parse(localStorage.getItem('box_items_' + cat)) || [];
             let item = items.find(i => i.id === itemId);
-            if(!item) return;
+            if(!item) {
+                alert('Item nahi mila!');
+                return;
+            }
 
             let html = `
                 <h2>✏️ Edit Post Details</h2>
@@ -816,8 +804,8 @@
                 <label style="font-weight:bold; font-size:13px;">Official Website Link:</label>
                 <input type="text" id="editItemOfficial" value="${item.officialLink || ''}">
 
-                <button onclick="saveEditedItemToFirebase()">Update & Save Changes</button>
-                <button onclick="openAdminDashboard()" style="background:#64748b; margin-top:8px;">Back to Dashboard</button>
+                <button type="button" onclick="saveEditedItemToFirebase()">Update & Save Changes</button>
+                <button type="button" onclick="openAdminDashboard()" style="background:#64748b; margin-top:8px;">Back to Dashboard</button>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
         }
@@ -853,13 +841,11 @@
                 pdfId: existing.pdfId || ''
             };
 
-            db.ref('box_items_' + cat + '/' + itemId).set(updatedItem, (error) => {
-                if(error) {
-                    alert('Update karne mein error aayi: ' + error.message);
-                } else {
-                    alert('Post successfully update ho gayi!');
-                    openAdminDashboard();
-                }
+            db.ref('box_items_' + cat + '/' + itemId).set(updatedItem).then(() => {
+                alert('Post successfully update ho gayi!');
+                openAdminDashboard();
+            }).catch((error) => {
+                alert('Update karne mein error aayi: ' + error.message);
             });
         }
 
@@ -923,13 +909,11 @@
 
             let pageData = { about, terms, contact, privacy, feedback, advertise };
 
-            db.ref('footer_pages').set(pageData, (error) => {
-                if(error) {
-                    alert('Error updating footer pages: ' + error.message);
-                } else {
-                    alert('All Footer Pages updated successfully and synced!');
-                    closePageModal();
-                }
+            db.ref('footer_pages').set(pageData).then(() => {
+                alert('All Footer Pages updated successfully and synced!');
+                closePageModal();
+            }).catch((error) => {
+                alert('Error updating footer pages: ' + error.message);
             });
         }
 
@@ -956,13 +940,11 @@
 
             let newItem = { title, dates, fee, age, total, details, applyLink, officialLink, pdfId };
 
-            db.ref('box_items_' + cat).push(newItem, (error) => {
-                if(error) {
-                    alert('Failed to add item: ' + error.message);
-                } else {
-                    alert('Successfully added and synced with Firebase!');
-                    closePageModal();
-                }
+            db.ref('box_items_' + cat).push(newItem).then(() => {
+                alert('Successfully added and synced with Firebase!');
+                closePageModal();
+            }).catch((error) => {
+                alert('Failed to add item: ' + error.message);
             });
         }
 
@@ -971,13 +953,11 @@
             let data = {};
             if(desc) data.desc = desc;
 
-            db.ref('general_settings').update(data, (error) => {
-                if(error) {
-                    alert('Error saving settings');
-                } else {
-                    alert('Settings updated successfully!');
-                    closePageModal();
-                }
+            db.ref('general_settings').update(data).then(() => {
+                alert('Settings updated successfully!');
+                closePageModal();
+            }).catch((error) => {
+                alert('Error saving settings: ' + error.message);
             });
         }
 
@@ -989,13 +969,11 @@
             let savedPortals = JSON.parse(localStorage.getItem('custom_portals_list')) || [];
             savedPortals.push({ name, link });
 
-            db.ref('custom_portals_list').set(savedPortals, (error) => {
-                if(error) {
-                    alert('Error updating portals');
-                } else {
-                    alert('Portal added successfully!');
-                    closePageModal();
-                }
+            db.ref('custom_portals_list').set(savedPortals).then(() => {
+                alert('Portal added successfully!');
+                closePageModal();
+            }).catch((error) => {
+                alert('Error updating portals: ' + error.message);
             });
         }
 
@@ -1007,13 +985,11 @@
             let ig = document.getElementById('adminIgLink').value;
 
             let links = { wa, tg, yt, fb, ig };
-            db.ref('social_links').set(links, (error) => {
-                if(error) {
-                    alert('Error saving social links');
-                } else {
-                    alert('Social links updated successfully!');
-                    closePageModal();
-                }
+            db.ref('social_links').set(links).then(() => {
+                alert('Social links updated successfully!');
+                closePageModal();
+            }).catch((error) => {
+                alert('Error saving social links: ' + error.message);
             });
         }
 
@@ -1025,14 +1001,14 @@
                     <p style="font-size:13px; color:#666;">Upload photo to resize and crop instantly.</p>
                     <input type="file" id="toolImageInput" accept="image/*" onchange="previewToolImage(event)">
                     <div style="text-align:center; margin:10px 0;" id="toolPreviewArea"></div>
-                    <button onclick="alert('Photo ready for download!')">Download Cropped Photo</button>
+                    <button type="button" onclick="alert('Photo ready for download!')">Download Cropped Photo</button>
                 `;
             } else if(toolType === 'pdf') {
                 html = `
                     <h2>📄 JPG to PDF Converter</h2>
                     <p style="font-size:13px; color:#666;">Select multiple JPG images to convert into a single PDF document.</p>
                     <input type="file" id="pdfImageInput" accept="image/*" multiple>
-                    <button onclick="convertImagesToPDF()">Convert & Download PDF</button>
+                    <button type="button" onclick="convertImagesToPDF()">Convert & Download PDF</button>
                 `;
             } else if(toolType === 'bg') {
                 html = `
@@ -1044,7 +1020,7 @@
                         <option value="#0056b3">Blue Background</option>
                         <option value="#dc3545">Red Background</option>
                     </select>
-                    <button onclick="alert('Background updated successfully!')">Download Processed Photo</button>
+                    <button type="button" onclick="alert('Background updated successfully!')">Download Processed Photo</button>
                 `;
             }
             document.getElementById('modalBodyContent').innerHTML = html;
