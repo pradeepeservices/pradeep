@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title id="page-title">Pradeep E Services - Online Job & Cyber Cafe Portal</title>
     <!-- jsPDF Library for JPG to PDF Conversion -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -321,7 +324,9 @@
             appId: "1:951935789707:web:582694acc3a67afd0c428e",
             measurementId: "G-LCN124C9W6"
         };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
 
         window.onload = function() {
@@ -353,6 +358,8 @@
             renderActiveAd();
             syncDataFromFirebase();
             syncSocialLinksFromFirebase();
+            syncGeneralSettingsFromFirebase();
+            syncPortalsFromFirebase();
         }
 
         function applySavedSiteContent() {
@@ -420,6 +427,30 @@
                     if(!localStorage.getItem('social_ig')) localStorage.setItem('social_ig', 'https://instagram.com');
                 }
                 applySocialLinks();
+            });
+        }
+
+        // Real-time synchronization for General Settings (Tagline & Logo) from Firebase
+        function syncGeneralSettingsFromFirebase() {
+            db.ref('general_settings').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    if(data.desc) localStorage.setItem('custom_site_desc', data.desc);
+                    if(data.logo) localStorage.setItem('custom_site_logo', data.logo);
+                    applySavedSiteContent();
+                }
+            });
+        }
+
+        // Real-time synchronization for Portals from Firebase
+        function syncPortalsFromFirebase() {
+            db.ref('custom_portals_list').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    const portalsArray = Object.values(data);
+                    localStorage.setItem('custom_portals_list', JSON.stringify(portalsArray));
+                    applySavedSiteContent();
+                }
             });
         }
 
@@ -846,14 +877,14 @@
 
                 <!-- General Website Details -->
                 <div style="background: #fdf2f2; padding: 12px; border-radius: 6px; border: 1px solid #f5c6cb; margin-bottom: 15px;">
-                    <h4 style="margin:0 0 8px 0; color: #721c24;">✏️ Website General Settings</h4>
+                    <h4 style="margin:0 0 8px 0; color: #721c24;">✏️ Website General Settings (Cloud Synced)</h4>
                     <label style="font-size: 12px; font-weight: bold;">Subtitle / Tagline:</label>
                     <input type="text" id="newDescInput" value="${currentDesc}">
                     <label style="font-size: 12px; font-weight: bold;">Logo / Photo:</label>
                     <div class="upload-zone" onclick="document.getElementById('newLogoFile').click()">📷 Click to upload logo
                     <input type="file" id="newLogoFile" accept="image/*" style="display:none" onchange="previewAdminImage(this,'logoPreview')"></div>
                     <img id="logoPreview" class="preview-thumb" style="display:none">
-                    <button onclick="updateGeneralSettings()" style="background: #d9534f;">Save General Settings</button>
+                    <button onclick="updateGeneralSettings()" style="background: #d9534f;">Save & Sync General Settings</button>
                 </div>
 
                 <!-- Social Media Links Manager (Cloud Synced) -->
@@ -890,7 +921,7 @@
 
                 <!-- Important Portals Manager -->
                 <div style="background: #f3f0ff; padding: 12px; border-radius: 6px; border: 1px solid #d4c7ff; margin-bottom: 15px;">
-                    <h4 style="margin:0 0 8px 0; color: #4b0082;">🌐 Important Portals Quick Links Manager</h4>
+                    <h4 style="margin:0 0 8px 0; color: #4b0082;">🌐 Important Portals Quick Links Manager (Cloud Synced)</h4>
                     <input type="text" id="portalNameInput" placeholder="Portal Name">
                     <input type="text" id="portalLinkInput" placeholder="Portal URL (https://...)">
                     <button id="portalSaveBtn" onclick="addNewPortalBadge()" style="background: #6b11ff;">➕ Add Portal Badge</button>
@@ -958,12 +989,22 @@
         async function updateGeneralSettings() {
             const newDesc=document.getElementById('newDescInput').value;
             const logoFile=document.getElementById('newLogoFile')?.files[0];
-            if(newDesc){localStorage.setItem('custom_site_desc',newDesc);document.getElementById('header-subtitle').innerText=newDesc}
+            let logoData = localStorage.getItem('custom_site_logo') || '';
             if(logoFile){
-                const data=await saveImageFileAsDataURL(logoFile,1200);localStorage.setItem('custom_site_logo',data);
-                document.getElementById('displayLogoBox').innerHTML=`<img src="${data}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                logoData = await saveImageFileAsDataURL(logoFile,1200);
             }
-            alert("General settings updated successfully!");
+            
+            let settingsData = { desc: newDesc, logo: logoData };
+            db.ref('general_settings').set(settingsData, (error) => {
+                if(error) {
+                    alert("Cloud sync failed!");
+                } else {
+                    localStorage.setItem('custom_site_desc', newDesc);
+                    if(logoData) localStorage.setItem('custom_site_logo', logoData);
+                    alert("General settings updated & synced to cloud successfully!");
+                    applySavedSiteContent();
+                }
+            });
         }
 
         function saveSocialLinks() {
@@ -975,7 +1016,6 @@
 
             let socialData = { wa, tg, yt, fb, ig };
 
-            // Firebase Cloud Database par save karein taaki sabhi browsers par sync ho
             db.ref('social_links').set(socialData, (error) => {
                 if(error) {
                     alert("Cloud sync failed!");
@@ -1186,17 +1226,28 @@
             }else{
                 portals.push({ name, link });
             }
-            localStorage.setItem('custom_portals_list', JSON.stringify(portals));
-            alert("Portal saved successfully!");
-            cancelEditPortal(true); 
-            applySavedSiteContent(); 
-            loadAdminPortalList();
+            
+            db.ref('custom_portals_list').set(portals, (error) => {
+                if(error) {
+                    alert("Cloud sync failed!");
+                } else {
+                    localStorage.setItem('custom_portals_list', JSON.stringify(portals));
+                    alert("Portal saved & synced to cloud successfully!");
+                    cancelEditPortal(true); 
+                    applySavedSiteContent(); 
+                    loadAdminPortalList();
+                }
+            });
         }
 
         function resetDefaultPortals() {
-            localStorage.removeItem('custom_portals_list');
-            alert("Portals reset to default!");
-            location.reload();
+            db.ref('custom_portals_list').remove((err) => {
+                if(!err) {
+                    localStorage.removeItem('custom_portals_list');
+                    alert("Portals reset to default!");
+                    location.reload();
+                }
+            });
         }
 
         function updateCredentials() {
