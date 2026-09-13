@@ -353,10 +353,18 @@
                 db.ref('box_items_' + cat).on('value', (snapshot) => {
                     const data = snapshot.val();
                     if(data) {
-                        const itemsArray = Object.values(data);
+                        // Store with Firebase unique keys
+                        let itemsObj = {};
+                        Object.keys(data).forEach(key => {
+                            itemsObj[key] = data[key];
+                        });
+                        localStorage.setItem('box_items_map_' + cat, JSON.stringify(itemsObj));
+                        
+                        const itemsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
                         localStorage.setItem('box_items_' + cat, JSON.stringify(itemsArray));
                     } else {
                         localStorage.removeItem('box_items_' + cat);
+                        localStorage.removeItem('box_items_map_' + cat);
                     }
                     loadBoxItemsIntoSite(cat);
                 });
@@ -492,18 +500,24 @@
             }
 
             let html = '<ul>';
-            items.forEach((item, index) => {
+            items.forEach((item) => {
                 let displayTitle = item.title || item;
-                html += `<li onclick='openVacancyPage(${JSON.stringify(boxKey)}, ${index})'>${displayTitle}</li>`;
+                let itemId = item.id || '';
+                html += `<li onclick='openVacancyPage(${JSON.stringify(boxKey)}, ${JSON.stringify(itemId)})'>${displayTitle}</li>`;
             });
             html += '</ul>';
             contentBox.innerHTML = html;
         }
 
-        function openVacancyPage(cat, index) {
+        function openVacancyPage(cat, itemId) {
             let items = JSON.parse(localStorage.getItem('box_items_' + cat));
-            if(!items || !items[index]) return;
-            let item = items[index];
+            if(!items) return;
+            let item = items.find(i => i.id === itemId);
+            if(!item) {
+                // Fallback by index if old structure
+                item = items[itemId];
+            }
+            if(!item) return;
 
             document.getElementById('vacancyPageTitle').innerText = item.title || 'Update Details';
             document.getElementById('vacancyPageCategory').innerText = cat.toUpperCase();
@@ -619,6 +633,39 @@
             let feedbackVal = localStorage.getItem('page_feedback') || '';
             let advertiseVal = localStorage.getItem('page_advertise') || '';
 
+            // Generate manage list for existing items across categories
+            let categories = [
+                {key: 'jobs', name: 'Latest Jobs'},
+                {key: 'admit', name: 'Admit Card'},
+                {key: 'result', name: 'Results'},
+                {key: 'yojana', name: 'Sarkari Yojana'},
+                {key: 'offline', name: 'Offline Forms'}
+            ];
+
+            let manageItemsHtml = '';
+            categories.forEach(catObj => {
+                let items = JSON.parse(localStorage.getItem('box_items_' + catObj.key)) || [];
+                if(items.length > 0) {
+                    manageItemsHtml += `<h4 style="margin:10px 0 5px 0; color:#2a5298;">📁 ${catObj.name}</h4>`;
+                    items.forEach(item => {
+                        let safeTitle = (item.title || '').replace(/'/g, "&apos;");
+                        manageItemsHtml += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:6px; margin-bottom:6px; font-size:13px;">
+                                <span style="font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%;">${safeTitle}</span>
+                                <div style="display:flex; gap:6px;">
+                                    <button onclick="editItemPrompt('${catObj.key}', '${item.id}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer; width:auto; margin:0;">Edit</button>
+                                    <button onclick="deleteItemFromFirebase('${catObj.key}', '${item.id}')" style="background:#dc2626; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer; width:auto; margin:0;">Delete</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+
+            if(!manageItemsHtml) {
+                manageItemsHtml = `<p style="font-size:13px; color:#666;">No posts added yet.</p>`;
+            }
+
             let html = `
                 <h2>Admin Control Panel</h2>
                 <hr style="margin:10px 0 15px 0;">
@@ -633,6 +680,13 @@
                     <div class="admin-title">🖼️ Advertisement Banner Manager</div>
                     <input type="file" id="adminAdFileInput" accept="image/*" style="margin-bottom:8px;">
                     <button onclick="uploadAdBannerFromAdmin()">Update Ad Banner Photo</button>
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-title">⚙️ Manage / Edit / Delete Existing Posts</div>
+                    <div style="max-height:220px; overflow-y:auto; border:1px solid #cbd5e1; padding:10px; border-radius:6px; background:#fff;">
+                        ${manageItemsHtml}
+                    </div>
                 </div>
 
                 <div class="admin-card">
@@ -661,7 +715,7 @@
                 </div>
 
                 <div class="admin-card">
-                    <div class="admin-title">📢 Add / Manage Box Items</div>
+                    <div class="admin-title">📢 Add New Post / Item</div>
                     <select id="selectBoxCategory" onchange="updateOfflinePdfManager()">
                         <option value="jobs">Latest Jobs</option>
                         <option value="admit">Admit Card</option>
@@ -710,6 +764,103 @@
                 </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
+        }
+
+        // Delete Item from Firebase
+        function deleteItemFromFirebase(cat, itemId) {
+            if(confirm('Kya aap is post ko delete karna chahte hain?')) {
+                db.ref('box_items_' + cat + '/' + itemId).remove((error) => {
+                    if(error) {
+                        alert('Delete karne mein error aayi: ' + error.message);
+                    } else {
+                        alert('Post successfully delete ho gayi!');
+                        openAdminDashboard(); // Refresh admin modal list
+                    }
+                });
+            }
+        }
+
+        // Edit Item Prompt Form
+        function editItemPrompt(cat, itemId) {
+            let items = JSON.parse(localStorage.getItem('box_items_' + cat)) || [];
+            let item = items.find(i => i.id === itemId);
+            if(!item) return;
+
+            let html = `
+                <h2>✏️ Edit Post Details</h2>
+                <hr style="margin:10px 0 15px 0;">
+                <input type="hidden" id="editCatKey" value="${cat}">
+                <input type="hidden" id="editItemId" value="${itemId}">
+                
+                <label style="font-weight:bold; font-size:13px;">Post Title:</label>
+                <input type="text" id="editItemTitle" value="${item.title || ''}">
+                
+                <label style="font-weight:bold; font-size:13px;">Important Dates:</label>
+                <textarea id="editItemDates" rows="2">${item.dates || ''}</textarea>
+                
+                <label style="font-weight:bold; font-size:13px;">Application Fee:</label>
+                <textarea id="editItemFee" rows="2">${item.fee || ''}</textarea>
+                
+                <label style="font-weight:bold; font-size:13px;">Age Limit:</label>
+                <input type="text" id="editItemAge" value="${item.age || ''}">
+                
+                <label style="font-weight:bold; font-size:13px;">Total Posts:</label>
+                <input type="text" id="editItemTotal" value="${item.total || ''}">
+                
+                <label style="font-weight:bold; font-size:13px;">Full Details:</label>
+                <textarea id="editItemDetails" rows="4">${item.details || ''}</textarea>
+                
+                <label style="font-weight:bold; font-size:13px;">Apply Online Link:</label>
+                <input type="text" id="editItemApply" value="${item.applyLink || ''}">
+                
+                <label style="font-weight:bold; font-size:13px;">Official Website Link:</label>
+                <input type="text" id="editItemOfficial" value="${item.officialLink || ''}">
+
+                <button onclick="saveEditedItemToFirebase()">Update & Save Changes</button>
+                <button onclick="openAdminDashboard()" style="background:#64748b; margin-top:8px;">Back to Dashboard</button>
+            `;
+            document.getElementById('modalBodyContent').innerHTML = html;
+        }
+
+        // Save Edited Item to Firebase
+        function saveEditedItemToFirebase() {
+            let cat = document.getElementById('editCatKey').value;
+            let itemId = document.getElementById('editItemId').value;
+            
+            let title = document.getElementById('editItemTitle').value;
+            let dates = document.getElementById('editItemDates').value;
+            let fee = document.getElementById('editItemFee').value;
+            let age = document.getElementById('editItemAge').value;
+            let total = document.getElementById('editItemTotal').value;
+            let details = document.getElementById('editItemDetails').value;
+            let applyLink = document.getElementById('editItemApply').value;
+            let officialLink = document.getElementById('editItemOfficial').value;
+
+            if(!title) { alert('Title mandatory hai!'); return; }
+
+            let items = JSON.parse(localStorage.getItem('box_items_' + cat)) || [];
+            let existing = items.find(i => i.id === itemId) || {};
+
+            let updatedItem = {
+                title,
+                dates,
+                fee,
+                age,
+                total,
+                details,
+                applyLink,
+                officialLink,
+                pdfId: existing.pdfId || ''
+            };
+
+            db.ref('box_items_' + cat + '/' + itemId).set(updatedItem, (error) => {
+                if(error) {
+                    alert('Update karne mein error aayi: ' + error.message);
+                } else {
+                    alert('Post successfully update ho gayi!');
+                    openAdminDashboard();
+                }
+            });
         }
 
         // Admin Logo Upload Handler
