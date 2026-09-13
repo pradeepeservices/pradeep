@@ -288,7 +288,7 @@
         window.onload = function() {
             if(!localStorage.getItem('admin_pass')) { localStorage.setItem('admin_pass', 'guru82'); }
 
-            // Default Footer Page Contents
+            // Default Footer Page Contents Setup
             if(!localStorage.getItem('page_about')) {
                 localStorage.setItem('page_about', 'Pradeep E Services is a trusted online portal providing accurate updates on MP Online, CSC services, Government Jobs, and various welfare schemes.');
             }
@@ -304,6 +304,9 @@
             if(!localStorage.getItem('page_advertise')) {
                 localStorage.setItem('page_advertise', 'If you want to place advertisements or promote your brand on our website, please contact us via phone or email.');
             }
+            if(!localStorage.getItem('page_feedback')) {
+                localStorage.setItem('page_feedback', 'We value your feedback! Please let us know how we can improve our services for you.');
+            }
 
             applySavedSiteContent();
             renderActiveAd();
@@ -311,6 +314,7 @@
             syncSocialLinksFromFirebase();
             syncGeneralSettingsFromFirebase();
             syncPortalsFromFirebase();
+            syncFooterPagesFromFirebase();
         }
 
         function applySavedSiteContent() {
@@ -401,6 +405,20 @@
                     const portalsArray = Object.values(data);
                     localStorage.setItem('custom_portals_list', JSON.stringify(portalsArray));
                     applySavedSiteContent();
+                }
+            });
+        }
+
+        function syncFooterPagesFromFirebase() {
+            db.ref('footer_pages').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    if(data.about) localStorage.setItem('page_about', data.about);
+                    if(data.terms) localStorage.setItem('page_terms', data.terms);
+                    if(data.contact) localStorage.setItem('page_contact', data.contact);
+                    if(data.privacy) localStorage.setItem('page_privacy', data.privacy);
+                    if(data.feedback) localStorage.setItem('page_feedback', data.feedback);
+                    if(data.advertise) localStorage.setItem('page_advertise', data.advertise);
                 }
             });
         }
@@ -594,6 +612,13 @@
         }
 
         function openAdminDashboard() {
+            let aboutVal = localStorage.getItem('page_about') || '';
+            let termsVal = localStorage.getItem('page_terms') || '';
+            let contactVal = localStorage.getItem('page_contact') || '';
+            let privacyVal = localStorage.getItem('page_privacy') || '';
+            let feedbackVal = localStorage.getItem('page_feedback') || '';
+            let advertiseVal = localStorage.getItem('page_advertise') || '';
+
             let html = `
                 <h2>Admin Control Panel</h2>
                 <hr style="margin:10px 0 15px 0;">
@@ -608,6 +633,31 @@
                     <div class="admin-title">🖼️ Advertisement Banner Manager</div>
                     <input type="file" id="adminAdFileInput" accept="image/*" style="margin-bottom:8px;">
                     <button onclick="uploadAdBannerFromAdmin()">Update Ad Banner Photo</button>
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-title">📄 Footer Pages Content Manager</div>
+                    <p style="font-size:12px; color:#666; margin-top:0;">Edit text content for footer links below:</p>
+                    
+                    <label style="font-weight:bold; font-size:13px;">About Us Content:</label>
+                    <textarea id="editPageAbout" rows="3">${aboutVal}</textarea>
+
+                    <label style="font-weight:bold; font-size:13px;">Terms & Conditions Content:</label>
+                    <textarea id="editPageTerms" rows="3">${termsVal}</textarea>
+
+                    <label style="font-weight:bold; font-size:13px;">Contact Us Content:</label>
+                    <textarea id="editPageContact" rows="3">${contactVal}</textarea>
+
+                    <label style="font-weight:bold; font-size:13px;">Privacy Policy Content:</label>
+                    <textarea id="editPagePrivacy" rows="3">${privacyVal}</textarea>
+
+                    <label style="font-weight:bold; font-size:13px;">Feedback Content:</label>
+                    <textarea id="editPageFeedback" rows="3">${feedbackVal}</textarea>
+
+                    <label style="font-weight:bold; font-size:13px;">Advertise With Us Content:</label>
+                    <textarea id="editPageAdvertise" rows="3">${advertiseVal}</textarea>
+
+                    <button onclick="saveFooterPagesToFirebase()">Save All Footer Pages</button>
                 </div>
 
                 <div class="admin-card">
@@ -702,6 +752,34 @@
             } else {
                 alert('Please select an ad banner image file first!');
             }
+        }
+
+        // Save Footer Pages to Firebase
+        function saveFooterPagesToFirebase() {
+            let about = document.getElementById('editPageAbout').value;
+            let terms = document.getElementById('editPageTerms').value;
+            let contact = document.getElementById('editPageContact').value;
+            let privacy = document.getElementById('editPagePrivacy').value;
+            let feedback = document.getElementById('editPageFeedback').value;
+            let advertise = document.getElementById('editPageAdvertise').value;
+
+            localStorage.setItem('page_about', about);
+            localStorage.setItem('page_terms', terms);
+            localStorage.setItem('page_contact', contact);
+            localStorage.setItem('page_privacy', privacy);
+            localStorage.setItem('page_feedback', feedback);
+            localStorage.setItem('page_advertise', advertise);
+
+            let pageData = { about, terms, contact, privacy, feedback, advertise };
+
+            db.ref('footer_pages').set(pageData, (error) => {
+                if(error) {
+                    alert('Error updating footer pages: ' + error.message);
+                } else {
+                    alert('All Footer Pages updated successfully and synced!');
+                    closePageModal();
+                }
+            });
         }
 
         async function addBoxItemToFirebase() {
