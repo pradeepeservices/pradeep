@@ -33,10 +33,6 @@
         .profile-icon:hover { background: rgba(255,255,255,0.4); }
         .lang-select { padding: 5px 10px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; background: white; color: #1e3c72; }
 
-        /* Quick Upload Box inside Header */
-        .header-upload-box { background: rgba(255, 255, 255, 0.15); padding: 8px 12px; border-radius: 6px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; border: 1px dashed rgba(255,255,255,0.5); }
-        .header-upload-box input[type="file"] { color: white; font-size: 11px; cursor: pointer; }
-
         /* Social Media Banner */
         .social-banner { background: #1a1a2e; color: white; text-align: center; padding: 10px; font-size: 14px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; }
         .social-banner a { color: white; text-decoration: none; font-weight: bold; padding: 5px 12px; border-radius: 4px; font-size: 13px; }
@@ -130,12 +126,6 @@
             </div>
         </div>
         <p id="header-subtitle">Aapka Apna Cyber Cafe & Online Seva Kendra</p>
-
-        <!-- Direct Photo / Logo Upload Option for User -->
-        <div class="header-upload-box">
-            <span>📷 Upload Logo/Photo:</span>
-            <input type="file" id="siteLogoFileInput" accept="image/*" onchange="handleHeaderLogoUpload(event)">
-        </div>
     </header>
 
     <!-- Social Media Banner -->
@@ -321,21 +311,6 @@
             syncSocialLinksFromFirebase();
             syncGeneralSettingsFromFirebase();
             syncPortalsFromFirebase();
-        }
-
-        // Direct Header Logo Upload Handler
-        function handleHeaderLogoUpload(event) {
-            let file = event.target.files[0];
-            if(file) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    let base64Image = e.target.result;
-                    localStorage.setItem('custom_site_logo', base64Image);
-                    applySavedSiteContent();
-                    alert('Logo / Photo updated successfully on the website!');
-                };
-                reader.readAsDataURL(file);
-            }
         }
 
         function applySavedSiteContent() {
@@ -620,6 +595,12 @@
                 <hr style="margin:10px 0 15px 0;">
                 
                 <div class="admin-card">
+                    <div class="admin-title">📷 Upload Header Logo / Profile Photo</div>
+                    <input type="file" id="adminLogoFileInput" accept="image/*" style="margin-bottom:8px;">
+                    <button onclick="uploadLogoFromAdmin()">Update Website Logo</button>
+                </div>
+
+                <div class="admin-card">
                     <div class="admin-title">📢 Add / Manage Box Items</div>
                     <select id="selectBoxCategory" onchange="updateOfflinePdfManager()">
                         <option value="jobs">Latest Jobs</option>
@@ -675,6 +656,28 @@
                 </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
+        }
+
+        // Admin Logo Upload Handler
+        function uploadLogoFromAdmin() {
+            let fileInput = document.getElementById('adminLogoFileInput');
+            if(fileInput && fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let base64Image = e.target.result;
+                    localStorage.setItem('custom_site_logo', base64Image);
+                    
+                    // Sync logo to Firebase general settings if needed
+                    db.ref('general_settings').update({ logo: base64Image });
+
+                    applySavedSiteContent();
+                    alert('Logo / Profile photo updated successfully from Admin Panel!');
+                    closePageModal();
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                alert('Please select an image file first!');
+            }
         }
 
         async function addBoxItemToFirebase() {
