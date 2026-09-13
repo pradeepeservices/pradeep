@@ -385,6 +385,10 @@
                 if(data) {
                     if(data.desc) localStorage.setItem('custom_site_desc', data.desc);
                     if(data.logo) localStorage.setItem('custom_site_logo', data.logo);
+                    if(data.adBanner) {
+                        localStorage.setItem('custom_ad_banner', data.adBanner);
+                        renderActiveAd();
+                    }
                     applySavedSiteContent();
                 }
             });
@@ -601,6 +605,12 @@
                 </div>
 
                 <div class="admin-card">
+                    <div class="admin-title">🖼️ Advertisement Banner Manager</div>
+                    <input type="file" id="adminAdFileInput" accept="image/*" style="margin-bottom:8px;">
+                    <button onclick="uploadAdBannerFromAdmin()">Update Ad Banner Photo</button>
+                </div>
+
+                <div class="admin-card">
                     <div class="admin-title">📢 Add / Manage Box Items</div>
                     <select id="selectBoxCategory" onchange="updateOfflinePdfManager()">
                         <option value="jobs">Latest Jobs</option>
@@ -648,12 +658,6 @@
                     <input type="text" id="adminIgLink" placeholder="Instagram URL">
                     <button onclick="saveSocialLinksToFirebase()">Save Social Links</button>
                 </div>
-
-                <div class="admin-card">
-                    <div class="admin-title">🖼️ Advertisement Banner Manager</div>
-                    <input type="text" id="adminAdInput" placeholder="Ad Banner Image URL">
-                    <button onclick="saveAdBanner()">Save Ad Banner</button>
-                </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
         }
@@ -667,7 +671,6 @@
                     let base64Image = e.target.result;
                     localStorage.setItem('custom_site_logo', base64Image);
                     
-                    // Sync logo to Firebase general settings if needed
                     db.ref('general_settings').update({ logo: base64Image });
 
                     applySavedSiteContent();
@@ -677,6 +680,27 @@
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
                 alert('Please select an image file first!');
+            }
+        }
+
+        // Admin Ad Banner Photo Upload Handler
+        function uploadAdBannerFromAdmin() {
+            let fileInput = document.getElementById('adminAdFileInput');
+            if(fileInput && fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let base64Image = e.target.result;
+                    localStorage.setItem('custom_ad_banner', base64Image);
+
+                    db.ref('general_settings').update({ adBanner: base64Image });
+
+                    renderActiveAd();
+                    alert('Ad Banner updated successfully from Admin Panel!');
+                    closePageModal();
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                alert('Please select an ad banner image file first!');
             }
         }
 
@@ -762,16 +786,6 @@
                     closePageModal();
                 }
             });
-        }
-
-        function saveAdBanner() {
-            let adUrl = document.getElementById('adminAdInput').value;
-            if(adUrl) {
-                localStorage.setItem('custom_ad_banner', adUrl);
-                renderActiveAd();
-                alert('Ad Banner updated successfully!');
-                closePageModal();
-            }
         }
 
         function openToolModal(toolType) {
