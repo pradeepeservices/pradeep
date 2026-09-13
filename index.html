@@ -74,7 +74,7 @@
         .page-box { background: white; width: min(94%,820px); margin: 4% auto; padding: 24px; border-radius: 20px; position: relative; max-height: 88vh; overflow-y: auto; box-shadow: 0 25px 80px rgba(0,0,0,.28); }
         .close-btn { color: #aaa; float: right; font-size: 26px; font-weight: bold; cursor: pointer; }
         .close-btn:hover { color: #333; }
-        .page-box input, .page-box textarea, .page-box select { width: 100%; padding: 11px 12px; margin: 6px 0 12px 0; border: 1px solid #d9dfeb; border-radius: 10px; box-sizing: border-box; font-family: Arial, sans-serif; outline: none; }
+        .page-box input, .page-box textarea, .page-box select { width: 100%; padding: 11px 12px; margin: 6px 0 12px 0; border: 1px solid #d9dfeb; border-radius: 10px; box-sizing: border-box; font-family: Arial, sans-serif; outline: none; display: block; }
         .page-box input:focus, .page-box textarea:focus, .page-box select:focus { border-color: #6b8cff; box-shadow: 0 0 0 3px rgba(36,87,230,.1); }
         .page-box button { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; padding: 11px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 6px; }
         .page-box button:hover { opacity: 0.9; }
@@ -287,7 +287,6 @@
             }
         }
 
-        // Ad Banner Display
         let savedAd = localStorage.getItem('custom_ad_banner');
         let adContainer = document.getElementById('activeAdContainer');
         let adDisplay = document.getElementById('adBannerDisplay');
@@ -373,10 +372,10 @@
         if(items && items.length > 0) {
             let html = '<ul>';
             items.forEach((item, index) => {
-                if(item.isDetailedPost) {
-                    html += `<li onclick="openVacancyPage('${boxKey}', ${index})">📌 ${item.title}</li>`;
-                } else if(item.pdfData) {
+                if(item.pdfData) {
                     html += `<li onclick="downloadPdf('${item.pdfData}', '${item.title}')">📄 ${item.title} (PDF Download)</li>`;
+                } else if(item.isDetailedPost) {
+                    html += `<li onclick="openVacancyPage('${boxKey}', ${index})">📌 ${item.title}</li>`;
                 } else {
                     html += `<li onclick="window.open('${item.link}', '_blank')">${item.title}</li>`;
                 }
@@ -427,7 +426,7 @@
                 <h2 class="admin-title" style="color:#6b11ff;">⚙️ Pradeep E Services - Admin Panel</h2>
                 <button onclick="openWebsiteSettings()" style="background:#0088cc; margin-bottom:10px;">🌐 Edit Title, Profile Logo & Ad Banner</button>
                 <button onclick="openPasswordSettings()" style="background:#e67e22; margin-bottom:10px;">🔑 Change Admin Password</button>
-                <button onclick="openAddItemManager()" style="background:#16a34a; margin-bottom:10px;">➕ Add New Item / Post (+) with PDF/Image Upload</button>
+                <button onclick="openAddItemManager()" style="background:#16a34a; margin-bottom:10px;">➕ Add New Item / Post with PDF/Image Upload</button>
                 <button onclick="closePageModal()" style="background:#ef4444;">❌ Close Dashboard</button>
             </div>
         `;
@@ -549,7 +548,7 @@
         let content = document.getElementById('modalBodyContent');
         content.innerHTML = `
             <div class="admin-card">
-                <h3 class="admin-title">➕ Add New Item / Post (+)</h3>
+                <h3 class="admin-title">➕ Add New Item / Post</h3>
                 <label>Select Category:</label>
                 <select id="addItemCategory">
                     <option value="jobs">Latest Jobs</option>
@@ -561,7 +560,7 @@
                 <label>Post / Item Title:</label>
                 <input type="text" id="addItemTitle" placeholder="e.g. MP Offline Form 2026 / Result">
                 
-                <label>Upload PDF File (Especially for Offline Forms or Notice):</label>
+                <label>Upload PDF File (For Offline Forms or Notice):</label>
                 <input type="file" id="addItemPdfFile" accept="application/pdf" style="margin-bottom:10px;">
 
                 <label>External Link (Optional):</label>
