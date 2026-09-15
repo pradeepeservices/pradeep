@@ -263,8 +263,8 @@
                 <div class="details" id="vacancyPageDetails"></div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
                     <a id="vacancyPageApply" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;">📝 Apply Online</a>
-                    <a id="vacancyPageOfficial" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#2457e6;">🌐 Official Website</a>
-                    <a id="vacancyPagePdf" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#e67e22;">📄 Download Offline Form PDF</a>
+                    <a id="vacancyPageNotification" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#2457e6;">🔔 Notification</a>
+                    <a id="vacancyPagePdf" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#e67e22;">📄 Download PDF</a>
                 </div>
             </div>
         </div>
@@ -490,11 +490,6 @@
             if(!blob){alert('PDF file not found in browser storage.');return;}
             const url=URL.createObjectURL(blob); window.open(url,'_blank'); setTimeout(()=>URL.revokeObjectURL(url),60000);
         }
-        function updateOfflinePdfManager(){
-            const cat=document.getElementById('selectBoxCategory')?.value;
-            const box=document.getElementById('offlinePdfManager');
-            if(box) box.style.display=cat==='offline'?'block':'none';
-        }
 
         function loadBoxItemsIntoSite(boxKey) {
             let items = JSON.parse(localStorage.getItem('box_items_' + boxKey));
@@ -543,16 +538,16 @@
                 applyBtn.style.display = 'none';
             }
 
-            let officialBtn = document.getElementById('vacancyPageOfficial');
-            if(item.officialLink) {
-                officialBtn.style.display = 'inline-block';
-                officialBtn.href = item.officialLink;
+            let notificationBtn = document.getElementById('vacancyPageNotification');
+            if(item.notificationLink) {
+                notificationBtn.style.display = 'inline-block';
+                notificationBtn.href = item.notificationLink;
             } else {
-                officialBtn.style.display = 'none';
+                notificationBtn.style.display = 'none';
             }
 
             let pdfBtn = document.getElementById('vacancyPagePdf');
-            if(cat === 'offline' && item.pdfId) {
+            if(item.pdfId) {
                 pdfBtn.style.display = 'inline-block';
                 pdfBtn.onclick = function(e) { e.preventDefault(); openOfflinePdf(item.pdfId); };
             } else {
@@ -777,7 +772,7 @@
 
                 <div class="admin-card">
                     <div class="admin-title">📢 Add New Post / Item</div>
-                    <select id="selectBoxCategory" onchange="updateOfflinePdfManager()">
+                    <select id="selectBoxCategory">
                         <option value="jobs">Latest Jobs</option>
                         <option value="admit">Admit Card</option>
                         <option value="result">Results</option>
@@ -792,11 +787,11 @@
                     <input type="text" id="newItemTotal" placeholder="Total Posts">
                     <textarea id="newItemDetails" placeholder="Full Details / Description" rows="4"></textarea>
                     <input type="text" id="newItemApply" placeholder="Apply Online Link (URL)">
-                    <input type="text" id="newItemOfficial" placeholder="Official Website Link (URL)">
+                    <input type="text" id="newItemNotification" placeholder="Notification Link (URL)">
                     
-                    <div id="offlinePdfManager" style="display:none; margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;">
-                        <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload Offline Form PDF File:</label>
-                        <input type="file" id="offlinePdfFileInput" accept="application/pdf" style="margin-top:5px;">
+                    <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;">
+                        <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload PDF File:</label>
+                        <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
                     </div>
 
                     <button type="button" onclick="addBoxItemToFirebase()">Add Item to Site</button>
@@ -915,8 +910,8 @@
                 <label style="font-weight:bold; font-size:13px;">Apply Online Link:</label>
                 <input type="text" id="editItemApply" value="${item.applyLink || ''}">
                 
-                <label style="font-weight:bold; font-size:13px;">Official Website Link:</label>
-                <input type="text" id="editItemOfficial" value="${item.officialLink || ''}">
+                <label style="font-weight:bold; font-size:13px;">Notification Link:</label>
+                <input type="text" id="editItemNotification" value="${item.notificationLink || ''}">
 
                 <button type="button" onclick="saveEditedItemToFirebase()">Update & Save Changes</button>
                 <button type="button" onclick="openAdminDashboard()" style="background:#64748b; margin-top:8px;">Back to Dashboard</button>
@@ -935,7 +930,7 @@
             let total = document.getElementById('editItemTotal').value;
             let details = document.getElementById('editItemDetails').value;
             let applyLink = document.getElementById('editItemApply').value;
-            let officialLink = document.getElementById('editItemOfficial').value;
+            let notificationLink = document.getElementById('editItemNotification').value;
 
             if(!title) { alert('Title mandatory hai!'); return; }
 
@@ -950,7 +945,7 @@
                 total,
                 details,
                 applyLink,
-                officialLink,
+                notificationLink,
                 pdfId: existing.pdfId || ''
             };
 
@@ -1048,19 +1043,17 @@
             let total = document.getElementById('newItemTotal').value;
             let details = document.getElementById('newItemDetails').value;
             let applyLink = document.getElementById('newItemApply').value;
-            let officialLink = document.getElementById('newItemOfficial').value;
+            let notificationLink = document.getElementById('newItemNotification').value;
 
             if(!title) { alert('Please enter item title!'); return; }
 
             let pdfId = '';
-            if(cat === 'offline') {
-                let fileInput = document.getElementById('offlinePdfFileInput');
-                if(fileInput && fileInput.files && fileInput.files[0]) {
-                    pdfId = await saveOfflinePdf(fileInput.files[0]);
-                }
+            let fileInput = document.getElementById('newItemPdfFileInput');
+            if(fileInput && fileInput.files && fileInput.files[0]) {
+                pdfId = await saveOfflinePdf(fileInput.files[0]);
             }
 
-            let newItem = { title, dates, fee, age, total, details, applyLink, officialLink, pdfId };
+            let newItem = { title, dates, fee, age, total, details, applyLink, notificationLink, pdfId };
 
             db.ref('box_items_' + cat).push(newItem).then(() => {
                 alert('Successfully added and synced with Firebase!');
