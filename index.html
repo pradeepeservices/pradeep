@@ -14,6 +14,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
+    <!-- Canvas / AI Background Removal CDN (@imgly/background-removal) -->
+    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/bundle.js"></script>
+
     <style>
         /* Blue / Purple Theme Styling */
         body { font-family: Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; color: #333; overflow-x: hidden; }
@@ -220,9 +223,9 @@
     <div class="tools-section">
         <h3 style="margin-top:0; color:#0088cc;" id="tools-heading">🛠️ Online Utility Tools</h3>
         <div class="tools-grid">
-            <div class="tool-card" onclick="openToolModal('crop')">📷 Photo Crop Tool</div>
+            <div class="tool-card" onclick="openToolModal('crop')">📷 Photo Crop & Resize Tool</div>
             <div class="tool-card" onclick="openToolModal('pdf')">📄 JPG to PDF Converter</div>
-            <div class="tool-card" onclick="openToolModal('bg')">✨ Background Remove / Change</div>
+            <div class="tool-card" onclick="openToolModal('ai-bg')">✨ AI Background Remove & Changer</div>
         </div>
     </div>
 
@@ -1165,7 +1168,9 @@
                     <h2>📷 Photo Crop & Resize Tool</h2>
                     <p style="font-size:13px; color:#666;">Upload photo to resize and crop instantly.</p>
                     <input type="file" id="toolImageInput" accept="image/*" onchange="previewToolImage(event)">
-                    <div style="text-align:center; margin:10px 0;" id="toolPreviewArea"></div>
+                    <div style="text-align:center; margin:10px 0;" id="toolPreviewArea">
+                        <img id="toolPreviewImage" style="max-width:100%; max-height:200px; display:none;" />
+                    </div>
                     <button type="button" onclick="alert('Photo ready for download!')">Download Cropped Photo</button>
                 `;
             } else if(toolType === 'pdf') {
@@ -1175,17 +1180,25 @@
                     <input type="file" id="pdfImageInput" accept="image/*" multiple>
                     <button type="button" onclick="convertImagesToPDF()">Convert & Download PDF</button>
                 `;
-            } else if(toolType === 'bg') {
+            } else if(toolType === 'ai-bg') {
                 html = `
-                    <h2>✨ Background Remove / Change</h2>
-                    <p style="font-size:13px; color:#666;">Upload photo to change background color.</p>
-                    <input type="file" id="bgImageInput" accept="image/*">
-                    <select id="bgColorSelect" style="margin-top:10px;">
+                    <h2>✨ Canva-Style AI Background Remove & Changer</h2>
+                    <p style="font-size:13px; color:#666;">Upload any photo to automatically remove background using AI, and apply a new solid color background.</p>
+                    <input type="file" id="aiBgImageInput" accept="image/*" style="margin-bottom:10px;">
+                    
+                    <label style="font-weight:bold; font-size:13px;">Choose New Background Color:</label>
+                    <select id="aiBgColorSelect" style="margin-top:5px; margin-bottom:10px;">
+                        <option value="transparent">Transparent (No Background)</option>
                         <option value="#ffffff">White Background</option>
-                        <option value="#0056b3">Blue Background</option>
+                        <option value="#0056b3">Royal Blue Background</option>
                         <option value="#dc3545">Red Background</option>
+                        <option value="#28a745">Green Background</option>
+                        <option value="#f8f9fa">Light Grey Background</option>
                     </select>
-                    <button type="button" onclick="alert('Background updated successfully!')">Download Processed Photo</button>
+
+                    <button type="button" onclick="processAIBgRemoval()" id="aiProcessBtn">🚀 Remove BG & Apply New Background</button>
+                    <div id="aiProgressStatus" style="font-size:13px; color:#6b11ff; font-weight:bold; margin-top:10px; text-align:center;"></div>
+                    <div style="text-align:center; margin-top:15px;" id="aiResultArea"></div>
                 `;
             }
             document.getElementById('modalBodyContent').innerHTML = html;
@@ -1196,9 +1209,67 @@
             let reader = new FileReader();
             reader.onload = function(){
                 let output = document.getElementById('toolPreviewImage');
-                if(output) output.src = reader.result;
+                if(output) {
+                    output.src = reader.result;
+                    output.style.display = 'block';
+                }
             };
-            reader.readAsDataURL(event.target.files[0]);
+            if(event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        }
+
+        // Canva-Style AI Background Removal Logic using @imgly/background-removal
+        async function processAIBgRemoval() {
+            let fileInput = document.getElementById('aiBgImageInput');
+            let statusDiv = document.getElementById('aiProgressStatus');
+            let resultArea = document.getElementById('aiResultArea');
+            let bgColor = document.getElementById('aiBgColorSelect').value;
+
+            if(!fileInput.files || !fileInput.files[0]) {
+                alert('Please select a photo first!');
+                return;
+            }
+
+            let file = fileInput.files[0];
+            statusDiv.innerText = '⏳ AI is processing and removing background (Please wait 5-10 seconds)...';
+            resultArea.innerHTML = '';
+
+            try {
+                // Call imgly background removal
+                const blob = await imglyRemoveBackground(file);
+                
+                // Load the background-removed transparent image onto a canvas to apply a new background color if selected
+                const url = URL.createObjectURL(blob);
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+
+                    if(bgColor !== 'transparent') {
+                        ctx.fillStyle = bgColor;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                    ctx.drawImage(img, 0, 0);
+
+                    const finalDataUrl = canvas.toDataURL('image/png');
+                    statusDiv.innerText = '✅ Background successfully removed & updated!';
+                    
+                    resultArea.innerHTML = `
+                        <p style="font-size:13px; font-weight:bold; color:#1e3c72;">Processed Output Preview:</p>
+                        <img src="${finalDataUrl}" style="max-width:100%; max-height:220px; border:1px solid #ccc; border-radius:6px; margin-bottom:10px;" /><br>
+                        <a href="${finalDataUrl}" download="Processed_Photo.png" style="display:inline-block; background:#16a34a; color:white; padding:10px 20px; text-decoration:none; border-radius:4px; font-weight:bold;">📥 Download Processed Photo</a>
+                    `;
+                };
+                img.src = url;
+
+            } catch (error) {
+                console.error(error);
+                statusDiv.innerText = '❌ Error processing image. Please try again.';
+                alert('Background removal failed: ' + error.message);
+            }
         }
 
         async function convertImagesToPDF() {
