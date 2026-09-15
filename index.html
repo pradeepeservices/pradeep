@@ -691,15 +691,15 @@
                 <hr style="margin:10px 0 15px 0;">
                 
                 <div class="admin-card">
-                    <div class="admin-title">📷 Upload Header Logo / Profile Photo</div>
-                    <input type="file" id="adminLogoFileInput" accept="image/*" style="margin-bottom:8px;">
-                    <button type="button" onclick="uploadLogoFromAdmin()">Update Website Logo</button>
+                    <div class="admin-title">📷 Upload Multiple Header Logos / Profile Photos (Auto-Compressed)</div>
+                    <input type="file" id="adminLogoFileInput" accept="image/*" multiple style="margin-bottom:8px;">
+                    <button type="button" onclick="uploadLogoFromAdmin()">Update Website Logo(s)</button>
                 </div>
 
                 <div class="admin-card">
-                    <div class="admin-title">🖼️ Advertisement Banner Manager</div>
-                    <input type="file" id="adminAdFileInput" accept="image/*" style="margin-bottom:8px;">
-                    <button type="button" onclick="uploadAdBannerFromAdmin()">Update Ad Banner Photo</button>
+                    <div class="admin-title">🖼️ Advertisement Banner Manager (Auto-Compressed)</div>
+                    <input type="file" id="adminAdFileInput" accept="image/*" multiple style="margin-bottom:8px;">
+                    <button type="button" onclick="uploadAdBannerFromAdmin()">Update Ad Banner Photo(s)</button>
                 </div>
 
                 <div class="admin-card">
@@ -788,6 +788,44 @@
                 </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
+        }
+
+        // Helper Function: Auto Compress Image to Base64
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function () {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const MAX_WIDTH = 800;
+                        const MAX_HEIGHT = 800;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressedData = canvas.toDataURL('image/jpeg', 0.7);
+                        resolve(compressedData);
+                    };
+                };
+            });
         }
 
         // Delete Item from Firebase
@@ -886,45 +924,46 @@
             });
         }
 
-        // Admin Logo Upload Handler
-        function uploadLogoFromAdmin() {
+        // Admin Multiple Logo Upload Handler (Auto-Compressed)
+        async function uploadLogoFromAdmin() {
             let fileInput = document.getElementById('adminLogoFileInput');
-            if(fileInput && fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    let base64Image = e.target.result;
-                    localStorage.setItem('custom_site_logo', base64Image);
-                    
-                    db.ref('general_settings').update({ logo: base64Image });
+            if(fileInput && fileInput.files && fileInput.files.length > 0) {
+                let compressedImages = [];
+                for(let file of fileInput.files) {
+                    let compressed = await compressImage(file);
+                    compressedImages.push(compressed);
+                }
+                // Save the first one as primary site logo or store array as needed
+                let base64Image = compressedImages[0];
+                localStorage.setItem('custom_site_logo', base64Image);
+                db.ref('general_settings').update({ logo: base64Image });
 
-                    applySavedSiteContent();
-                    alert('Logo / Profile photo updated successfully from Admin Panel!');
-                    closePageModal();
-                };
-                reader.readAsDataURL(fileInput.files[0]);
+                applySavedSiteContent();
+                alert('Logo / Profile photo(s) compressed and updated successfully from Admin Panel!');
+                closePageModal();
             } else {
-                alert('Please select an image file first!');
+                alert('Please select at least one image file first!');
             }
         }
 
-        // Admin Ad Banner Photo Upload Handler
-        function uploadAdBannerFromAdmin() {
+        // Admin Multiple Ad Banner Photo Upload Handler (Auto-Compressed)
+        async function uploadAdBannerFromAdmin() {
             let fileInput = document.getElementById('adminAdFileInput');
-            if(fileInput && fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    let base64Image = e.target.result;
-                    localStorage.setItem('custom_ad_banner', base64Image);
+            if(fileInput && fileInput.files && fileInput.files.length > 0) {
+                let compressedImages = [];
+                for(let file of fileInput.files) {
+                    let compressed = await compressImage(file);
+                    compressedImages.push(compressed);
+                }
+                let base64Image = compressedImages[0];
+                localStorage.setItem('custom_ad_banner', base64Image);
+                db.ref('general_settings').update({ adBanner: base64Image });
 
-                    db.ref('general_settings').update({ adBanner: base64Image });
-
-                    renderActiveAd();
-                    alert('Ad Banner updated successfully from Admin Panel!');
-                    closePageModal();
-                };
-                reader.readAsDataURL(fileInput.files[0]);
+                renderActiveAd();
+                alert('Ad Banner compressed and updated successfully from Admin Panel!');
+                closePageModal();
             } else {
-                alert('Please select an ad banner image file first!');
+                alert('Please select at least one ad banner image file first!');
             }
         }
 
