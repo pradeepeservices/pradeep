@@ -265,6 +265,7 @@
                     <a id="vacancyPageApply" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;">📝 Apply Online</a>
                     <a id="vacancyPageNotification" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#2457e6;">🔔 Notification</a>
                     <a id="vacancyPagePdf" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#e67e22;">📄 Check Official Notification</a>
+                    <a id="vacancyPagePdf2" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#8b5cf6;">📄 Check Second PDF</a>
                 </div>
             </div>
         </div>
@@ -313,9 +314,6 @@
             }
             if(!localStorage.getItem('page_advertise')) {
                 localStorage.setItem('page_advertise', 'If you want to place advertisements or promote your brand on our website, please contact us via phone or email.');
-            }
-            if(!localStorage.getItem('page_feedback')) {
-                localStorage.setItem('page_feedback', 'We value your feedback! Please let us know how we can improve our services for you.');
             }
 
             applySavedSiteContent();
@@ -445,7 +443,6 @@
                     if(data.terms) localStorage.setItem('page_terms', data.terms);
                     if(data.contact) localStorage.setItem('page_contact', data.contact);
                     if(data.privacy) localStorage.setItem('page_privacy', data.privacy);
-                    if(data.feedback) localStorage.setItem('page_feedback', data.feedback);
                     if(data.advertise) localStorage.setItem('page_advertise', data.advertise);
                 }
             });
@@ -541,7 +538,6 @@
             document.getElementById('vacancyPageTitle').style.color = item.textColor || '#ffffff';
             document.getElementById('vacancyPageCategory').innerText = cat.toUpperCase();
             
-            // If offline, news or yojana, hide meta cards if fields are not present
             let isSimpleCat = (cat === 'offline' || cat === 'news' || cat === 'yojana');
             let infoGrid = document.getElementById('vacancyInfoGrid');
             
@@ -584,6 +580,14 @@
                 pdfBtn.onclick = function(e) { e.preventDefault(); openOfflinePdf(item.pdfId); };
             } else {
                 pdfBtn.style.display = 'none';
+            }
+
+            let pdfBtn2 = document.getElementById('vacancyPagePdf2');
+            if(item.pdfId2) {
+                pdfBtn2.style.display = 'inline-block';
+                pdfBtn2.onclick = function(e) { e.preventDefault(); openOfflinePdf(item.pdfId2); };
+            } else {
+                pdfBtn2.style.display = 'none';
             }
 
             document.getElementById('appHome').style.display = 'none';
@@ -655,18 +659,56 @@
         }
 
         function openPage(pageKey) {
+            if(pageKey === 'feedback') {
+                let html = `
+                    <h2>💬 Send Your Feedback</h2>
+                    <p style="font-size:13px; color:#666;">Aapke sujhav hamare liye bahut mahatvapurna hain.</p>
+                    <input type="text" id="userFeedbackName" placeholder="Aapka Naam (Your Name)">
+                    <input type="email" id="userFeedbackEmail" placeholder="Aapka Email (Your Email)">
+                    <textarea id="userFeedbackMessage" placeholder="Apna message ya sujhav yahan likhein..." rows="4"></textarea>
+                    <button type="button" onclick="submitUserFeedback()">Submit Feedback</button>
+                `;
+                document.getElementById('modalBodyContent').innerHTML = html;
+                openPageModal();
+                return;
+            }
+
             let content = localStorage.getItem('page_' + pageKey) || 'Content not available.';
             let titleMap = {
                 'about': 'About Us',
                 'terms': 'Terms & Conditions',
                 'contact': 'Contact Us',
                 'privacy': 'Privacy Policy',
-                'feedback': 'Feedback',
                 'advertise': 'Advertise With Us'
             };
             let html = `<h2>${titleMap[pageKey] || 'Information'}</h2><hr style="margin:10px 0 15px 0;"><p style="white-space: pre-line; line-height:1.6;">${content}</p>`;
             document.getElementById('modalBodyContent').innerHTML = html;
             openPageModal();
+        }
+
+        function submitUserFeedback() {
+            let name = document.getElementById('userFeedbackName').value;
+            let email = document.getElementById('userFeedbackEmail').value;
+            let message = document.getElementById('userFeedbackMessage').value;
+
+            if(!name || !email || !message) {
+                alert('Kripya Name, Email aur Message sabhi fields bharein!');
+                return;
+            }
+
+            let feedbackData = {
+                name: name,
+                email: email,
+                message: message,
+                date: new Date().toLocaleString()
+            };
+
+            db.ref('user_feedbacks').push(feedbackData).then(() => {
+                alert('Aapka feedback safalpurvak bhej diya gaya hai. Dhanyawad!');
+                closePageModal();
+            }).catch((error) => {
+                alert('Feedback bhejne mein error aayi: ' + error.message);
+            });
         }
 
         function openLoginModal() {
@@ -695,7 +737,6 @@
             let termsVal = localStorage.getItem('page_terms') || '';
             let contactVal = localStorage.getItem('page_contact') || '';
             let privacyVal = localStorage.getItem('page_privacy') || '';
-            let feedbackVal = localStorage.getItem('page_feedback') || '';
             let advertiseVal = localStorage.getItem('page_advertise') || '';
 
             let categories = [
@@ -751,10 +792,42 @@
                 managePortalsHtml = `<p style="font-size:13px; color:#666;">No portal links added yet.</p>`;
             }
 
+            // Fetch Feedbacks for Admin Dashboard
+            db.ref('user_feedbacks').once('value', (snapshot) => {
+                let fbData = snapshot.val();
+                let feedbacksHtml = '';
+                if(fbData) {
+                    let fbArray = Object.keys(fbData).map(key => ({ id: key, ...fbData[key] }));
+                    fbArray.reverse().forEach(fb => {
+                        feedbacksHtml += `
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:6px; margin-bottom:8px; font-size:13px;">
+                                <div style="display:flex; justify-content:between; font-weight:bold; color:#172554;">
+                                    <span>👤 ${fb.name || 'User'} (${fb.email || 'No email'})</span>
+                                    <span style="font-size:11px; color:#64748b; font-weight:normal;">${fb.date || ''}</span>
+                                </div>
+                                <p style="margin:5px 0 0 0; color:#334155; white-space:pre-line;">${fb.message || ''}</p>
+                            </div>
+                        `;
+                    });
+                }
+                if(!feedbacksHtml) {
+                    feedbacksHtml = `<p style="font-size:13px; color:#666;">No feedbacks received yet.</p>`;
+                }
+                let fbContainerElem = document.getElementById('adminFeedbacksListContainer');
+                if(fbContainerElem) fbContainerElem.innerHTML = feedbacksHtml;
+            });
+
             let html = `
                 <h2>Admin Control Panel</h2>
                 <hr style="margin:10px 0 15px 0;">
                 
+                <div class="admin-card">
+                    <div class="admin-title">💬 User Feedbacks Received</div>
+                    <div style="max-height:220px; overflow-y:auto; border:1px solid #cbd5e1; padding:10px; border-radius:6px; background:#fff;" id="adminFeedbacksListContainer">
+                        Loading feedbacks...
+                    </div>
+                </div>
+
                 <div class="admin-card">
                     <div class="admin-title">📷 Upload Header Logo (Auto-Compressed)</div>
                     <input type="file" id="adminLogoFileInput" accept="image/*" style="margin-bottom:8px;">
@@ -798,9 +871,6 @@
                     <label style="font-weight:bold; font-size:13px;">Privacy Policy Content:</label>
                     <textarea id="editPagePrivacy" rows="3">${privacyVal}</textarea>
 
-                    <label style="font-weight:bold; font-size:13px;">Feedback Content:</label>
-                    <textarea id="editPageFeedback" rows="3">${feedbackVal}</textarea>
-
                     <label style="font-weight:bold; font-size:13px;">Advertise With Us Content:</label>
                     <textarea id="editPageAdvertise" rows="3">${advertiseVal}</textarea>
 
@@ -833,8 +903,11 @@
                         <input type="text" id="newItemNotification" placeholder="Notification URL">
                         
                         <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;" id="pdfUploadBoxWrapper">
-                            <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload PDF:</label>
-                            <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
+                            <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload First PDF (Any Size > 2MB):</label>
+                            <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px; margin-bottom:10px;">
+                            
+                            <label style="font-weight:bold; font-size:13px; color:#8b5cf6;">Upload Second PDF (Any Size > 2MB):</label>
+                            <input type="file" id="newItemPdfFileInput2" accept="application/pdf" style="margin-top:5px;">
                         </div>
                     </div>
 
@@ -896,7 +969,6 @@
             }
         }
 
-        // Helper Function: Auto Compress Image to Base64
         function compressImage(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -1034,7 +1106,8 @@
                 total: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemTotal') ? document.getElementById('editItemTotal').value : (existing.total || '')),
                 applyLink: applyLinkVal,
                 notificationLink: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemNotification') ? document.getElementById('editItemNotification').value : (existing.notificationLink || '')),
-                pdfId: existing.pdfId || ''
+                pdfId: existing.pdfId || '',
+                pdfId2: existing.pdfId2 || ''
             };
 
             db.ref('box_items_' + cat + '/' + itemId).set(updatedItem).then(() => {
@@ -1045,7 +1118,6 @@
             });
         }
 
-        // Admin Header Logo Upload Handler
         async function uploadLogoFromAdmin() {
             let fileInput = document.getElementById('adminLogoFileInput');
             if(fileInput && fileInput.files && fileInput.files[0]) {
@@ -1061,7 +1133,6 @@
             }
         }
 
-        // Admin Single Profile Photo Upload Handler
         async function uploadProfilePhotoFromAdmin() {
             let fileInput = document.getElementById('adminProfileFileInput');
             if(fileInput && fileInput.files && fileInput.files[0]) {
@@ -1077,7 +1148,6 @@
             }
         }
 
-        // Admin Multiple Ad Banner Photos Upload Handler (Auto-Compressed Slider)
         async function uploadAdBannerFromAdmin() {
             let fileInput = document.getElementById('adminAdFileInput');
             if(fileInput && fileInput.files && fileInput.files.length > 0) {
@@ -1102,17 +1172,15 @@
             let terms = document.getElementById('editPageTerms').value;
             let contact = document.getElementById('editPageContact').value;
             let privacy = document.getElementById('editPagePrivacy').value;
-            let feedback = document.getElementById('editPageFeedback').value;
             let advertise = document.getElementById('editPageAdvertise').value;
 
             localStorage.setItem('page_about', about);
             localStorage.setItem('page_terms', terms);
             localStorage.setItem('page_contact', contact);
             localStorage.setItem('page_privacy', privacy);
-            localStorage.setItem('page_feedback', feedback);
             localStorage.setItem('page_advertise', advertise);
 
-            let pageData = { about, terms, contact, privacy, feedback, advertise };
+            let pageData = { about, terms, contact, privacy, advertise };
 
             db.ref('footer_pages').set(pageData).then(() => {
                 alert('All Footer Pages updated successfully and synced!');
@@ -1130,7 +1198,7 @@
 
             if(!title) { alert('Please enter item title!'); return; }
 
-            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '';
+            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '', pdfId2 = '';
 
             if(cat === 'yojana') {
                 applyLink = document.getElementById('newItemYojanaApply').value;
@@ -1146,9 +1214,14 @@
                 if(fileInput && fileInput.files && fileInput.files[0]) {
                     pdfId = await saveOfflinePdf(fileInput.files[0]);
                 }
+
+                let fileInput2 = document.getElementById('newItemPdfFileInput2');
+                if(fileInput2 && fileInput2.files && fileInput2.files[0]) {
+                    pdfId2 = await saveOfflinePdf(fileInput2.files[0]);
+                }
             }
 
-            let newItem = { title, textColor, dates, fee, age, total, details, applyLink, notificationLink, pdfId };
+            let newItem = { title, textColor, dates, fee, age, total, details, applyLink, notificationLink, pdfId, pdfId2 };
 
             db.ref('box_items_' + cat).push(newItem).then(() => {
                 alert('Successfully added and synced with Firebase!');
