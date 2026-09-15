@@ -264,7 +264,7 @@
                 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
                     <a id="vacancyPageApply" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;">📝 Apply Online</a>
                     <a id="vacancyPageNotification" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#2457e6;">🔔 Notification</a>
-                    <a id="vacancyPagePdf" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#e67e22;">📄 Download PDF</a>
+                    <a id="vacancyPagePdf" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#e67e22;">📄 Check Official Notification</a>
                 </div>
             </div>
         </div>
@@ -325,6 +325,15 @@
             syncGeneralSettingsFromFirebase();
             syncPortalsFromFirebase();
             syncFooterPagesFromFirebase();
+
+            // Handle browser Back / Forward button navigation history
+            window.addEventListener('popstate', function(event) {
+                if(event.state && event.state.page === 'vacancy') {
+                    showVacancyDirect(event.state.cat, event.state.itemId, false);
+                } else {
+                    goHomeDirect(false);
+                }
+            });
         }
 
         function applySavedSiteContent() {
@@ -517,6 +526,11 @@
         }
 
         function openVacancyPage(cat, itemId) {
+            history.pushState({ page: 'vacancy', cat: cat, itemId: itemId }, '', '#post-' + itemId);
+            showVacancyDirect(cat, itemId, true);
+        }
+
+        function showVacancyDirect(cat, itemId, scrollToTop = true) {
             let items = JSON.parse(localStorage.getItem('box_items_' + cat));
             if(!items) return;
             let item = items.find(i => i.id === itemId);
@@ -556,13 +570,18 @@
 
             document.getElementById('appHome').style.display = 'none';
             document.getElementById('vacancyPage').style.display = 'block';
-            window.scrollTo(0,0);
+            if(scrollToTop) window.scrollTo(0,0);
         }
 
         function goHome() {
+            history.pushState({ page: 'home' }, '', window.location.pathname);
+            goHomeDirect(true);
+        }
+
+        function goHomeDirect(scrollToTop = true) {
             document.getElementById('vacancyPage').style.display = 'none';
             document.getElementById('appHome').style.display = 'block';
-            window.scrollTo(0,0);
+            if(scrollToTop) window.scrollTo(0,0);
         }
 
         // Ad Banner Slider Implementation (Only slider images change, rest of the page remains stable)
@@ -787,10 +806,10 @@
                     <input type="text" id="newItemTotal" placeholder="Total Posts">
                     <textarea id="newItemDetails" placeholder="Full Details / Description" rows="4"></textarea>
                     <input type="text" id="newItemApply" placeholder="Apply Online Link (URL)">
-                    <input type="text" id="newItemNotification" placeholder="Notification Link (URL)">
+                    <input type="text" id="newItemNotification" placeholder="Notification URL">
                     
                     <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;">
-                        <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload PDF File:</label>
+                        <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload PDF:</label>
                         <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
                     </div>
 
