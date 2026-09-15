@@ -54,8 +54,8 @@
         .box-header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 16px; border-top-left-radius: 6px; border-top-right-radius: 6px; }
         .box-content { padding: 12px; min-height: 180px; max-height: 250px; overflow-y: auto; }
         .box-content ul { padding-left: 20px; margin: 0; }
-        .box-content li { margin-bottom: 10px; cursor: pointer; color: #2a5298; font-size: 13px; text-decoration: underline; font-weight: 500; }
-        .box-content li:hover { color: #6b11ff; }
+        .box-content li { margin-bottom: 10px; cursor: pointer; font-size: 13px; text-decoration: underline; font-weight: 500; }
+        .box-content li:hover { opacity: 0.8; }
 
         /* Important Portals Quick Access Section */
         .portals-section { width: 95%; max-width: 1200px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; border: 2px solid #6b11ff; box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
@@ -255,10 +255,10 @@
             </div>
             <div class="vacancy-body">
                 <div id="vacancyInfoGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px;">
-                    <div class="admin-card" style="margin:0;"><b>📅 Important Dates</b><div id="vacancyPageDates" style="margin-top:6px;color:#475569;white-space:pre-line;">Not specified</div></div>
-                    <div class="admin-card" style="margin:0;"><b>💰 Application Fee</b><div id="vacancyPageFee" style="margin-top:6px;color:#475569;white-space:pre-line;">Not specified</div></div>
-                    <div class="admin-card" style="margin:0;"><b>🎂 Age Limit</b><div id="vacancyPageAge" style="margin-top:6px;color:#475569;white-space:pre-line;">Not specified</div></div>
-                    <div class="admin-card" style="margin:0;"><b>📊 Total Posts</b><div id="vacancyPageTotal" style="margin-top:6px;color:#475569;white-space:pre-line;">Not specified</div></div>
+                    <div class="admin-card" id="cardDatesGrid" style="margin:0;"><b>📅 Important Dates</b><div id="vacancyPageDates" style="margin-top:6px;color:#475569;white-space:pre-line;">Not specified</div></div>
+                    <div class="admin-card" id="cardFeeGrid" style="margin:0;"><b>💰 Application Fee</b><div id="vacancyPageFee" style="margin-top:6px;color:#475569;white-space:pre-line;">Not specified</div></div>
+                    <div class="admin-card" id="cardAgeGrid" style="margin:0;"><b>🎂 Age Limit</b><div id="vacancyPageAge" style="margin-top:6px;color:#475569;white-space:pre-line;">Not specified</div></div>
+                    <div class="admin-card" id="cardTotalGrid" style="margin:0;"><b>📊 Total Posts</b><div id="vacancyPageTotal" style="margin-top:6px;color:#475569;white-space:pre-line;">Not specified</div></div>
                 </div>
                 <div class="details" id="vacancyPageDetails"></div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
@@ -490,7 +490,7 @@
         async function getOfflinePdfBlob(id){
             if(!id)return null;
             const dbRef=await openOfflinePdfDB();
-            const blob=await new Promise((resolve,reject)=>{const tx=dbRef.transaction('pdfs','readonly');const req=tx.objectStore('pdfs').get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});
+            const blob=await new Promise((resolve,reject)=>{const tx=dbRef.transaction('pdfs','readonly');const req=tx.objectStore('pdfs').get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(tx.error);});
             dbRef.close();
             return blob;
         }
@@ -518,8 +518,9 @@
             let html = '<ul>';
             items.forEach((item) => {
                 let displayTitle = item.title || item;
+                let textColor = item.textColor || '#2a5298';
                 let itemId = item.id || '';
-                html += `<li onclick='openVacancyPage(${JSON.stringify(boxKey)}, ${JSON.stringify(itemId)})'>${displayTitle}</li>`;
+                html += `<li onclick='openVacancyPage(${JSON.stringify(boxKey)}, ${JSON.stringify(itemId)})' style="color: ${textColor};">${displayTitle}</li>`;
             });
             html += '</ul>';
             contentBox.innerHTML = html;
@@ -537,11 +538,28 @@
             if(!item) return;
 
             document.getElementById('vacancyPageTitle').innerText = item.title || 'Update Details';
+            document.getElementById('vacancyPageTitle').style.color = item.textColor || '#ffffff';
             document.getElementById('vacancyPageCategory').innerText = cat.toUpperCase();
-            document.getElementById('vacancyPageDates').innerText = item.dates || 'Not specified';
-            document.getElementById('vacancyPageFee').innerText = item.fee || 'Not specified';
-            document.getElementById('vacancyPageAge').innerText = item.age || 'Not specified';
-            document.getElementById('vacancyPageTotal').innerText = item.total || 'Not specified';
+            
+            // If offline or news, hide meta cards if fields are not present
+            let isSimpleCat = (cat === 'offline' || cat === 'news');
+            let infoGrid = document.getElementById('vacancyInfoGrid');
+            
+            if(isSimpleCat && !item.dates && !item.fee && !item.age && !item.total) {
+                infoGrid.style.display = 'none';
+            } else {
+                infoGrid.style.display = 'grid';
+                document.getElementById('cardDatesGrid').style.display = item.dates ? 'block' : 'none';
+                document.getElementById('cardFeeGrid').style.display = item.fee ? 'block' : 'none';
+                document.getElementById('cardAgeGrid').style.display = item.age ? 'block' : 'none';
+                document.getElementById('cardTotalGrid').style.display = item.total ? 'block' : 'none';
+
+                document.getElementById('vacancyPageDates').innerText = item.dates || 'Not specified';
+                document.getElementById('vacancyPageFee').innerText = item.fee || 'Not specified';
+                document.getElementById('vacancyPageAge').innerText = item.age || 'Not specified';
+                document.getElementById('vacancyPageTotal').innerText = item.total || 'Not specified';
+            }
+
             document.getElementById('vacancyPageDetails').innerText = item.details || 'No additional details provided.';
 
             let applyBtn = document.getElementById('vacancyPageApply');
@@ -584,7 +602,7 @@
             if(scrollToTop) window.scrollTo(0,0);
         }
 
-        // Ad Banner Slider Implementation (Only slider images change, rest of the page remains stable)
+        // Ad Banner Slider Implementation
         let currentSlideIndex = 0;
         let slideInterval = null;
         function renderActiveAd() {
@@ -698,7 +716,7 @@
                         let safeTitle = (item.title || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                         manageItemsHtml += `
                             <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:6px; margin-bottom:6px; font-size:13px;">
-                                <span style="font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%;">${safeTitle}</span>
+                                <span style="font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%; color:${item.textColor || '#333'}">${safeTitle}</span>
                                 <div style="display:flex; gap:6px;">
                                     <button type="button" onclick="editItemPrompt('${catObj.key}', '${item.id}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer; width:auto; margin:0;">Edit</button>
                                     <button type="button" onclick="deleteItemFromFirebase('${catObj.key}', '${item.id}')" style="background:#dc2626; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer; width:auto; margin:0;">Delete</button>
@@ -791,7 +809,7 @@
 
                 <div class="admin-card">
                     <div class="admin-title">📢 Add New Post / Item</div>
-                    <select id="selectBoxCategory">
+                    <select id="selectBoxCategory" onchange="toggleFormFieldsBasedOnCategory()">
                         <option value="jobs">Latest Jobs</option>
                         <option value="admit">Admit Card</option>
                         <option value="result">Results</option>
@@ -800,18 +818,27 @@
                         <option value="news">News / सूचना</option>
                     </select>
                     <input type="text" id="newItemTitle" placeholder="Post / Item Title">
-                    <textarea id="newItemDates" placeholder="Important Dates" rows="2"></textarea>
-                    <textarea id="newItemFee" placeholder="Application Fee" rows="2"></textarea>
-                    <input type="text" id="newItemAge" placeholder="Age Limit">
-                    <input type="text" id="newItemTotal" placeholder="Total Posts">
-                    <textarea id="newItemDetails" placeholder="Full Details / Description" rows="4"></textarea>
-                    <input type="text" id="newItemApply" placeholder="Apply Online Link (URL)">
-                    <input type="text" id="newItemNotification" placeholder="Notification URL">
                     
-                    <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;">
-                        <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload PDF:</label>
-                        <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin: 6px 0 12px 0;">
+                        <label style="font-weight: bold; font-size: 13px; color: #172554;">Text Color Pick:</label>
+                        <input type="color" id="newItemColor" value="#2a5298" style="width: 60px; height: 35px; padding: 2px; cursor: pointer; margin: 0;">
                     </div>
+
+                    <div id="extraFieldsContainer">
+                        <textarea id="newItemDates" placeholder="Important Dates" rows="2"></textarea>
+                        <textarea id="newItemFee" placeholder="Application Fee" rows="2"></textarea>
+                        <input type="text" id="newItemAge" placeholder="Age Limit">
+                        <input type="text" id="newItemTotal" placeholder="Total Posts">
+                        <input type="text" id="newItemApply" placeholder="Apply Online Link (URL)">
+                        <input type="text" id="newItemNotification" placeholder="Notification URL">
+                        
+                        <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;" id="pdfUploadBoxWrapper">
+                            <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload PDF:</label>
+                            <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
+                        </div>
+                    </div>
+
+                    <textarea id="newItemDetails" placeholder="Full Details / Description" rows="4"></textarea>
 
                     <button type="button" onclick="addBoxItemToFirebase()">Add Item to Site</button>
                 </div>
@@ -843,6 +870,18 @@
                 </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
+        }
+
+        function toggleFormFieldsBasedOnCategory() {
+            let cat = document.getElementById('selectBoxCategory').value;
+            let extraContainer = document.getElementById('extraFieldsContainer');
+            if(extraContainer) {
+                if(cat === 'offline' || cat === 'news') {
+                    extraContainer.style.display = 'none';
+                } else {
+                    extraContainer.style.display = 'block';
+                }
+            }
         }
 
         // Helper Function: Auto Compress Image to Base64
@@ -902,6 +941,8 @@
                 return;
             }
 
+            let isSimpleCat = (cat === 'offline' || cat === 'news');
+
             let html = `
                 <h2>✏️ Edit Post Details</h2>
                 <hr style="margin:10px 0 15px 0;">
@@ -911,26 +952,33 @@
                 <label style="font-weight:bold; font-size:13px;">Post Title:</label>
                 <input type="text" id="editItemTitle" value="${item.title || ''}">
                 
-                <label style="font-weight:bold; font-size:13px;">Important Dates:</label>
-                <textarea id="editItemDates" rows="2">${item.dates || ''}</textarea>
-                
-                <label style="font-weight:bold; font-size:13px;">Application Fee:</label>
-                <textarea id="editItemFee" rows="2">${item.fee || ''}</textarea>
-                
-                <label style="font-weight:bold; font-size:13px;">Age Limit:</label>
-                <input type="text" id="editItemAge" value="${item.age || ''}">
-                
-                <label style="font-weight:bold; font-size:13px;">Total Posts:</label>
-                <input type="text" id="editItemTotal" value="${item.total || ''}">
-                
+                <div style="display: flex; align-items: center; gap: 10px; margin: 6px 0 12px 0;">
+                    <label style="font-weight: bold; font-size: 13px; color: #172554;">Text Color Pick:</label>
+                    <input type="color" id="editItemColor" value="${item.textColor || '#2a5298'}" style="width: 60px; height: 35px; padding: 2px; cursor: pointer; margin: 0;">
+                </div>
+
+                <div id="editExtraFieldsContainer" style="${isSimpleCat ? 'display:none;' : 'display:block;'}">
+                    <label style="font-weight:bold; font-size:13px;">Important Dates:</label>
+                    <textarea id="editItemDates" rows="2">${item.dates || ''}</textarea>
+                    
+                    <label style="font-weight:bold; font-size:13px;">Application Fee:</label>
+                    <textarea id="editItemFee" rows="2">${item.fee || ''}</textarea>
+                    
+                    <label style="font-weight:bold; font-size:13px;">Age Limit:</label>
+                    <input type="text" id="editItemAge" value="${item.age || ''}">
+                    
+                    <label style="font-weight:bold; font-size:13px;">Total Posts:</label>
+                    <input type="text" id="editItemTotal" value="${item.total || ''}">
+                    
+                    <label style="font-weight:bold; font-size:13px;">Apply Online Link:</label>
+                    <input type="text" id="editItemApply" value="${item.applyLink || ''}">
+                    
+                    <label style="font-weight:bold; font-size:13px;">Notification Link:</label>
+                    <input type="text" id="editItemNotification" value="${item.notificationLink || ''}">
+                </div>
+
                 <label style="font-weight:bold; font-size:13px;">Full Details:</label>
                 <textarea id="editItemDetails" rows="4">${item.details || ''}</textarea>
-                
-                <label style="font-weight:bold; font-size:13px;">Apply Online Link:</label>
-                <input type="text" id="editItemApply" value="${item.applyLink || ''}">
-                
-                <label style="font-weight:bold; font-size:13px;">Notification Link:</label>
-                <input type="text" id="editItemNotification" value="${item.notificationLink || ''}">
 
                 <button type="button" onclick="saveEditedItemToFirebase()">Update & Save Changes</button>
                 <button type="button" onclick="openAdminDashboard()" style="background:#64748b; margin-top:8px;">Back to Dashboard</button>
@@ -943,13 +991,8 @@
             let itemId = document.getElementById('editItemId').value;
             
             let title = document.getElementById('editItemTitle').value;
-            let dates = document.getElementById('editItemDates').value;
-            let fee = document.getElementById('editItemFee').value;
-            let age = document.getElementById('editItemAge').value;
-            let total = document.getElementById('editItemTotal').value;
+            let textColor = document.getElementById('editItemColor').value;
             let details = document.getElementById('editItemDetails').value;
-            let applyLink = document.getElementById('editItemApply').value;
-            let notificationLink = document.getElementById('editItemNotification').value;
 
             if(!title) { alert('Title mandatory hai!'); return; }
 
@@ -958,13 +1001,14 @@
 
             let updatedItem = {
                 title,
-                dates,
-                fee,
-                age,
-                total,
+                textColor,
                 details,
-                applyLink,
-                notificationLink,
+                dates: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemDates') ? document.getElementById('editItemDates').value : (existing.dates || '')),
+                fee: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemFee') ? document.getElementById('editItemFee').value : (existing.fee || '')),
+                age: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemAge') ? document.getElementById('editItemAge').value : (existing.age || '')),
+                total: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemTotal') ? document.getElementById('editItemTotal').value : (existing.total || '')),
+                applyLink: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemApply') ? document.getElementById('editItemApply').value : (existing.applyLink || '')),
+                notificationLink: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemNotification') ? document.getElementById('editItemNotification').value : (existing.notificationLink || '')),
                 pdfId: existing.pdfId || ''
             };
 
@@ -1056,23 +1100,28 @@
         async function addBoxItemToFirebase() {
             let cat = document.getElementById('selectBoxCategory').value;
             let title = document.getElementById('newItemTitle').value;
-            let dates = document.getElementById('newItemDates').value;
-            let fee = document.getElementById('newItemFee').value;
-            let age = document.getElementById('newItemAge').value;
-            let total = document.getElementById('newItemTotal').value;
+            let textColor = document.getElementById('newItemColor').value;
             let details = document.getElementById('newItemDetails').value;
-            let applyLink = document.getElementById('newItemApply').value;
-            let notificationLink = document.getElementById('newItemNotification').value;
 
             if(!title) { alert('Please enter item title!'); return; }
 
-            let pdfId = '';
-            let fileInput = document.getElementById('newItemPdfFileInput');
-            if(fileInput && fileInput.files && fileInput.files[0]) {
-                pdfId = await saveOfflinePdf(fileInput.files[0]);
+            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '';
+
+            if(cat !== 'offline' && cat !== 'news') {
+                dates = document.getElementById('newItemDates').value;
+                fee = document.getElementById('newItemFee').value;
+                age = document.getElementById('newItemAge').value;
+                total = document.getElementById('newItemTotal').value;
+                applyLink = document.getElementById('newItemApply').value;
+                notificationLink = document.getElementById('newItemNotification').value;
+
+                let fileInput = document.getElementById('newItemPdfFileInput');
+                if(fileInput && fileInput.files && fileInput.files[0]) {
+                    pdfId = await saveOfflinePdf(fileInput.files[0]);
+                }
             }
 
-            let newItem = { title, dates, fee, age, total, details, applyLink, notificationLink, pdfId };
+            let newItem = { title, textColor, dates, fee, age, total, details, applyLink, notificationLink, pdfId };
 
             db.ref('box_items_' + cat).push(newItem).then(() => {
                 alert('Successfully added and synced with Firebase!');
