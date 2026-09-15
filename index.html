@@ -541,8 +541,8 @@
             document.getElementById('vacancyPageTitle').style.color = item.textColor || '#ffffff';
             document.getElementById('vacancyPageCategory').innerText = cat.toUpperCase();
             
-            // If offline or news, hide meta cards if fields are not present
-            let isSimpleCat = (cat === 'offline' || cat === 'news');
+            // If offline, news or yojana, hide meta cards if fields are not present
+            let isSimpleCat = (cat === 'offline' || cat === 'news' || cat === 'yojana');
             let infoGrid = document.getElementById('vacancyInfoGrid');
             
             if(isSimpleCat && !item.dates && !item.fee && !item.age && !item.total) {
@@ -838,6 +838,10 @@
                         </div>
                     </div>
 
+                    <div id="yojanaFieldsContainer" style="display:none;">
+                        <input type="text" id="newItemYojanaApply" placeholder="Apply Online Link (URL)">
+                    </div>
+
                     <textarea id="newItemDetails" placeholder="Full Details / Description" rows="4"></textarea>
 
                     <button type="button" onclick="addBoxItemToFirebase()">Add Item to Site</button>
@@ -870,16 +874,24 @@
                 </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
+            toggleFormFieldsBasedOnCategory();
         }
 
         function toggleFormFieldsBasedOnCategory() {
             let cat = document.getElementById('selectBoxCategory').value;
             let extraContainer = document.getElementById('extraFieldsContainer');
-            if(extraContainer) {
+            let yojanaContainer = document.getElementById('yojanaFieldsContainer');
+            
+            if(extraContainer && yojanaContainer) {
                 if(cat === 'offline' || cat === 'news') {
                     extraContainer.style.display = 'none';
+                    yojanaContainer.style.display = 'none';
+                } else if(cat === 'yojana') {
+                    extraContainer.style.display = 'none';
+                    yojanaContainer.style.display = 'block';
                 } else {
                     extraContainer.style.display = 'block';
+                    yojanaContainer.style.display = 'none';
                 }
             }
         }
@@ -942,6 +954,7 @@
             }
 
             let isSimpleCat = (cat === 'offline' || cat === 'news');
+            let isYojanaCat = (cat === 'yojana');
 
             let html = `
                 <h2>✏️ Edit Post Details</h2>
@@ -957,7 +970,7 @@
                     <input type="color" id="editItemColor" value="${item.textColor || '#2a5298'}" style="width: 60px; height: 35px; padding: 2px; cursor: pointer; margin: 0;">
                 </div>
 
-                <div id="editExtraFieldsContainer" style="${isSimpleCat ? 'display:none;' : 'display:block;'}">
+                <div id="editExtraFieldsContainer" style="${isSimpleCat || isYojanaCat ? 'display:none;' : 'display:block;'}">
                     <label style="font-weight:bold; font-size:13px;">Important Dates:</label>
                     <textarea id="editItemDates" rows="2">${item.dates || ''}</textarea>
                     
@@ -975,6 +988,11 @@
                     
                     <label style="font-weight:bold; font-size:13px;">Notification Link:</label>
                     <input type="text" id="editItemNotification" value="${item.notificationLink || ''}">
+                </div>
+
+                <div id="editYojanaFieldsContainer" style="${isYojanaCat ? 'display:block;' : 'display:none;'}">
+                    <label style="font-weight:bold; font-size:13px;">Apply Online Link:</label>
+                    <input type="text" id="editItemYojanaApply" value="${item.applyLink || ''}">
                 </div>
 
                 <label style="font-weight:bold; font-size:13px;">Full Details:</label>
@@ -999,16 +1017,23 @@
             let items = JSON.parse(localStorage.getItem('box_items_' + cat)) || [];
             let existing = items.find(i => i.id === itemId) || {};
 
+            let applyLinkVal = existing.applyLink || '';
+            if(cat === 'yojana') {
+                applyLinkVal = document.getElementById('editItemYojanaApply') ? document.getElementById('editItemYojanaApply').value : '';
+            } else if(cat !== 'offline' && cat !== 'news') {
+                applyLinkVal = document.getElementById('editItemApply') ? document.getElementById('editItemApply').value : '';
+            }
+
             let updatedItem = {
                 title,
                 textColor,
                 details,
-                dates: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemDates') ? document.getElementById('editItemDates').value : (existing.dates || '')),
-                fee: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemFee') ? document.getElementById('editItemFee').value : (existing.fee || '')),
-                age: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemAge') ? document.getElementById('editItemAge').value : (existing.age || '')),
-                total: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemTotal') ? document.getElementById('editItemTotal').value : (existing.total || '')),
-                applyLink: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemApply') ? document.getElementById('editItemApply').value : (existing.applyLink || '')),
-                notificationLink: (cat === 'offline' || cat === 'news') ? '' : (document.getElementById('editItemNotification') ? document.getElementById('editItemNotification').value : (existing.notificationLink || '')),
+                dates: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemDates') ? document.getElementById('editItemDates').value : (existing.dates || '')),
+                fee: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemFee') ? document.getElementById('editItemFee').value : (existing.fee || '')),
+                age: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemAge') ? document.getElementById('editItemAge').value : (existing.age || '')),
+                total: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemTotal') ? document.getElementById('editItemTotal').value : (existing.total || '')),
+                applyLink: applyLinkVal,
+                notificationLink: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemNotification') ? document.getElementById('editItemNotification').value : (existing.notificationLink || '')),
                 pdfId: existing.pdfId || ''
             };
 
@@ -1107,7 +1132,9 @@
 
             let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '';
 
-            if(cat !== 'offline' && cat !== 'news') {
+            if(cat === 'yojana') {
+                applyLink = document.getElementById('newItemYojanaApply').value;
+            } else if(cat !== 'offline' && cat !== 'news') {
                 dates = document.getElementById('newItemDates').value;
                 fee = document.getElementById('newItemFee').value;
                 age = document.getElementById('newItemAge').value;
