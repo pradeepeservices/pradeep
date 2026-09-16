@@ -323,6 +323,9 @@
             syncPortalsFromFirebase();
             syncFooterPagesFromFirebase();
 
+            // Track Visitor and Location upon visiting website
+            trackVisitorAndLocation();
+
             // Handle browser Back / Forward button navigation history
             window.addEventListener('popstate', function(event) {
                 if(event.state && event.state.page === 'vacancy') {
@@ -331,6 +334,38 @@
                     goHomeDirect(false);
                 }
             });
+        }
+
+        // Visitor Tracking & Location Function using ipapi.co
+        function trackVisitorAndLocation() {
+            if(sessionStorage.getItem('visited_tracked')) return;
+
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    let visitorInfo = {
+                        ip: data.ip || 'Unknown',
+                        city: data.city || 'Unknown City',
+                        region: data.region || 'Unknown Region',
+                        country: data.country_name || 'Unknown Country',
+                        org: data.org || 'ISP',
+                        date: new Date().toLocaleString()
+                    };
+                    db.ref('website_visitors').push(visitorInfo);
+                    sessionStorage.setItem('visited_tracked', 'true');
+                })
+                .catch(() => {
+                    let visitorInfo = {
+                        ip: 'Direct Visitor',
+                        city: 'Unknown',
+                        region: 'Unknown',
+                        country: 'Unknown',
+                        org: 'Unknown',
+                        date: new Date().toLocaleString()
+                    };
+                    db.ref('website_visitors').push(visitorInfo);
+                    sessionStorage.setItem('visited_tracked', 'true');
+                });
         }
 
         function applySavedSiteContent() {
@@ -375,7 +410,6 @@
                     const data = snapshot.val();
                     if(data) {
                         const itemsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-                        // Reverse array taaki nayi post sabse upar dikhe
                         itemsArray.reverse();
                         localStorage.setItem('box_items_' + cat, JSON.stringify(itemsArray));
                     } else {
@@ -785,6 +819,38 @@
                 managePortalsHtml = `<p style="font-size:13px; color:#666;">No portal links added yet.</p>`;
             }
 
+            // Fetch Visitors Stats for Admin Dashboard
+            db.ref('website_visitors').once('value', (snapshot) => {
+                let visitorsData = snapshot.val();
+                let visitorCount = 0;
+                let visitorListHtml = '';
+                
+                if(visitorsData) {
+                    let vArray = Object.keys(visitorsData).map(key => ({ id: key, ...visitorsData[key] }));
+                    visitorCount = vArray.length;
+                    vArray.reverse().forEach(v => {
+                        visitorListHtml += `
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:8px 10px; border-radius:6px; margin-bottom:6px; font-size:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:5px;">
+                                <div>
+                                    <strong style="color:#1e3c72;">📍 ${v.city || 'Unknown'}, ${v.region || ''}, ${v.country || 'Unknown Country'}</strong><br>
+                                    <span style="color:#64748b;">IP: ${v.ip || 'N/A'} | ISP: ${v.org || 'N/A'}</span>
+                                </div>
+                                <span style="font-size:11px; color:#475569; background:#e2e8f0; padding:2px 6px; border-radius:4px;">🕒 ${v.date || ''}</span>
+                            </div>
+                        `;
+                    });
+                }
+                if(!visitorListHtml) {
+                    visitorListHtml = `<p style="font-size:13px; color:#666;">No visitor logs recorded yet.</p>`;
+                }
+
+                let totalCountElem = document.getElementById('adminTotalVisitorCount');
+                if(totalCountElem) totalCountElem.innerText = visitorCount;
+
+                let visitorListElem = document.getElementById('adminVisitorListContainer');
+                if(visitorListElem) visitorListElem.innerHTML = visitorListHtml;
+            });
+
             // Fetch Feedbacks for Admin Dashboard
             db.ref('user_feedbacks').once('value', (snapshot) => {
                 let fbData = snapshot.val();
@@ -813,6 +879,18 @@
             let html = `
                 <h2>Admin Control Panel</h2>
                 <hr style="margin:10px 0 15px 0;">
+
+                <!-- Website Visitor Statistics Card -->
+                <div class="admin-card" style="border: 2px solid #2563eb; background: #eff6ff;">
+                    <div class="admin-title" style="color: #1e40af; display: flex; justify-content: space-between; align-items: center;">
+                        <span>📊 Website Visitor Statistics & Locations</span>
+                        <span style="background: #2563eb; color: white; padding: 4px 12px; border-radius: 999px; font-size: 14px;">Total Visits: <strong id="adminTotalVisitorCount">0</strong></span>
+                    </div>
+                    <p style="font-size:12px; color:#1e3c72; margin-top:0;">यहाँ आप उन सभी यूजर्स की लिस्ट और उनकी लाइव लोकेशन (शहर, राज्य, देश) देख सकते हैं जिन्होंने आपकी वेबसाइट विजिट की है:</p>
+                    <div style="max-height:220px; overflow-y:auto; border:1px solid #cbd5e1; padding:10px; border-radius:6px; background:#fff;" id="adminVisitorListContainer">
+                        Loading visitor logs...
+                    </div>
+                </div>
                 
                 <div class="admin-card">
                     <div class="admin-title">💬 User Feedbacks Received</div>
@@ -1009,7 +1087,7 @@
             if(confirm('Kya aap is post ko delete karna chahte hain?')) {
                 db.ref('box_items_' + cat + '/' + itemId).remove().then(() => {
                     alert('Post successfully delete ho gayi!');
-                    openAdminDashboard();
+                    openAdminDashboard(); // Keeps admin panel open without closing modal
                 }).catch((error) => {
                     alert('Delete karne mein error aayi: ' + error.message);
                 });
@@ -1122,7 +1200,7 @@
 
             db.ref('box_items_' + cat + '/' + itemId).set(updatedItem).then(() => {
                 alert('Post successfully update ho gayi!');
-                openAdminDashboard();
+                openAdminDashboard(); // Stays in admin panel instead of closing modal
             }).catch((error) => {
                 alert('Update karne mein error aayi: ' + error.message);
             });
@@ -1137,7 +1215,7 @@
 
                 applySavedSiteContent();
                 alert('Website logo compressed and updated successfully!');
-                closePageModal();
+                openAdminDashboard(); // Keeps admin panel open
             } else {
                 alert('Please select a logo image file first!');
             }
@@ -1152,7 +1230,7 @@
 
                 applySavedSiteContent();
                 alert('Profile photo compressed and updated successfully!');
-                closePageModal();
+                openAdminDashboard(); // Keeps admin panel open
             } else {
                 alert('Please select a profile image file first!');
             }
@@ -1171,7 +1249,7 @@
 
                 renderActiveAd();
                 alert('Ad Banners compressed and updated successfully as a Slider!');
-                closePageModal();
+                openAdminDashboard(); // Keeps admin panel open
             } else {
                 alert('Please select advertisement banner images first!');
             }
@@ -1194,7 +1272,7 @@
 
             db.ref('footer_pages').set(pageData).then(() => {
                 alert('All Footer Pages updated successfully and synced!');
-                closePageModal();
+                openAdminDashboard(); // Keeps admin panel open
             }).catch((error) => {
                 alert('Error updating footer pages: ' + error.message);
             });
@@ -1235,7 +1313,7 @@
 
             db.ref('box_items_' + cat).push(newItem).then(() => {
                 alert('Successfully added and synced with Firebase!');
-                closePageModal();
+                openAdminDashboard(); // Stays in admin panel so you can add more posts if needed
             }).catch((error) => {
                 alert('Failed to add item: ' + error.message);
             });
@@ -1248,7 +1326,7 @@
 
             db.ref('general_settings').update(data).then(() => {
                 alert('Settings updated successfully!');
-                closePageModal();
+                openAdminDashboard(); // Keeps admin panel open
             }).catch((error) => {
                 alert('Error saving settings: ' + error.message);
             });
@@ -1323,7 +1401,7 @@
             let links = { wa, tg, yt, fb, ig };
             db.ref('social_links').set(links).then(() => {
                 alert('Social links updated successfully!');
-                closePageModal();
+                openAdminDashboard(); // Keeps admin panel open
             }).catch((error) => {
                 alert('Error saving social links: ' + error.message);
             });
