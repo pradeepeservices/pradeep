@@ -1200,7 +1200,8 @@
 
             db.ref('box_items_' + cat + '/' + itemId).set(updatedItem).then(() => {
                 alert('Post successfully update ho gayi!');
-                openAdminDashboard(); // Stays in admin panel instead of closing modal
+                // अब एडिट करने के बाद सीधे एडमिन डैशबोर्ड ओपन होगा, वेबसाइट बंद या होमपेज पर नहीं जाएगी
+                openAdminDashboard(); 
             }).catch((error) => {
                 alert('Update karne mein error aayi: ' + error.message);
             });
