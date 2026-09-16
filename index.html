@@ -7,8 +7,9 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title id="page-title">Pradeep E Services - Online Job & Cyber Cafe Portal</title>
-    <!-- jsPDF Library for JPG to PDF Conversion -->
+    <!-- jsPDF Library for JPG to PDF / ID Card Conversion -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- Firebase App & Realtime Database CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -78,7 +79,7 @@
 
         /* Dynamic Modal */
         .page-modal { display: none; position: fixed; z-index: 1100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-        .page-box { background: white; width: 90%; max-width: 700px; margin: 4% auto; padding: 25px; border-radius: 8px; position: relative; max-height: 88vh; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .page-box { background: white; width: 90%; max-width: 750px; margin: 3% auto; padding: 25px; border-radius: 8px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .close-btn { color: #aaa; float: right; font-size: 26px; font-weight: bold; cursor: pointer; }
         .close-btn:hover { color: #333; }
         .page-box input, .page-box textarea, .page-box select { width: 100%; padding: 10px; margin: 6px 0 12px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: Arial, sans-serif; }
@@ -98,6 +99,17 @@
         .back-home { display:inline-flex; align-items:center; gap:8px; border:0; background:#fff; color:#173a9c; padding:10px 15px; border-radius:10px; font-weight:800; cursor:pointer; }
         .vacancy-apply { display:inline-block; margin-top:18px; padding:13px 20px; border-radius:11px; background:#16a34a; color:#fff; text-decoration:none; font-weight:800; }
         
+        /* Bank ID Card Preview Styling */
+        .idcard-preview { width: 380px; background: #ffffff; border: 2px solid #1e3c72; border-radius: 12px; padding: 15px; margin: 15px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.15); box-sizing: border-box; text-align: left; position: relative; }
+        .idcard-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 10px; }
+        .idcard-logo { width: 45px; height: 45px; object-fit: contain; }
+        .idcard-bankname { font-size: 15px; font-weight: bold; color: #1e3c72; text-align: center; flex-grow: 1; }
+        .idcard-body { display: flex; gap: 12px; align-items: center; }
+        .idcard-photo { width: 85px; height: 105px; border: 1px solid #ccc; border-radius: 4px; object-fit: cover; background: #eee; }
+        .idcard-details { font-size: 12px; line-height: 1.5; color: #333; flex-grow: 1; }
+        .idcard-details span { font-weight: bold; color: #1e3c72; }
+        .idcard-footer { margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 6px; font-size: 11px; text-align: center; color: #555; font-weight: bold; }
+
         @media(max-width:760px){.top-bar{position:static;justify-content:flex-end;margin-bottom:12px}.logo-area{margin-top:4px}.box{width:100%}.page-box{padding:17px}.vacancy-body{padding:18px}}
     </style>
 </head>
@@ -223,6 +235,7 @@
             <div class="tool-card" onclick="openToolModal('crop')">📷 Photo Crop Tool</div>
             <div class="tool-card" onclick="openToolModal('pdf')">📄 JPG to PDF Converter</div>
             <div class="tool-card" onclick="openToolModal('bg')">✨ Background Remove / Change</div>
+            <div class="tool-card" onclick="openToolModal('bankid')">💳 Bank Identity Card Maker</div>
         </div>
     </div>
 
@@ -530,7 +543,6 @@
             const blob=await getOfflinePdfBlob(id);
             if(!blob){alert('PDF file not found in browser storage.');return;}
             const url=URL.createObjectURL(blob);
-            // Fixed PDF download/view mechanism to ensure it triggers correctly across all browsers
             const a = document.createElement('a');
             a.href = url;
             a.download = 'PradeepEServices_Form.pdf';
@@ -1445,9 +1457,142 @@
                     </select>
                     <button type="button" onclick="alert('Background updated successfully!')">Download Processed Photo</button>
                 `;
+            } else if(toolType === 'bankid') {
+                html = `
+                    <h2>💳 Bank Identity Card Maker</h2>
+                    <p style="font-size:13px; color:#666;">Sabhi banks ke identity card yahan details bhar kar turant banayein aur download karein.</p>
+                    
+                    <label style="font-weight:bold; font-size:13px;">Select Bank / Institution:</label>
+                    <select id="cardBankSelect" onchange="updateIdCardPreview()">
+                        <option value="State Bank of India (SBI)">State Bank of India (SBI)</option>
+                        <option value="Bank of Baroda (BOB)">Bank of Baroda (BOB)</option>
+                        <option value="Punjab National Bank (PNB)">Punjab National Bank (PNB)</option>
+                        <option value="Central Bank of India">Central Bank of India</option>
+                        <option value="HDFC Bank">HDFC Bank</option>
+                        <option value="ICICI Bank">ICICI Bank</option>
+                        <option value="MP Online / CSC Kiosk">MP Online / CSC Kiosk</option>
+                    </select>
+
+                    <label style="font-weight:bold; font-size:13px;">Bank Logo Image (Optional/Custom):</label>
+                    <input type="file" id="cardLogoInput" accept="image/*" onchange="previewCardLogo(event)">
+
+                    <label style="font-weight:bold; font-size:13px;">Customer Name:</label>
+                    <input type="text" id="cardCustName" placeholder="Customer Full Name" oninput="updateIdCardPreview()">
+
+                    <label style="font-weight:bold; font-size:13px;">Father's / Husband's Name:</label>
+                    <input type="text" id="cardRelName" placeholder="Father's or Husband's Name" oninput="updateIdCardPreview()">
+
+                    <label style="font-weight:bold; font-size:13px;">Account Number:</label>
+                    <input type="text" id="cardAccNo" placeholder="Bank Account Number" oninput="updateIdCardPreview()">
+
+                    <label style="font-weight:bold; font-size:13px;">IFSC Code:</label>
+                    <input type="text" id="cardIfsc" placeholder="IFSC Code" oninput="updateIdCardPreview()">
+
+                    <label style="font-weight:bold; font-size:13px;">Address:</label>
+                    <input type="text" id="cardAddress" placeholder="Customer Residential Address" oninput="updateIdCardPreview()">
+
+                    <label style="font-weight:bold; font-size:13px;">Kiosk Name:</label>
+                    <input type="text" id="cardKioskName" placeholder="Kiosk / Service Centre Name" oninput="updateIdCardPreview()">
+
+                    <label style="font-weight:bold; font-size:13px;">Kiosk Location:</label>
+                    <input type="text" id="cardKioskLoc" placeholder="Kiosk Location / Branch" oninput="updateIdCardPreview()">
+
+                    <label style="font-weight:bold; font-size:13px;">Customer Photo:</label>
+                    <input type="file" id="cardPhotoInput" accept="image/*" onchange="previewCardPhoto(event)">
+
+                    <h4 style="margin:15px 0 5px 0; color:#1e3c72; text-align:center;">Card Live Preview:</h4>
+                    
+                    <div id="captureCardArea" class="idcard-preview">
+                        <div class="idcard-header">
+                            <img id="prevLogoImg" src="https://cdn-icons-png.flaticon.com/512/2830/2830284.png" class="idcard-logo" alt="Logo">
+                            <div class="idcard-name" id="prevBankName" style="font-size:13px; font-weight:bold; color:#1e3c72; text-align:center; flex-grow:1;">STATE BANK OF INDIA</div>
+                        </div>
+                        <div class="idcard-body">
+                            <img id="prevCustPhoto" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="idcard-photo" alt="Photo">
+                            <div class="idcard-details">
+                                <div>Name: <span id="lblCustName">---</span></div>
+                                <div>F/H Name: <span id="lblRelName">---</span></div>
+                                <div>A/c No: <span id="lblAccNo">---</span></div>
+                                <div>IFSC: <span id="lblIfsc">---</span></div>
+                                <div>Address: <span id="lblAddress">---</span></div>
+                            </div>
+                        </div>
+                        <div class="idcard-footer">
+                            Kiosk: <span id="lblKioskName">---</span> | Loc: <span id="lblKioskLoc">---</span>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="downloadBankIdCardAsImage()" style="background:#16a34a; margin-top:12px;">📥 Download ID Card as Image</button>
+                `;
+                setTimeout(updateIdCardPreview, 100);
             }
             document.getElementById('modalBodyContent').innerHTML = html;
             openPageModal();
+        }
+
+        let customCardLogoBase64 = '';
+        let customCardPhotoBase64 = '';
+
+        function previewCardLogo(event) {
+            let file = event.target.files[0];
+            if(file) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    customCardLogoBase64 = e.target.result;
+                    document.getElementById('prevLogoImg').src = customCardLogoBase64;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewCardPhoto(event) {
+            let file = event.target.files[0];
+            if(file) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    customCardPhotoBase64 = e.target.result;
+                    document.getElementById('prevCustPhoto').src = customCardPhotoBase64;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateIdCardPreview() {
+            let bankName = document.getElementById('cardBankSelect') ? document.getElementById('cardBankSelect').value : 'State Bank of India';
+            let cName = document.getElementById('cardCustName') ? document.getElementById('cardCustName').value : '';
+            let rName = document.getElementById('cardRelName') ? document.getElementById('cardRelName').value : '';
+            let accNo = document.getElementById('cardAccNo') ? document.getElementById('cardAccNo').value : '';
+            let ifsc = document.getElementById('cardIfsc') ? document.getElementById('cardIfsc').value : '';
+            let addr = document.getElementById('cardAddress') ? document.getElementById('cardAddress').value : '';
+            let kName = document.getElementById('cardKioskName') ? document.getElementById('cardKioskName').value : '';
+            let kLoc = document.getElementById('cardKioskLoc') ? document.getElementById('cardKioskLoc').value : '';
+
+            if(document.getElementById('prevBankName')) document.getElementById('prevBankName').innerText = bankName.toUpperCase();
+            if(document.getElementById('lblCustName')) document.getElementById('lblCustName').innerText = cName || '---';
+            if(document.getElementById('lblRelName')) document.getElementById('lblRelName').innerText = rName || '---';
+            if(document.getElementById('lblAccNo')) document.getElementById('lblAccNo').innerText = accNo || '---';
+            if(document.getElementById('lblIfsc')) document.getElementById('lblIfsc').innerText = ifsc || '---';
+            if(document.getElementById('lblAddress')) document.getElementById('lblAddress').innerText = addr || '---';
+            if(document.getElementById('lblKioskName')) document.getElementById('lblKioskName').innerText = kName || '---';
+            if(document.getElementById('lblKioskLoc')) document.getElementById('lblKioskLoc').innerText = kLoc || '---';
+
+            if(!customCardLogoBase64 && document.getElementById('prevLogoImg')) {
+                document.getElementById('prevLogoImg').src = 'https://cdn-icons-png.flaticon.com/512/2830/2830284.png';
+            }
+        }
+
+        function downloadBankIdCardAsImage() {
+            let cardElement = document.getElementById('captureCardArea');
+            if(!cardElement) return;
+
+            html2canvas(cardElement, { scale: 3, useCORS: true }).then(canvas => {
+                let link = document.createElement('a');
+                link.download = 'Bank_Identity_Card.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                alert('ID Card download karne mein error aayi: ' + err.message);
+            });
         }
 
         function previewToolImage(event) {
