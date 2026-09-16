@@ -264,8 +264,7 @@
                 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
                     <a id="vacancyPageApply" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;">📝 Apply Online</a>
                     <a id="vacancyPageNotification" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#2457e6;">🔔 Notification</a>
-                    <a id="vacancyPagePdf" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#e67e22;">📄 Check Official Notification</a>
-                    <a id="vacancyPagePdf2" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#8b5cf6;">📄 Check Second PDF</a>
+                    <a id="vacancyPagePdf" class="vacancy-apply" href="#" target="_blank" rel="noopener" style="display:none;margin-top:0;background:#e67e22;">📄 Download Form PDF</a>
                 </div>
             </div>
         </div>
@@ -582,14 +581,6 @@
                 pdfBtn.style.display = 'none';
             }
 
-            let pdfBtn2 = document.getElementById('vacancyPagePdf2');
-            if(item.pdfId2) {
-                pdfBtn2.style.display = 'inline-block';
-                pdfBtn2.onclick = function(e) { e.preventDefault(); openOfflinePdf(item.pdfId2); };
-            } else {
-                pdfBtn2.style.display = 'none';
-            }
-
             document.getElementById('appHome').style.display = 'none';
             document.getElementById('vacancyPage').style.display = 'block';
             if(scrollToTop) window.scrollTo(0,0);
@@ -901,18 +892,16 @@
                         <input type="text" id="newItemTotal" placeholder="Total Posts">
                         <input type="text" id="newItemApply" placeholder="Apply Online Link (URL)">
                         <input type="text" id="newItemNotification" placeholder="Notification URL">
-                        
-                        <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;" id="pdfUploadBoxWrapper">
-                            <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload First PDF (Any Size > 2MB):</label>
-                            <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px; margin-bottom:10px;">
-                            
-                            <label style="font-weight:bold; font-size:13px; color:#8b5cf6;">Upload Second PDF (Any Size > 2MB):</label>
-                            <input type="file" id="newItemPdfFileInput2" accept="application/pdf" style="margin-top:5px;">
-                        </div>
                     </div>
 
                     <div id="yojanaFieldsContainer" style="display:none;">
                         <input type="text" id="newItemYojanaApply" placeholder="Apply Online Link (URL)">
+                    </div>
+
+                    <!-- Offline Form PDF Upload Box -->
+                    <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;" id="pdfUploadBoxWrapper">
+                        <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload Form PDF (Offline Form ke liye):</label>
+                        <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
                     </div>
 
                     <textarea id="newItemDetails" placeholder="Full Details / Description" rows="4"></textarea>
@@ -954,17 +943,25 @@
             let cat = document.getElementById('selectBoxCategory').value;
             let extraContainer = document.getElementById('extraFieldsContainer');
             let yojanaContainer = document.getElementById('yojanaFieldsContainer');
+            let pdfWrapper = document.getElementById('pdfUploadBoxWrapper');
             
-            if(extraContainer && yojanaContainer) {
-                if(cat === 'offline' || cat === 'news') {
+            if(extraContainer && yojanaContainer && pdfWrapper) {
+                if(cat === 'offline') {
                     extraContainer.style.display = 'none';
                     yojanaContainer.style.display = 'none';
+                    pdfWrapper.style.display = 'block';
+                } else if(cat === 'news') {
+                    extraContainer.style.display = 'none';
+                    yojanaContainer.style.display = 'none';
+                    pdfWrapper.style.display = 'none';
                 } else if(cat === 'yojana') {
                     extraContainer.style.display = 'none';
                     yojanaContainer.style.display = 'block';
+                    pdfWrapper.style.display = 'none';
                 } else {
                     extraContainer.style.display = 'block';
                     yojanaContainer.style.display = 'none';
+                    pdfWrapper.style.display = 'block';
                 }
             }
         }
@@ -1067,6 +1064,12 @@
                     <input type="text" id="editItemYojanaApply" value="${item.applyLink || ''}">
                 </div>
 
+                <!-- Update PDF for Offline / Jobs -->
+                <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;" id="editPdfBoxWrapper">
+                    <label style="font-weight:bold; font-size:13px; color:#2a5298;">Update PDF File (Nayi PDF Upload Karein):</label>
+                    <input type="file" id="editItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
+                </div>
+
                 <label style="font-weight:bold; font-size:13px;">Full Details:</label>
                 <textarea id="editItemDetails" rows="4">${item.details || ''}</textarea>
 
@@ -1076,7 +1079,7 @@
             document.getElementById('modalBodyContent').innerHTML = html;
         }
 
-        function saveEditedItemToFirebase() {
+        async function saveEditedItemToFirebase() {
             let cat = document.getElementById('editCatKey').value;
             let itemId = document.getElementById('editItemId').value;
             
@@ -1096,6 +1099,12 @@
                 applyLinkVal = document.getElementById('editItemApply') ? document.getElementById('editItemApply').value : '';
             }
 
+            let pdfId = existing.pdfId || '';
+            let fileInput = document.getElementById('editItemPdfFileInput');
+            if(fileInput && fileInput.files && fileInput.files[0]) {
+                pdfId = await saveOfflinePdf(fileInput.files[0]);
+            }
+
             let updatedItem = {
                 title,
                 textColor,
@@ -1106,8 +1115,7 @@
                 total: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemTotal') ? document.getElementById('editItemTotal').value : (existing.total || '')),
                 applyLink: applyLinkVal,
                 notificationLink: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemNotification') ? document.getElementById('editItemNotification').value : (existing.notificationLink || '')),
-                pdfId: existing.pdfId || '',
-                pdfId2: existing.pdfId2 || ''
+                pdfId: pdfId
             };
 
             db.ref('box_items_' + cat + '/' + itemId).set(updatedItem).then(() => {
@@ -1198,11 +1206,16 @@
 
             if(!title) { alert('Please enter item title!'); return; }
 
-            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '', pdfId2 = '';
+            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '';
 
             if(cat === 'yojana') {
                 applyLink = document.getElementById('newItemYojanaApply').value;
-            } else if(cat !== 'offline' && cat !== 'news') {
+            } else if(cat === 'offline') {
+                let fileInput = document.getElementById('newItemPdfFileInput');
+                if(fileInput && fileInput.files && fileInput.files[0]) {
+                    pdfId = await saveOfflinePdf(fileInput.files[0]);
+                }
+            } else if(cat !== 'news') {
                 dates = document.getElementById('newItemDates').value;
                 fee = document.getElementById('newItemFee').value;
                 age = document.getElementById('newItemAge').value;
@@ -1214,14 +1227,9 @@
                 if(fileInput && fileInput.files && fileInput.files[0]) {
                     pdfId = await saveOfflinePdf(fileInput.files[0]);
                 }
-
-                let fileInput2 = document.getElementById('newItemPdfFileInput2');
-                if(fileInput2 && fileInput2.files && fileInput2.files[0]) {
-                    pdfId2 = await saveOfflinePdf(fileInput2.files[0]);
-                }
             }
 
-            let newItem = { title, textColor, dates, fee, age, total, details, applyLink, notificationLink, pdfId, pdfId2 };
+            let newItem = { title, textColor, dates, fee, age, total, details, applyLink, notificationLink, pdfId };
 
             db.ref('box_items_' + cat).push(newItem).then(() => {
                 alert('Successfully added and synced with Firebase!');
