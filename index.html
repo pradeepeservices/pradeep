@@ -375,6 +375,8 @@
                     const data = snapshot.val();
                     if(data) {
                         const itemsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                        // Reverse array taaki nayi post sabse upar dikhe
+                        itemsArray.reverse();
                         localStorage.setItem('box_items_' + cat, JSON.stringify(itemsArray));
                     } else {
                         localStorage.removeItem('box_items_' + cat);
