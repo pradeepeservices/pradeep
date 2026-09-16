@@ -502,35 +502,74 @@
             }
         }
 
+        // --- UPDATED FIXED PDF INDEXEDDB HANDLERS ---
         const OFFLINE_PDF_DB='PradeepEServicesPDFDB';
         function openOfflinePdfDB(){
             return new Promise((resolve,reject)=>{
-                const req=indexedDB.open(OFFLINE_PDF_DB,1);
-                req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('pdfs'))req.result.createObjectStore('pdfs');};
+                const req=indexedDB.open(OFFLINE_PDF_DB,2);
+                req.onupgradeneeded=(event)=>{
+                    const dbInstance = event.target.result;
+                    if(!dbInstance.objectStoreNames.contains('pdfs')){
+                        dbInstance.createObjectStore('pdfs');
+                    }
+                };
                 req.onsuccess=()=>resolve(req.result);
                 req.onerror=()=>reject(req.error);
             });
         }
+        
         async function saveOfflinePdf(file){
             if(!file)return '';
             const id='pdf_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-            const dbRef=await openOfflinePdfDB();
-            await new Promise((resolve,reject)=>{const tx=dbRef.transaction('pdfs','readwrite');tx.objectStore('pdfs').put(file,id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
-            dbRef.close();
-            return id;
+            try {
+                const dbRef=await openOfflinePdfDB();
+                await new Promise((resolve,reject)=>{
+                    const tx=dbRef.transaction('pdfs','readwrite');
+                    tx.objectStore('pdfs').put(file, id);
+                    tx.oncomplete=()=>resolve();
+                    tx.onerror=(e)=>reject(e.target.error);
+                });
+                dbRef.close();
+                return id;
+            } catch(err) {
+                console.error("PDF Saving Error:", err);
+                return '';
+            }
         }
+
         async function getOfflinePdfBlob(id){
             if(!id)return null;
-            const dbRef=await openOfflinePdfDB();
-            const blob=await new Promise((resolve,reject)=>{const tx=dbRef.transaction('pdfs','readonly');const req=tx.objectStore('pdfs').get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(tx.error);});
-            dbRef.close();
-            return blob;
+            try {
+                const dbRef=await openOfflinePdfDB();
+                const blob=await new Promise((resolve,reject)=>{
+                    const tx=dbRef.transaction('pdfs','readonly');
+                    const req=tx.objectStore('pdfs').get(id);
+                    req.onsuccess=()=>resolve(req.result||null);
+                    req.onerror=(e)=>reject(e.target.error);
+                });
+                dbRef.close();
+                return blob;
+            } catch(err) {
+                console.error("PDF Fetching Error:", err);
+                return null;
+            }
         }
+
         async function openOfflinePdf(id){
-            const blob=await getOfflinePdfBlob(id);
-            if(!blob){alert('PDF file not found in browser storage.');return;}
-            const url=URL.createObjectURL(blob); window.open(url,'_blank'); setTimeout(()=>URL.revokeObjectURL(url),60000);
+            if(!id) {
+                alert('PDF file not found in browser storage.');
+                return;
+            }
+            let blob = await getOfflinePdfBlob(id);
+            if(!blob){
+                alert('PDF file not found in browser storage.');
+                return;
+            }
+            const url=URL.createObjectURL(blob); 
+            window.open(url,'_blank'); 
+            setTimeout(()=>URL.revokeObjectURL(url),60000);
         }
+        // ---------------------------------------------
 
         function loadBoxItemsIntoSite(boxKey) {
             let items = JSON.parse(localStorage.getItem('box_items_' + boxKey));
@@ -1087,7 +1126,7 @@
             if(confirm('Kya aap is post ko delete karna chahte hain?')) {
                 db.ref('box_items_' + cat + '/' + itemId).remove().then(() => {
                     alert('Post successfully delete ho gayi!');
-                    openAdminDashboard(); // Keeps admin panel open without closing modal
+                    openAdminDashboard(); 
                 }).catch((error) => {
                     alert('Delete karne mein error aayi: ' + error.message);
                 });
@@ -1200,7 +1239,6 @@
 
             db.ref('box_items_' + cat + '/' + itemId).set(updatedItem).then(() => {
                 alert('Post successfully update ho gayi!');
-                // अब एडिट करने के बाद सीधे एडमिन डैशबोर्ड ओपन होगा, वेबसाइट बंद या होमपेज पर नहीं जाएगी
                 openAdminDashboard(); 
             }).catch((error) => {
                 alert('Update karne mein error aayi: ' + error.message);
@@ -1216,7 +1254,7 @@
 
                 applySavedSiteContent();
                 alert('Website logo compressed and updated successfully!');
-                openAdminDashboard(); // Keeps admin panel open
+                openAdminDashboard();
             } else {
                 alert('Please select a logo image file first!');
             }
@@ -1231,7 +1269,7 @@
 
                 applySavedSiteContent();
                 alert('Profile photo compressed and updated successfully!');
-                openAdminDashboard(); // Keeps admin panel open
+                openAdminDashboard();
             } else {
                 alert('Please select a profile image file first!');
             }
@@ -1250,7 +1288,7 @@
 
                 renderActiveAd();
                 alert('Ad Banners compressed and updated successfully as a Slider!');
-                openAdminDashboard(); // Keeps admin panel open
+                openAdminDashboard();
             } else {
                 alert('Please select advertisement banner images first!');
             }
@@ -1273,7 +1311,7 @@
 
             db.ref('footer_pages').set(pageData).then(() => {
                 alert('All Footer Pages updated successfully and synced!');
-                openAdminDashboard(); // Keeps admin panel open
+                openAdminDashboard();
             }).catch((error) => {
                 alert('Error updating footer pages: ' + error.message);
             });
@@ -1314,7 +1352,7 @@
 
             db.ref('box_items_' + cat).push(newItem).then(() => {
                 alert('Successfully added and synced with Firebase!');
-                openAdminDashboard(); // Stays in admin panel so you can add more posts if needed
+                openAdminDashboard(); 
             }).catch((error) => {
                 alert('Failed to add item: ' + error.message);
             });
@@ -1327,7 +1365,7 @@
 
             db.ref('general_settings').update(data).then(() => {
                 alert('Settings updated successfully!');
-                openAdminDashboard(); // Keeps admin panel open
+                openAdminDashboard();
             }).catch((error) => {
                 alert('Error saving settings: ' + error.message);
             });
@@ -1402,7 +1440,7 @@
             let links = { wa, tg, yt, fb, ig };
             db.ref('social_links').set(links).then(() => {
                 alert('Social links updated successfully!');
-                openAdminDashboard(); // Keeps admin panel open
+                openAdminDashboard();
             }).catch((error) => {
                 alert('Error saving social links: ' + error.message);
             });
