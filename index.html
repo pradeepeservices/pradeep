@@ -232,10 +232,10 @@
 
         <!-- Offline Forms -->
         <div class="box" style="border-color: #ff8c00;">
-            <div class="box-header" style="background: linear-gradient(135deg, #f2994a, #f2c94c);" id="box-offline">Offline Forms (PDF Download)</div>
+            <div class="box-header" style="background: linear-gradient(135deg, #f2994a, #f2c94c);" id="box-offline">Offline Forms (PDF Link)</div>
             <div class="box-content" id="content-offline">
                 <ul>
-                    <li>Offline Vacancy Form PDF Download</li>
+                    <li>Offline Vacancy Form PDF Link</li>
                     <li>Pension & Scholarship Offline Forms</li>
                 </ul>
             </div>
@@ -396,23 +396,14 @@
             syncPortalsFromFirebase();
             syncFooterPagesFromFirebase();
 
-            // Set the Home page as the first browser-history entry.
-            // This ensures that pressing the browser/Android Back button from
-            // a Post/Vacancy Details page returns to Home instead of leaving
-            // the website.
             if(!history.state || history.state.page !== 'home') {
                 history.replaceState({ page: 'home' }, '', window.location.pathname + window.location.search + window.location.hash);
             }
 
-            // Open a specific post when its share URL/hash is opened directly.
-            // Hash-based URLs are used so GitHub Pages does not return a 404.
             handleSharedPostUrl();
             handleSharedToolUrl();
-
-            // Track Visitor and Location upon visiting website
             trackVisitorAndLocation();
 
-            // Handle browser Back / Forward button navigation history
             window.addEventListener('popstate', function(event) {
                 if(event.state && event.state.page === 'vacancy') {
                     showVacancyDirect(event.state.cat, event.state.itemId, false);
@@ -507,8 +498,6 @@
                         localStorage.removeItem('box_items_' + cat);
                     }
                     loadBoxItemsIntoSite(cat);
-                    // Firebase data can arrive after the first page load, so check the
-                    // shared-post URL again whenever a category finishes syncing.
                     handleSharedPostUrl();
                 });
             });
@@ -596,44 +585,6 @@
             }
         }
 
-        const OFFLINE_PDF_DB='PradeepEServicesPDFDB';
-        function openOfflinePdfDB(){
-            return new Promise((resolve,reject)=>{
-                const req=indexedDB.open(OFFLINE_PDF_DB,1);
-                req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('pdfs'))req.result.createObjectStore('pdfs');};
-                req.onsuccess=()=>resolve(req.result);
-                req.onerror=()=>reject(req.error);
-            });
-        }
-        async function saveOfflinePdf(file){
-            if(!file)return '';
-            const id='pdf_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-            const dbRef=await openOfflinePdfDB();
-            await new Promise((resolve,reject)=>{const tx=dbRef.transaction('pdfs','readwrite');tx.objectStore('pdfs').put(file,id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
-            dbRef.close();
-            return id;
-        }
-        async function getOfflinePdfBlob(id){
-            if(!id)return null;
-            const dbRef=await openOfflinePdfDB();
-            const blob=await new Promise((resolve,reject)=>{const tx=dbRef.transaction('pdfs','readonly');const req=tx.objectStore('pdfs').get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(tx.error);});
-            dbRef.close();
-            return blob;
-        }
-        async function openOfflinePdf(id){
-            const blob=await getOfflinePdfBlob(id);
-            if(!blob){alert('PDF file not found in browser storage.');return;}
-            const url=URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'PradeepEServices_Form.pdf';
-            a.target = '_blank';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(()=>URL.revokeObjectURL(url),60000);
-        }
-
         function loadBoxItemsIntoSite(boxKey) {
             let items = JSON.parse(localStorage.getItem('box_items_' + boxKey));
             let contentBox = document.getElementById('content-' + boxKey);
@@ -644,7 +595,7 @@
                 if(boxKey === 'admit') contentBox.innerHTML = '<ul><li>Download Hall Tickets & Exam Dates</li></ul>';
                 if(boxKey === 'result') contentBox.innerHTML = '<ul><li>Check Exam Results & Merit Lists</li></ul>';
                 if(boxKey === 'yojana') contentBox.innerHTML = '<ul><li>Sambal Card Registration & Status</li></ul>';
-                if(boxKey === 'offline') contentBox.innerHTML = '<ul><li>Offline Vacancy Form PDF Download</li></ul>';
+                if(boxKey === 'offline') contentBox.innerHTML = '<ul><li>Offline Vacancy Form PDF Link</li></ul>';
                 if(boxKey === 'news') contentBox.innerHTML = '<ul><li>Latest Important Updates & Notifications</li></ul>';
                 return;
             }
@@ -661,16 +612,11 @@
         }
 
         function openVacancyPage(cat, itemId) {
-            // Keep the post URL shareable while avoiding GitHub Pages 404s.
             const shareHash = '#post-' + encodeURIComponent(cat) + '-' + encodeURIComponent(itemId);
             history.pushState({ page: 'vacancy', cat: cat, itemId: itemId }, '', shareHash);
             showVacancyDirect(cat, itemId, true);
         }
 
-        // Supports both the new format (#post-category-itemId) and the older
-        // #post-itemId format, so previously shared links continue to work.
-        // Tool deep-linking: each utility can be opened directly from a shared URL.
-        // Example: https://your-site.com/#tool-bankid
         const SHAREABLE_TOOLS = ['crop', 'pdf', 'bg', 'bankid'];
 
         function updateToolShareUrl(toolType) {
@@ -686,7 +632,6 @@
             const toolType = decodeURIComponent(hash.substring(6));
             if(!SHAREABLE_TOOLS.includes(toolType)) return;
 
-            // Let the existing tool renderer build the exact same UI as a normal click.
             openToolModal(toolType, true);
         }
 
@@ -701,7 +646,6 @@
             let foundCat = '';
             let foundId = '';
 
-            // New URL format: #post-category-itemId
             for(const cat of categories) {
                 const prefix = encodeURIComponent(cat) + '-';
                 if(raw.startsWith(prefix)) {
@@ -711,7 +655,6 @@
                 }
             }
 
-            // Backward compatibility: #post-itemId
             if(!foundId) {
                 const possibleId = decodeURIComponent(raw);
                 for(const cat of categories) {
@@ -762,7 +705,7 @@
 
             const title = item.title || 'Update Details';
             const seoTitle = item.seoTitle || title + ' - Pradeep E Services';
-            const metaDescription = item.metaDescription || ((item.details || title).replace(/\\s+/g,' ').trim().slice(0,160));
+            const metaDescription = item.metaDescription || ((item.details || title).replace(/\s+/g,' ').trim().slice(0,160));
             setPostMeta(seoTitle, metaDescription);
 
             document.getElementById('vacancyPageTitle').innerText = title;
@@ -815,9 +758,10 @@
             if(item.notificationLink) { notificationBtn.style.display='inline-block'; notificationBtn.href=item.notificationLink; } else { notificationBtn.style.display='none'; }
 
             let pdfBtn = document.getElementById('vacancyPagePdf');
-            if(item.pdfId) {
+            if(item.pdfUrl) {
                 pdfBtn.style.display='inline-block';
-                pdfBtn.onclick=function(e){e.preventDefault();openOfflinePdf(item.pdfId);};
+                pdfBtn.href = item.pdfUrl;
+                pdfBtn.innerText = '📄 Download Form PDF';
             } else { pdfBtn.style.display='none'; }
 
             document.getElementById('appHome').style.display='none';
@@ -826,9 +770,6 @@
         }
 
         function goHome() {
-            // Return to the existing Home history entry instead of creating
-            // another one. Browser/Android Back will therefore stay within
-            // the website when moving from Post Details to Home.
             if(history.state && history.state.page === 'vacancy') {
                 history.back();
             } else {
@@ -844,7 +785,6 @@
             if(scrollToTop) window.scrollTo(0,0);
         }
 
-        // Ad Banner Slider Implementation
         let currentSlideIndex = 0;
         let slideInterval = null;
         function renderActiveAd() {
@@ -925,7 +865,6 @@
             let html = `<h2>${titleMap[pageKey] || 'Information'}</h2><hr style="margin:10px 0 15px 0;"><p style="white-space: pre-line; line-height:1.6;">${content}</p>`;
             document.getElementById('modalBodyContent').innerHTML = html;
             openPageModal();
-            if(!fromSharedUrl) updateToolShareUrl(toolType);
         }
 
         function submitUserFeedback() {
@@ -1034,7 +973,6 @@
                 managePortalsHtml = `<p style="font-size:13px; color:#666;">No portal links added yet.</p>`;
             }
 
-            // Fetch Visitors Stats for Admin Dashboard
             db.ref('website_visitors').once('value', (snapshot) => {
                 let visitorsData = snapshot.val();
                 let visitorCount = 0;
@@ -1066,7 +1004,6 @@
                 if(visitorListElem) visitorListElem.innerHTML = visitorListHtml;
             });
 
-            // Fetch Feedbacks for Admin Dashboard
             db.ref('user_feedbacks').once('value', (snapshot) => {
                 let fbData = snapshot.val();
                 let feedbacksHtml = '';
@@ -1095,7 +1032,6 @@
                 <h2>Admin Control Panel</h2>
                 <hr style="margin:10px 0 15px 0;">
 
-                <!-- Website Visitor Statistics Card -->
                 <div class="admin-card" style="border: 2px solid #2563eb; background: #eff6ff;">
                     <div class="admin-title" style="color: #1e40af; display: flex; justify-content: space-between; align-items: center;">
                         <span>📊 Website Visitor Statistics & Locations</span>
@@ -1138,7 +1074,6 @@
                     <div class="admin-title" style="color:#173a9c;">📋 Vacancy / Post Details Manager</div>
                     <p style="font-size:12px;color:#64748b;margin-top:0;">
                         यहाँ से आप दूसरे पेज पर खुलने वाली Vacancy / Post Details की जानकारी को Edit या Delete कर सकते हैं।
-                        SEO Title, Meta Description, Poster, Dates, Fee, Age, Total Posts, Eligibility, Full Details और Links भी manage किए जा सकते हैं।
                     </p>
                     <div style="max-height:260px;overflow-y:auto;border:1px solid #cbd5e1;padding:10px;border-radius:6px;background:#fff;">
                         ${manageItemsHtml}
@@ -1207,10 +1142,10 @@
                         <input type="text" id="newItemYojanaApply" placeholder="Apply Online Link (URL)">
                     </div>
 
-                    <!-- Offline Form PDF Upload Box -->
-                    <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;" id="pdfUploadBoxWrapper">
-                        <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload Form PDF (Offline Form ke liye):</label>
-                        <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
+                    <!-- PDF URL Input Box (Replaced Offline PDF Upload) -->
+                    <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;" id="pdfUrlBoxWrapper">
+                        <label style="font-weight:bold; font-size:13px; color:#2a5298;">Form PDF Link (URL):</label>
+                        <input type="text" id="newItemPdfUrl" placeholder="https://example.com/form.pdf" style="margin-top:5px;">
                     </div>
 
                     <label style="font-weight:bold;font-size:13px;">Post Intro / Short Description:</label>
@@ -1259,7 +1194,7 @@
             let cat = document.getElementById('selectBoxCategory').value;
             let extraContainer = document.getElementById('extraFieldsContainer');
             let yojanaContainer = document.getElementById('yojanaFieldsContainer');
-            let pdfWrapper = document.getElementById('pdfUploadBoxWrapper');
+            let pdfWrapper = document.getElementById('pdfUrlBoxWrapper');
             
             if(extraContainer && yojanaContainer && pdfWrapper) {
                 if(cat === 'offline') {
@@ -1316,6 +1251,64 @@
                         resolve(compressedData);
                     };
                 };
+            });
+        }
+
+        async function addBoxItemToFirebase() {
+            let cat = document.getElementById('selectBoxCategory').value;
+            let title = document.getElementById('newItemTitle').value.trim();
+            if(!title) { alert('Kripya Title bharein!'); return; }
+
+            let seoTitle = document.getElementById('newItemSeoTitle').value.trim();
+            let metaDescription = document.getElementById('newItemMetaDescription').value.trim();
+            let textColor = document.getElementById('newItemColor').value;
+            let intro = document.getElementById('newItemIntro').value.trim();
+            let eligibility = document.getElementById('newItemEligibility').value.trim();
+            let details = document.getElementById('newItemDetails').value.trim();
+            let pdfUrl = document.getElementById('newItemPdfUrl') ? document.getElementById('newItemPdfUrl').value.trim() : '';
+
+            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '';
+            if(cat === 'yojana') {
+                applyLink = document.getElementById('newItemYojanaApply').value.trim();
+            } else if(cat !== 'offline' && cat !== 'news') {
+                dates = document.getElementById('newItemDates').value.trim();
+                fee = document.getElementById('newItemFee').value.trim();
+                age = document.getElementById('newItemAge').value.trim();
+                total = document.getElementById('newItemTotal').value.trim();
+                applyLink = document.getElementById('newItemApply').value.trim();
+                notificationLink = document.getElementById('newItemNotification').value.trim();
+            }
+
+            let posterImage = '';
+            let posterFileInput = document.getElementById('newItemPosterFileInput');
+            if(posterFileInput && posterFileInput.files[0]) {
+                posterImage = await compressImage(posterFileInput.files[0]);
+            }
+
+            let newItem = {
+                title: title,
+                seoTitle: seoTitle,
+                metaDescription: metaDescription,
+                textColor: textColor,
+                dates: dates,
+                fee: fee,
+                age: age,
+                total: total,
+                applyLink: applyLink,
+                notificationLink: notificationLink,
+                pdfUrl: pdfUrl,
+                posterImage: posterImage,
+                intro: intro,
+                eligibility: eligibility,
+                details: details,
+                date: new Date().toLocaleDateString('en-IN')
+            };
+
+            db.ref('box_items_' + cat).push(newItem).then(() => {
+                alert('Item safalpurvak jod diya gaya hai!');
+                openAdminDashboard();
+            }).catch((error) => {
+                alert('Error: ' + error.message);
             });
         }
 
@@ -1392,10 +1385,10 @@
                     <input type="text" id="editItemYojanaApply" value="${item.applyLink || ''}">
                 </div>
 
-                <!-- Update PDF for Offline / Jobs -->
-                <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9; display:${(isSimpleCat || isYojanaCat) ? 'none' : 'block'};" id="editPdfBoxWrapper">
-                    <label style="font-weight:bold; font-size:13px; color:#2a5298;">Update PDF File (Nayi PDF Upload Karein):</label>
-                    <input type="file" id="editItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
+                <!-- Update PDF URL for Offline / Jobs -->
+                <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9; display:${(isSimpleCat || isYojanaCat) ? 'none' : 'block'};" id="editPdfUrlBoxWrapper">
+                    <label style="font-weight:bold; font-size:13px; color:#2a5298;">Form PDF Link (URL):</label>
+                    <input type="text" id="editItemPdfUrl" value="${item.pdfUrl || ''}" placeholder="https://example.com/form.pdf" style="margin-top:5px;">
                 </div>
 
                 <label style="font-weight:bold; font-size:13px;">Post Intro / Short Description:</label>
@@ -1422,6 +1415,7 @@
             let intro = document.getElementById('editItemIntro') ? document.getElementById('editItemIntro').value.trim() : '';
             let eligibility = document.getElementById('editItemEligibility') ? document.getElementById('editItemEligibility').value.trim() : '';
             let details = document.getElementById('editItemDetails').value;
+            let pdfUrl = document.getElementById('editItemPdfUrl') ? document.getElementById('editItemPdfUrl').value.trim() : '';
 
             if(!title) { alert('Title mandatory hai!'); return; }
 
@@ -1432,96 +1426,126 @@
 
             let posterImage = existing.posterImage || '';
             let posterInput = document.getElementById('editItemPosterFileInput');
-            if(posterInput && posterInput.files && posterInput.files[0]) {
+            if(posterInput && posterInput.files[0]) {
                 posterImage = await compressImage(posterInput.files[0]);
             }
 
-            let applyLinkVal = existing.applyLink || '';
-            if(cat === 'yojana') {
-                applyLinkVal = document.getElementById('editItemYojanaApply') ? document.getElementById('editItemYojanaApply').value : '';
-            } else if(cat !== 'offline' && cat !== 'news') {
-                applyLinkVal = document.getElementById('editItemApply') ? document.getElementById('editItemApply').value : '';
-            }
-
-            let pdfId = existing.pdfId || '';
-            let fileInput = document.getElementById('editItemPdfFileInput');
-            if(fileInput && fileInput.files && fileInput.files[0]) {
-                pdfId = await saveOfflinePdf(fileInput.files[0]);
-            }
-
             let updatedItem = {
-                title,
-                textColor,
-                intro,
-                eligibility,
-                details,
-                seoTitle,
-                metaDescription,
-                posterImage,
-                updatedAt: new Date().toLocaleDateString("en-IN"),
-                dates: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemDates') ? document.getElementById('editItemDates').value : (existing.dates || '')),
-                fee: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemFee') ? document.getElementById('editItemFee').value : (existing.fee || '')),
-                age: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemAge') ? document.getElementById('editItemAge').value : (existing.age || '')),
-                total: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemTotal') ? document.getElementById('editItemTotal').value : (existing.total || '')),
-                applyLink: applyLinkVal,
-                notificationLink: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemNotification') ? document.getElementById('editItemNotification').value : (existing.notificationLink || '')),
-                pdfId: pdfId
+                title: title,
+                seoTitle: seoTitle,
+                metaDescription: metaDescription,
+                textColor: textColor,
+                posterImage: posterImage,
+                intro: intro,
+                eligibility: eligibility,
+                details: details,
+                pdfUrl: pdfUrl,
+                date: existing.date || new Date().toLocaleDateString('en-IN'),
+                updatedAt: new Date().toLocaleDateString('en-IN')
             };
 
-            db.ref('box_items_' + cat + '/' + itemId).set(updatedItem).then(() => {
+            if(cat === 'yojana') {
+                updatedItem.applyLink = document.getElementById('editItemYojanaApply').value.trim();
+            } else if(cat !== 'offline' && cat !== 'news') {
+                updatedItem.dates = document.getElementById('editItemDates').value.trim();
+                updatedItem.fee = document.getElementById('editItemFee').value.trim();
+                updatedItem.age = document.getElementById('editItemAge').value.trim();
+                updatedItem.total = document.getElementById('editItemTotal').value.trim();
+                updatedItem.applyLink = document.getElementById('editItemApply').value.trim();
+                updatedItem.notificationLink = document.getElementById('editItemNotification').value.trim();
+            }
+
+            db.ref('box_items_' + cat + '/' + itemId).update(updatedItem).then(() => {
                 alert('Post successfully update ho gayi!');
-                openAdminDashboard(); 
+                openAdminDashboard();
             }).catch((error) => {
-                alert('Update karne mein error aayi: ' + error.message);
+                alert('Error: ' + error.message);
             });
         }
 
-        async function uploadLogoFromAdmin() {
+        function uploadLogoFromAdmin() {
             let fileInput = document.getElementById('adminLogoFileInput');
-            if(fileInput && fileInput.files && fileInput.files[0]) {
-                let base64Image = await compressImage(fileInput.files[0]);
-                localStorage.setItem('custom_site_logo', base64Image);
-                db.ref('general_settings').update({ logo: base64Image });
-
-                applySavedSiteContent();
-                alert('Website logo compressed and updated successfully!');
-                openAdminDashboard(); 
-            } else {
-                alert('Please select a logo image file first!');
-            }
+            if(!fileInput.files[0]) { alert('Kripya logo image chunein!'); return; }
+            compressImage(fileInput.files[0]).then(base64 => {
+                db.ref('general_settings/logo').set(base64).then(() => {
+                    localStorage.setItem('custom_site_logo', base64);
+                    alert('Logo updated successfully!');
+                    applySavedSiteContent();
+                    openAdminDashboard();
+                });
+            });
         }
 
-        async function uploadProfilePhotoFromAdmin() {
+        function uploadProfilePhotoFromAdmin() {
             let fileInput = document.getElementById('adminProfileFileInput');
-            if(fileInput && fileInput.files && fileInput.files[0]) {
-                let base64Image = await compressImage(fileInput.files[0]);
-                localStorage.setItem('custom_profile_photo', base64Image);
-                db.ref('general_settings').update({ profilePhoto: base64Image });
-
-                applySavedSiteContent();
-                alert('Profile photo compressed and updated successfully!');
-                openAdminDashboard(); 
-            } else {
-                alert('Please select a profile image file first!');
-            }
+            if(!fileInput.files[0]) { alert('Kripya profile photo chunein!'); return; }
+            compressImage(fileInput.files[0]).then(base64 => {
+                db.ref('general_settings/profilePhoto').set(base64).then(() => {
+                    localStorage.setItem('custom_profile_photo', base64);
+                    alert('Profile photo updated successfully!');
+                    applySavedSiteContent();
+                    openAdminDashboard();
+                });
+            });
         }
 
         async function uploadAdBannerFromAdmin() {
             let fileInput = document.getElementById('adminAdFileInput');
-            if(fileInput && fileInput.files && fileInput.files.length > 0) {
-                let compressedImages = [];
-                for(let file of fileInput.files) {
-                    let compressed = await compressImage(file);
-                    compressedImages.push(compressed);
-                }
-                localStorage.setItem('custom_ad_banners', JSON.stringify(compressedImages));
-                db.ref('general_settings').update({ adBanners: compressedImages });
-
+            if(!fileInput.files || fileInput.files.length === 0) { alert('Kripya kam se kam ek ad banner image chunein!'); return; }
+            let banners = [];
+            for(let i=0; i<fileInput.files.length; i++) {
+                let compressed = await compressImage(fileInput.files[i]);
+                banners.push(compressed);
+            }
+            db.ref('general_settings/adBanners').set(banners).then(() => {
+                localStorage.setItem('custom_ad_banners', JSON.stringify(banners));
+                alert('Ad Banners updated successfully!');
                 renderActiveAd();
-                alert('Ad Banners compressed and updated successfully as a Slider!');
-                openAdminDashboard(); 
-            } else {
-                alert('Please select advertisement banner images first!');
+                openAdminDashboard();
+            });
+        }
+
+        function saveGeneralSettingsToFirebase() {
+            let tagline = document.getElementById('adminTaglineInput').value.trim();
+            if(!tagline) { alert('Tagline bharein!'); return; }
+            db.ref('general_settings/desc').set(tagline).then(() => {
+                localStorage.setItem('custom_site_desc', tagline);
+                alert('Tagline updated successfully!');
+                applySavedSiteContent();
+                openAdminDashboard();
+            });
+        }
+
+        function saveSocialLinksToFirebase() {
+            let links = {
+                wa: document.getElementById('adminWaLink').value.trim(),
+                tg: document.getElementById('adminTgLink').value.trim(),
+                yt: document.getElementById('adminYtLink').value.trim(),
+                fb: document.getElementById('adminFbLink').value.trim(),
+                ig: document.getElementById('adminIgLink').value.trim()
+            };
+            db.ref('social_links').set(links).then(() => {
+                alert('Social links updated successfully!');
+                openAdminDashboard();
+            });
+        }
+
+        function addNewPortalToFirebase() {
+            let name = document.getElementById('adminPortalName').value.trim();
+            let link = document.getElementById('adminPortalLink').value.trim();
+            if(!name || !link) { alert('Portal Name aur URL dono bharein!'); return; }
+            db.ref('custom_portals_list').push({ name: name, link: link }).then(() => {
+                alert('Portal link successfully add ho gaya!');
+                openAdminDashboard();
+            });
+        }
+
+        function deletePortalFromFirebase(portalId) {
+            if(confirm('Kya aap is portal link ko delete karna chahte hain?')) {
+                db.ref('custom_portals_list/' + portalId).remove().then(() => {
+                    alert('Portal link delete ho gaya!');
+                    openAdminDashboard();
+                });
             }
         }
 
@@ -1532,297 +1556,41 @@
             let privacy = document.getElementById('editPagePrivacy').value;
             let advertise = document.getElementById('editPageAdvertise').value;
 
-            localStorage.setItem('page_about', about);
-            localStorage.setItem('page_terms', terms);
-            localStorage.setItem('page_contact', contact);
-            localStorage.setItem('page_privacy', privacy);
-            localStorage.setItem('page_advertise', advertise);
-
-            let pageData = { about, terms, contact, privacy, advertise };
-
-            db.ref('footer_pages').set(pageData).then(() => {
-                alert('All Footer Pages updated successfully and synced!');
-                openAdminDashboard(); 
+            let footerData = { about: about, terms: terms, contact: contact, privacy: privacy, advertise: advertise };
+            db.ref('footer_pages').set(footerData).then(() => {
+                localStorage.setItem('page_about', about);
+                localStorage.setItem('page_terms', terms);
+                localStorage.setItem('page_contact', contact);
+                localStorage.setItem('page_privacy', privacy);
+                localStorage.setItem('page_advertise', advertise);
+                alert('Footer pages updated successfully!');
+                closePageModal();
             }).catch((error) => {
-                alert('Error updating footer pages: ' + error.message);
-            });
-        }
-
-        async function addBoxItemToFirebase() {
-            let cat = document.getElementById('selectBoxCategory').value;
-            let title = document.getElementById('newItemTitle').value;
-            let textColor = document.getElementById('newItemColor').value;
-            let intro = document.getElementById('newItemIntro') ? document.getElementById('newItemIntro').value.trim() : '';
-            let eligibility = document.getElementById('newItemEligibility') ? document.getElementById('newItemEligibility').value.trim() : '';
-            let details = document.getElementById('newItemDetails').value;
-            let seoTitle = document.getElementById('newItemSeoTitle') ? document.getElementById('newItemSeoTitle').value.trim() : '';
-            let metaDescription = document.getElementById('newItemMetaDescription') ? document.getElementById('newItemMetaDescription').value.trim() : '';
-
-            if(!title) { alert('Please enter item title!'); return; }
-
-            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '';
-
-            if(cat === 'yojana') {
-                applyLink = document.getElementById('newItemYojanaApply').value;
-            } else if(cat === 'offline') {
-                let fileInput = document.getElementById('newItemPdfFileInput');
-                if(fileInput && fileInput.files && fileInput.files[0]) {
-                    pdfId = await saveOfflinePdf(fileInput.files[0]);
-                }
-            } else if(cat !== 'news') {
-                dates = document.getElementById('newItemDates').value;
-                fee = document.getElementById('newItemFee').value;
-                age = document.getElementById('newItemAge').value;
-                total = document.getElementById('newItemTotal').value;
-                applyLink = document.getElementById('newItemApply').value;
-                notificationLink = document.getElementById('newItemNotification').value;
-
-                let fileInput = document.getElementById('newItemPdfFileInput');
-                if(fileInput && fileInput.files && fileInput.files[0]) {
-                    pdfId = await saveOfflinePdf(fileInput.files[0]);
-                }
-            }
-
-            let posterImage = '';
-            let posterInput = document.getElementById('newItemPosterFileInput');
-            if(posterInput && posterInput.files && posterInput.files[0]) {
-                posterImage = await compressImage(posterInput.files[0]);
-            }
-
-            let newItem = { title, textColor, intro, eligibility, dates, fee, age, total, details, applyLink, notificationLink, pdfId, seoTitle, metaDescription, posterImage, updatedAt: new Date().toLocaleDateString("en-IN") };
-
-            db.ref('box_items_' + cat).push(newItem).then(() => {
-                alert('Successfully added and synced with Firebase!');
-                openAdminDashboard(); 
-            }).catch((error) => {
-                alert('Failed to add item: ' + error.message);
-            });
-        }
-
-        function saveGeneralSettingsToFirebase() {
-            let desc = document.getElementById('adminTaglineInput').value;
-            let data = {};
-            if(desc) data.desc = desc;
-
-            db.ref('general_settings').update(data).then(() => {
-                alert('Settings updated successfully!');
-                openAdminDashboard(); 
-            }).catch((error) => {
-                alert('Error saving settings: ' + error.message);
-            });
-        }
-
-        function addNewPortalToFirebase() {
-            let name = document.getElementById('adminPortalName').value;
-            let link = document.getElementById('adminPortalLink').value;
-            if(!name || !link) { alert('Enter portal name and link'); return; }
-
-            let newPortal = { name, link };
-            db.ref('custom_portals_list').push(newPortal).then(() => {
-                alert('Portal added successfully!');
-                openAdminDashboard();
-            }).catch((error) => {
-                alert('Error updating portals: ' + error.message);
-            });
-        }
-
-        function deletePortalFromFirebase(portalId) {
-            if(confirm('Kya aap is portal link ko delete karna chahte hain?')) {
-                db.ref('custom_portals_list/' + portalId).remove().then(() => {
-                    alert('Portal successfully delete ho gaya!');
-                    openAdminDashboard();
-                }).catch((error) => {
-                    alert('Delete karne mein error aayi: ' + error.message);
-                });
-            }
-        }
-
-        function editPortalPrompt(portalId, currentName, currentLink) {
-            let html = `
-                <h2>✏️ Edit Portal Link</h2>
-                <hr style="margin:10px 0 15px 0;">
-                <input type="hidden" id="editPortalId" value="${portalId}">
-                
-                <label style="font-weight:bold; font-size:13px;">Portal Name:</label>
-                <input type="text" id="editPortalName" value="${currentName}">
-                
-                <label style="font-weight:bold; font-size:13px;">Portal URL:</label>
-                <input type="text" id="editPortalLink" value="${currentLink}">
-
-                <button type="button" onclick="saveEditedPortalToFirebase()">Update & Save Portal</button>
-                <button type="button" onclick="openAdminDashboard()" style="background:#64748b; margin-top:8px;">Back to Dashboard</button>
-            `;
-            document.getElementById('modalBodyContent').innerHTML = html;
-        }
-
-        function saveEditedPortalToFirebase() {
-            let portalId = document.getElementById('editPortalId').value;
-            let name = document.getElementById('editPortalName').value;
-            let link = document.getElementById('editPortalLink').value;
-
-            if(!name || !link) { alert('Portal name aur link dono mandatory hain!'); return; }
-
-            let updatedPortal = { name, link };
-            db.ref('custom_portals_list/' + portalId).set(updatedPortal).then(() => {
-                alert('Portal successfully update ho gaya!');
-                openAdminDashboard();
-            }).catch((error) => {
-                alert('Update karne mein error aayi: ' + error.message);
-            });
-        }
-
-        function saveSocialLinksToFirebase() {
-            let wa = document.getElementById('adminWaLink').value;
-            let tg = document.getElementById('adminTgLink').value;
-            let yt = document.getElementById('adminYtLink').value;
-            let fb = document.getElementById('adminFbLink').value;
-            let ig = document.getElementById('adminIgLink').value;
-
-            let links = { wa, tg, yt, fb, ig };
-            db.ref('social_links').set(links).then(() => {
-                alert('Social links updated successfully!');
-                openAdminDashboard(); 
-            }).catch((error) => {
-                alert('Error saving social links: ' + error.message);
-            });
-        }
-
-        function openToolModal(toolType, fromSharedUrl = false) {
-            // When a user opens a tool normally, put that tool in the URL so the
-            // exact tool page can be copied/shared. When opening from an existing
-            // shared URL, do not push another history entry.
-            if(!fromSharedUrl && SHAREABLE_TOOLS.includes(toolType)) {
-                updateToolShareUrl(toolType);
-            }
-            let html = '';
-            if(toolType === 'crop') {
-                html = `
-                    <h2>📷 Photo Crop & Resize Tool</h2>
-                    <p style="font-size:13px; color:#666;">Upload photo to resize and crop instantly.</p>
-                    <input type="file" id="toolImageInput" accept="image/*" onchange="previewToolImage(event)">
-                    <div style="text-align:center; margin:10px 0;" id="toolPreviewArea"></div>
-                    <button type="button" onclick="alert('Photo ready for download!')">Download Cropped Photo</button>
-                `;
-            } else if(toolType === 'pdf') {
-                html = `
-                    <h2>📄 JPG to PDF Converter</h2>
-                    <p style="font-size:13px; color:#666;">Select multiple JPG images to convert into a single PDF document.</p>
-                    <input type="file" id="pdfImageInput" accept="image/*" multiple>
-                    <button type="button" onclick="convertImagesToPDF()">Convert & Download PDF</button>
-                `;
-            } else if(toolType === 'bg') {
-                html = `
-                    <h2>✨ Background Remove / Change</h2>
-                    <p style="font-size:13px; color:#666;">Upload photo to change background color.</p>
-                    <input type="file" id="bgImageInput" accept="image/*">
-                    <select id="bgColorSelect" style="margin-top:10px;">
-                        <option value="#ffffff">White Background</option>
-                        <option value="#0056b3">Blue Background</option>
-                        <option value="#dc3545">Red Background</option>
-                    </select>
-                    <button type="button" onclick="alert('Background updated successfully!')">Download Processed Photo</button>
-                `;
-            } else if(toolType === 'bankid') {
-                html = `
-                    <h2>💳 Bank Identity Card Maker</h2>
-                    <p style="font-size:13px;color:#666;">Bank select karein, details aur customer photo bharein. Bank logo automatically aa jayega. Generate ke baad card ko Edit karke dobara badal sakte hain aur PDF download kar sakte hain.</p>
-                    <div class="bankid-help">⚠️ यह tool केवल आपके द्वारा दर्ज की गई जानकारी का printable card बनाता है। किसी बैंक का official ID/Passbook document होने का दावा नहीं करता।</div>
-                    <div id="bankIdEditor"><div class="bankid-editor-grid">
-                        <div class="full"><label style="font-weight:bold;font-size:13px;">Select Bank / Institution:</label><select id="cardBankSelect" onchange="updateIdCardPreview()">
-                            <option value="UCO Bank">UCO Bank</option><option value="State Bank of India (SBI)">State Bank of India (SBI)</option><option value="Bank of Baroda (BOB)">Bank of Baroda (BOB)</option><option value="Punjab National Bank (PNB)">Punjab National Bank (PNB)</option><option value="Central Bank of India">Central Bank of India</option><option value="Canara Bank">Canara Bank</option><option value="Union Bank of India">Union Bank of India</option><option value="Bank of India (BOI)">Bank of India (BOI)</option><option value="HDFC Bank">HDFC Bank</option><option value="ICICI Bank">ICICI Bank</option><option value="Axis Bank">Axis Bank</option><option value="Madhya Pradesh Gramin bank(MPGB)">Madhya Pradesh Gramin bank(MPGB)</option>
-                        </select></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Customer ID:</label><input type="text" id="cardCustomerId" placeholder="Customer ID" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Account Number:</label><input type="text" id="cardAccNo" placeholder="Bank Account Number" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">IFSC Code:</label><input type="text" id="cardIfsc" placeholder="IFSC Code" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Customer Name:</label><input type="text" id="cardCustName" placeholder="Customer Full Name" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Father's / Husband's Name:</label><input type="text" id="cardRelName" placeholder="Father's or Husband's Name" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">UID ID:</label><input type="text" id="cardUidId" placeholder="UID / Other ID (optional)" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">PIN Code:</label><input type="text" id="cardPin" placeholder="PIN Code" oninput="updateIdCardPreview()"></div>
-                        <div class="full"><label style="font-weight:bold;font-size:13px;">Address:</label><input type="text" id="cardAddress" placeholder="Customer Residential Address" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Kiosk Name:</label><input type="text" id="cardKioskName" placeholder="Kiosk / Service Centre Name" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Kiosk Location:</label><input type="text" id="cardKioskLoc" placeholder="Kiosk Location / Branch" oninput="updateIdCardPreview()"></div>
-                        <div class="full"><label style="font-weight:bold;font-size:13px;">Customer Photo:</label><input type="file" id="cardPhotoInput" accept="image/*" onchange="previewCardPhoto(event)"></div>
-                    </div>
-                    <h4 style="margin:15px 0 5px;color:#1e3c72;text-align:center;">Card Live Preview</h4>
-                    <div id="captureCardArea" class="idcard-preview"><div class="idcard-watermark" id="watermarkBankName"><img id="watermarkBankLogo" alt="Bank Watermark Logo"></div><div class="idcard-header"><img id="prevLogoImg" class="idcard-logo" alt="Bank Logo"><div class="idcard-bankblock"><div class="idcard-bankname" id="prevBankName">UCO BANK</div><div class="idcard-subtitle" id="prevBankSubtitle">UCO Bank Passbook</div></div></div><div class="idcard-body"><div class="idcard-details">
-                        <div class="row"><div class="label">Customer ID:</div><span id="lblCustomerId">---</span></div><div class="row"><div class="label">Account Number:</div><span id="lblAccNo">---</span></div><div class="row"><div class="label">IFSC Code:</div><span id="lblIfsc">---</span></div><div class="row"><div class="label">Customer Name:</div><span id="lblCustName">---</span></div><div class="row"><div class="label">Father/Husband:</div><span id="lblRelName">---</span></div><div class="row"><div class="label">UID ID:</div><span id="lblUidId">---</span></div><div class="row"><div class="label">Address:</div><span id="lblAddress">---</span></div><div class="row"><div class="label">Pin Code:</div><span id="lblPin">---</span></div>
-                    </div><div class="idcard-photo-wrap"><img id="prevCustPhoto" src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="112" height="138"><rect width="100%" height="100%" fill="#f1f5f9"/><circle cx="56" cy="48" r="25" fill="#94a3b8"/><path d="M18 128c5-29 22-43 38-43s33 14 38 43" fill="#94a3b8"/></svg>')}" class="idcard-photo" alt="Customer Photo"><div class="idcard-photo-label">Customer Photo</div></div></div><div class="idcard-footer">Kiosk: <span id="lblKioskName">---</span> &nbsp;|&nbsp; Location: <span id="lblKioskLoc">---</span></div><div class="idcard-disclaimer">For identification / service reference only</div></div>
-                    <button type="button" onclick="generateBankIdCard()" style="background:#1e3c72;margin-top:12px;">✅ Generate ID Card</button></div>
-                    <div id="bankIdResult" class="bankid-result"><h4 style="margin:8px 0;text-align:center;color:#1e3c72;">✅ ID Card Ready</h4><div id="resultCardMount"></div><div class="bankid-actions"><button type="button" class="bankid-edit-btn" onclick="editBankIdCard()">✏️ Edit Card</button><button type="button" class="bankid-image-btn" onclick="downloadBankIdCardAsImage()">🖼️ Download PNG</button><button type="button" class="bankid-pdf-btn" onclick="downloadBankIdCardAsPDF()">📄 Download PDF</button></div></div>`;
-                customCardLogoBase64 = ''; customCardPhotoBase64 = ''; setTimeout(updateIdCardPreview,100);
-            }
-            document.getElementById('modalBodyContent').innerHTML = html; openPageModal();
-        }
-
-        let customCardLogoBase64 = ''; let customCardPhotoBase64 = ''; let generatedBankIdCard = false;
-        const bankIdBrandData = {'UCO Bank':{short:'UCO',subtitle:'UCO Bank Passbook',bg:'#123b9b'},'State Bank of India (SBI)':{short:'SBI',subtitle:'State Bank of India',bg:'#0b5cab'},'Bank of Baroda (BOB)':{short:'BOB',subtitle:'Bank of Baroda',bg:'#e56b1f'},'Punjab National Bank (PNB)':{short:'PNB',subtitle:'Punjab National Bank',bg:'#a40000'},'Central Bank of India':{short:'CBI',subtitle:'Central Bank of India',bg:'#0b6eaa'},'Canara Bank':{short:'CANARA',subtitle:'Canara Bank',bg:'#0b4a8b'},'Union Bank of India':{short:'UNION',subtitle:'Union Bank of India',bg:'#0055a5'},'Bank of India (BOI)':{short:'BOI',subtitle:'Bank of India',bg:'#0057a8'},'HDFC Bank':{short:'HDFC',subtitle:'HDFC Bank',bg:'#004c97'},'ICICI Bank':{short:'ICICI',subtitle:'ICICI Bank',bg:'#f58220'},'Axis Bank':{short:'AXIS',subtitle:'Axis Bank',bg:'#8b1e3f'},'MP Online / CSC Kiosk':{short:'CSC',subtitle:'MP Online / CSC Kiosk',bg:'#0b6fa4'}};
-        function makeBuiltInBankLogo(bankName){const logoMap={'UCO Bank':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/uco.svg','State Bank of India (SBI)':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/sbi.svg','Bank of Baroda (BOB)':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/bob.svg','Punjab National Bank (PNB)':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/pnb.svg','Central Bank of India':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/cbi.svg','Canara Bank':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/canara.svg','Union Bank of India':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/ubi.svg','Bank of India (BOI)':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/boi.svg','HDFC Bank':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/hdfc.svg','ICICI Bank':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/icici.svg','Axis Bank':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/axis.svg'};return logoMap[bankName]||logoMap['UCO Bank'];}
-        function previewCardPhoto(event){let file=event.target.files[0];if(file){let reader=new FileReader();reader.onload=e=>{customCardPhotoBase64=e.target.result;let img=document.getElementById('prevCustPhoto');if(img)img.src=customCardPhotoBase64;};reader.readAsDataURL(file);}}
-        function updateIdCardPreview(){const bankName=document.getElementById('cardBankSelect')?.value||'UCO Bank';const brand=bankIdBrandData[bankName]||bankIdBrandData['UCO Bank'];const vals={customerId:document.getElementById('cardCustomerId')?.value||'',custName:document.getElementById('cardCustName')?.value||'',relName:document.getElementById('cardRelName')?.value||'',accNo:document.getElementById('cardAccNo')?.value||'',ifsc:document.getElementById('cardIfsc')?.value||'',uidId:document.getElementById('cardUidId')?.value||'',address:document.getElementById('cardAddress')?.value||'',pin:document.getElementById('cardPin')?.value||'',kioskName:document.getElementById('cardKioskName')?.value||'',kioskLoc:document.getElementById('cardKioskLoc')?.value||''};const set=(id,val)=>{const el=document.getElementById(id);if(el)el.innerText=val||'---';};set('prevBankName',bankName.toUpperCase());set('prevBankSubtitle',brand.subtitle);set('lblCustomerId',vals.customerId);set('lblCustName',vals.custName);set('lblRelName',vals.relName);set('lblAccNo',vals.accNo);set('lblIfsc',vals.ifsc);set('lblUidId',vals.uidId);set('lblAddress',vals.address);set('lblPin',vals.pin);set('lblKioskName',vals.kioskName);set('lblKioskLoc',vals.kioskLoc);const logoUrl=makeBuiltInBankLogo(bankName);const logo=document.getElementById('prevLogoImg');const watermarkLogo=document.getElementById('watermarkBankLogo');if(logo&&!customCardLogoBase64){logo.crossOrigin='anonymous';logo.src=logoUrl;logo.onerror=function(){this.onerror=null;this.src='https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/uco.svg';};}if(watermarkLogo){watermarkLogo.crossOrigin='anonymous';watermarkLogo.src=logoUrl;watermarkLogo.onerror=function(){this.onerror=null;this.src='https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/uco.svg';};}}
-        function generateBankIdCard(){updateIdCardPreview();const name=document.getElementById('cardCustName')?.value.trim();if(!name){alert('कृपया Customer Name भरें।');return;}const source=document.getElementById('captureCardArea'),mount=document.getElementById('resultCardMount');if(!source||!mount)return;mount.innerHTML='';const clone=source.cloneNode(true);clone.id='captureCardAreaResult';clone.style.transform='none';clone.style.margin='15px auto';mount.appendChild(clone);document.getElementById('bankIdEditor').style.display='none';document.getElementById('bankIdResult').style.display='block';generatedBankIdCard=true;}
-        function editBankIdCard(){document.getElementById('bankIdResult').style.display='none';document.getElementById('bankIdEditor').style.display='block';generatedBankIdCard=false;}
-        function getBankIdCaptureElement(){return document.getElementById('captureCardAreaResult')||document.getElementById('captureCardArea');}
-        function downloadBankIdCardAsImage(){const cardElement=getBankIdCaptureElement();if(!cardElement)return;html2canvas(cardElement,{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(canvas=>{const link=document.createElement('a');link.download='Bank_Identity_Card.png';link.href=canvas.toDataURL('image/png');link.click();}).catch(err=>alert('ID Card download karne mein error aayi: '+err.message));}
-        function downloadBankIdCardAsPDF(){const cardElement=getBankIdCaptureElement();if(!cardElement)return;html2canvas(cardElement,{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(canvas=>{const imgData=canvas.toDataURL('image/png');const {jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});const pageW=297,pageH=210,margin=12,maxW=pageW-margin*2,maxH=pageH-margin*2,ratio=Math.min(maxW/canvas.width,maxH/canvas.height),w=canvas.width*ratio,h=canvas.height*ratio,x=(pageW-w)/2,y=(pageH-h)/2;pdf.addImage(imgData,'PNG',x,y,w,h,undefined,'FAST');pdf.save('Bank_Identity_Card.pdf');}).catch(err=>alert('PDF banane mein error aayi: '+err.message));}
-
-        function previewToolImage(event) {
-            let reader = new FileReader();
-            reader.onload = function(){
-                let output = document.getElementById('toolPreviewImage');
-                if(output) output.src = reader.result;
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-
-        async function convertImagesToPDF() {
-            let fileInput = document.getElementById('pdfImageInput');
-            if(!fileInput.files || fileInput.files.length === 0) {
-                alert('Please select at least one image!');
-                return;
-            }
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            for(let i = 0; i < fileInput.files.length; i++) {
-                let file = fileInput.files[i];
-                let base64 = await readFileAsDataURL(file);
-                if(i > 0) doc.addPage();
-                doc.addImage(base64, 'JPEG', 10, 10, 190, 270);
-            }
-            doc.save('PradeepEServices_Document.pdf');
-            alert('PDF downloaded successfully!');
-            closePageModal();
-        }
-
-        function readFileAsDataURL(file) {
-            return new Promise((resolve, reject) => {
-                let reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-                reader.readAsDataURL(file);
+                alert('Error: ' + error.message);
             });
         }
 
         function changeLanguage() {
             let lang = document.getElementById('languageSwitcher').value;
-            if(lang === 'hi') {
-                document.getElementById('header-subtitle').innerText = 'आपका अपना साइबर कैफे & ऑनलाइन सेवा केंद्र';
-                document.getElementById('box-jobs').innerText = 'लेटेस्ट जॉब्स (Latest Jobs)';
-                document.getElementById('box-admit').innerText = 'एडमिट कार्ड (Admit Card)';
-                document.getElementById('box-result').innerText = 'रिजल्ट्स (Results)';
-                document.getElementById('box-yojana').innerText = 'सरकारी योजना (संबल, ई-श्रम आदि)';
-                document.getElementById('box-offline').innerText = 'ऑफलाइन फॉर्म (PDF Download)';
-                document.getElementById('box-news').innerText = 'न्यूज़ / सूचना (News)';
-                document.getElementById('portals-heading').innerText = '🌐 महत्वपूर्ण पोर्टल लिंक्स';
-                document.getElementById('tools-heading').innerText = '🛠️ ऑनलाइन यूटिलिटी टूल्स';
-            } else {
-                document.getElementById('header-subtitle').innerText = 'Aapka Apna Cyber Cafe & Online Seva Kendra';
+            if(lang === 'en') {
+                document.getElementById('header-title').innerText = 'Pradeep E Services';
                 document.getElementById('box-jobs').innerText = 'Latest Jobs';
                 document.getElementById('box-admit').innerText = 'Admit Card';
                 document.getElementById('box-result').innerText = 'Results';
-                document.getElementById('box-yojana').innerText = 'Sarkari Yojana (Sambal, e-Shram etc.)';
-                document.getElementById('box-offline').innerText = 'Offline Forms (FROM DOWNLOAD)';
-                document.getElementById('box-news').innerText = 'News / सूचना';
+                document.getElementById('box-yojana').innerText = 'Sarkari Yojana';
+                document.getElementById('box-offline').innerText = 'Offline Forms (PDF Link)';
+                document.getElementById('box-news').innerText = 'News / Updates';
                 document.getElementById('portals-heading').innerText = '🌐 Important Portal Links';
+                document.getElementById('tools-heading').innerText = '🛠️ Online Utility Tools';
+            } else {
+                document.getElementById('header-title').innerText = 'Pradeep E Services';
+                document.getElementById('box-jobs').innerText = 'Latest Jobs';
+                document.getElementById('box-admit').innerText = 'Admit Card';
+                document.getElementById('box-result').innerText = 'Results';
+                document.getElementById('box-yojana').innerText = 'Sarkari Yojana (संबल, ई-श्रम आदि)';
+                document.getElementById('box-offline').innerText = 'Offline Forms (PDF Link)';
+                document.getElementById('box-news').innerText = 'News / सूचना';
+                document.getElementById('portals-heading').innerText = '🌐 Important Portal Links (महत्वपूर्ण पोर्टल)';
                 document.getElementById('tools-heading').innerText = '🛠️ Online Utility Tools';
             }
         }
