@@ -116,8 +116,6 @@
         .result-post-intro{font-size:14px;line-height:1.7;text-align:left;color:#222;margin:8px 0 2px;}
         .result-post-nav{background:#07075f;color:#fff;display:flex;flex-wrap:wrap;justify-content:center;gap:0;border-bottom:2px solid #111;}
         .result-post-nav span{padding:8px 13px;font-size:12px;font-weight:700;border-right:1px solid rgba(255,255,255,.18);}
-        .post-ad-area{text-align:center;padding:12px 8px 4px;}
-        .post-ad-label{color:#c00;font-weight:700;font-size:13px;margin-bottom:8px;}
         .post-social{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:6px 8px 12px;}
         .post-social a{color:#fff;text-decoration:none;padding:8px 18px;border-radius:4px;font-size:12px;font-weight:700;}
         .post-wa{background:#20c76b}.post-tg{background:#0088cc}
@@ -302,15 +300,11 @@
                 <h1 id="vacancyPageTitle">Vacancy Details</h1>
                 <div class="result-post-updated" id="vacancyPageUpdated">Post Update: Updated Information</div>
                 <span id="vacancyPageCategory" style="display:none;"></span>
-                <div class="result-post-intro" id="vacancyPageIntro">Pradeep E Services par is post se judi latest jankari, important dates, eligibility, fee aur application links ki details yahan di gayi hain.</div>
+                <div class="result-post-intro" id="vacancyPageIntro">Pradeep E Services par is post se judi latest jankari, important dates, fee aur application links ki details yahan di gayi hain.</div>
             </div>
             <div id="postPosterArea" class="post-poster-area">
                 <div class="post-poster-label">📌 Post / Vacancy Poster</div>
                 <img id="postPosterImage" src="" alt="Post Vacancy Poster">
-            </div>
-            <div class="post-ad-area">
-                <div class="post-ad-label">Download Pradeep E Services App / Latest Updates</div>
-                <div id="postAdBanner" style="max-width:760px;margin:auto;"></div>
             </div>
             <div class="post-social">
                 <a id="postWhatsApp" class="post-wa" href="https://whatsapp.com" target="_blank" rel="noopener">🟢 WhatsApp</a>
@@ -329,7 +323,6 @@
                 <table class="post-detail-table">
                     <tr><th style="width:42%;">Post Name</th><th>Details</th></tr>
                     <tr><td id="postDetailPostName">Update</td><td id="postDetailTotal">As per notification</td></tr>
-                    <tr><td>Eligibility / Qualification</td><td id="postDetailEligibility">Please check the official notification and the details given below.</td></tr>
                 </table>
                 <div class="post-details-title">Full Notification / Important Information</div>
                 <div class="post-details-text" id="vacancyPageDetails">No additional details provided.</div>
@@ -338,7 +331,7 @@
                     <a id="vacancyPageNotification" class="post-notify" href="#" target="_blank" rel="noopener" style="display:none;">🔔 Notification</a>
                     <a id="vacancyPagePdf" class="post-pdf" href="#" target="_blank" rel="noopener" style="display:none;">📄 Download Form PDF</a>
                 </div>
-                <div class="post-disclaimer">नोट: आवेदन करने से पहले संबंधित विभाग की आधिकारिक अधिसूचना में पात्रता, आयु, शुल्क, तिथियां और अन्य शर्तें अवश्य जांच लें।</div>
+                <div class="post-disclaimer">नोट: आवेदन करने से पहले संबंधित विभाग की आधिकारिक अधिसूचना में आयु, शुल्क, तिथियां और अन्य शर्तें अवश्य जांच लें।</div>
             </div>
         </div>
     </section>
@@ -687,16 +680,6 @@
             if(ogDesc) ogDesc.setAttribute('content', safeDescription);
         }
 
-        function renderPostAd() {
-            const postAd = document.getElementById('postAdBanner');
-            if(!postAd) return;
-            let banners = [];
-            try { banners = JSON.parse(localStorage.getItem('custom_ad_banners')) || []; } catch(e) { banners = []; }
-            if(!banners.length) banners = ['93da493e-387b-4805-b014-8f9c326a4326.png'];
-            const src = banners[0];
-            postAd.innerHTML = `<img src="${src}" alt="Pradeep E Services Advertisement" style="width:100%;max-height:170px;object-fit:contain;border:1px solid #ddd;border-radius:4px;" onerror="this.style.display='none'">`;
-        }
-
         function showVacancyDirect(cat, itemId, scrollToTop = true) {
             let items = JSON.parse(localStorage.getItem('box_items_' + cat));
             if(!items) return;
@@ -727,7 +710,6 @@
             document.getElementById('vacancyPageShortTitle').innerText = title + ' : Short Details';
             document.getElementById('postDetailPostName').innerText = title;
             document.getElementById('postDetailTotal').innerText = item.total || 'As per official notification';
-            document.getElementById('postDetailEligibility').innerText = item.eligibility || 'Please check the official notification and the full details given below.';
 
             let isSimpleCat = (cat === 'offline' || cat === 'news' || cat === 'yojana');
             let infoGrid = document.getElementById('vacancyInfoGrid');
@@ -746,7 +728,6 @@
             }
 
             document.getElementById('vacancyPageDetails').innerText = item.details || 'No additional details provided.';
-            renderPostAd();
 
             document.getElementById('postWhatsApp').href = localStorage.getItem('social_wa') || 'https://whatsapp.com';
             document.getElementById('postTelegram').href = localStorage.getItem('social_tg') || 'https://telegram.org';
@@ -1151,9 +1132,6 @@
                     <label style="font-weight:bold;font-size:13px;">Post Intro / Short Description:</label>
                     <textarea id="newItemIntro" placeholder="Short introduction shown at the top of Vacancy / Post Details page" rows="3"></textarea>
 
-                    <label style="font-weight:bold;font-size:13px;">Eligibility / Qualification:</label>
-                    <textarea id="newItemEligibility" placeholder="Eligibility / Qualification details" rows="3"></textarea>
-
                     <label style="font-weight:bold;font-size:13px;">Full Details / Description:</label>
                     <textarea id="newItemDetails" placeholder="Full Details / Description" rows="5"></textarea>
 
@@ -1263,7 +1241,6 @@
             let metaDescription = document.getElementById('newItemMetaDescription').value.trim();
             let textColor = document.getElementById('newItemColor').value;
             let intro = document.getElementById('newItemIntro').value.trim();
-            let eligibility = document.getElementById('newItemEligibility').value.trim();
             let details = document.getElementById('newItemDetails').value.trim();
             let pdfUrl = document.getElementById('newItemPdfUrl') ? document.getElementById('newItemPdfUrl').value.trim() : '';
 
@@ -1299,7 +1276,6 @@
                 pdfUrl: pdfUrl,
                 posterImage: posterImage,
                 intro: intro,
-                eligibility: eligibility,
                 details: details,
                 date: new Date().toLocaleDateString('en-IN')
             };
@@ -1373,61 +1349,67 @@
                     <label style="font-weight:bold; font-size:13px;">Total Posts:</label>
                     <input type="text" id="editItemTotal" value="${item.total || ''}">
                     
-                    <label style="font-weight:bold; font-size:13px;">Apply Online Link:</label>
+                    <label style="font-weight:bold; font-size:13px;">Apply Online Link (URL):</label>
                     <input type="text" id="editItemApply" value="${item.applyLink || ''}">
                     
-                    <label style="font-weight:bold; font-size:13px;">Notification Link:</label>
+                    <label style="font-weight:bold; font-size:13px;">Notification URL:</label>
                     <input type="text" id="editItemNotification" value="${item.notificationLink || ''}">
                 </div>
 
                 <div id="editYojanaFieldsContainer" style="${isYojanaCat ? 'display:block;' : 'display:none;'}">
-                    <label style="font-weight:bold; font-size:13px;">Apply Online Link:</label>
+                    <label style="font-weight:bold; font-size:13px;">Apply Online Link (URL):</label>
                     <input type="text" id="editItemYojanaApply" value="${item.applyLink || ''}">
                 </div>
 
-                <!-- Update PDF URL for Offline / Jobs -->
-                <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9; display:${(isSimpleCat || isYojanaCat) ? 'none' : 'block'};" id="editPdfUrlBoxWrapper">
+                <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9; ${isSimpleCat || !isSimpleCat ? 'display:block;' : 'display:none;'}">
                     <label style="font-weight:bold; font-size:13px; color:#2a5298;">Form PDF Link (URL):</label>
                     <input type="text" id="editItemPdfUrl" value="${item.pdfUrl || ''}" placeholder="https://example.com/form.pdf" style="margin-top:5px;">
                 </div>
 
                 <label style="font-weight:bold; font-size:13px;">Post Intro / Short Description:</label>
-                <textarea id="editItemIntro" rows="3" placeholder="Short introduction shown at the top of Vacancy / Post Details page">${item.intro || ''}</textarea>
+                <textarea id="editItemIntro" rows="3">${item.intro || ''}</textarea>
 
-                <label style="font-weight:bold; font-size:13px;">Eligibility / Qualification:</label>
-                <textarea id="editItemEligibility" rows="3" placeholder="Eligibility / Qualification details">${item.eligibility || ''}</textarea>
-
-                <label style="font-weight:bold; font-size:13px;">Full Details:</label>
+                <label style="font-weight:bold; font-size:13px;">Full Details / Description:</label>
                 <textarea id="editItemDetails" rows="5">${item.details || ''}</textarea>
 
-                <button type="button" onclick="saveEditedItemToFirebase()">Update & Save Changes</button>
-                <button type="button" onclick="openAdminDashboard()" style="background:#64748b; margin-top:8px;">Back to Dashboard</button>
+                <button type="button" onclick="saveEditedItemToFirebase()">Save Changes</button>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
+            openPageModal();
         }
 
         async function saveEditedItemToFirebase() {
             let cat = document.getElementById('editCatKey').value;
             let itemId = document.getElementById('editItemId').value;
-            
-            let title = document.getElementById('editItemTitle').value;
+            let title = document.getElementById('editItemTitle').value.trim();
+            if(!title) { alert('Kripya Title bharein!'); return; }
+
+            let seoTitle = document.getElementById('editItemSeoTitle').value.trim();
+            let metaDescription = document.getElementById('editItemMetaDescription').value.trim();
             let textColor = document.getElementById('editItemColor').value;
-            let intro = document.getElementById('editItemIntro') ? document.getElementById('editItemIntro').value.trim() : '';
-            let eligibility = document.getElementById('editItemEligibility') ? document.getElementById('editItemEligibility').value.trim() : '';
-            let details = document.getElementById('editItemDetails').value;
+            let intro = document.getElementById('editItemIntro').value.trim();
+            let details = document.getElementById('editItemDetails').value.trim();
             let pdfUrl = document.getElementById('editItemPdfUrl') ? document.getElementById('editItemPdfUrl').value.trim() : '';
 
-            if(!title) { alert('Title mandatory hai!'); return; }
+            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '';
+            if(cat === 'yojana') {
+                applyLink = document.getElementById('editItemYojanaApply').value.trim();
+            } else if(cat !== 'offline' && cat !== 'news') {
+                dates = document.getElementById('editItemDates').value.trim();
+                fee = document.getElementById('editItemFee').value.trim();
+                age = document.getElementById('editItemAge').value.trim();
+                total = document.getElementById('editItemTotal').value.trim();
+                applyLink = document.getElementById('editItemApply').value.trim();
+                notificationLink = document.getElementById('editItemNotification').value.trim();
+            }
 
             let items = JSON.parse(localStorage.getItem('box_items_' + cat)) || [];
-            let existing = items.find(i => i.id === itemId) || {};
-            let seoTitle = document.getElementById('editItemSeoTitle') ? document.getElementById('editItemSeoTitle').value.trim() : (existing.seoTitle || '');
-            let metaDescription = document.getElementById('editItemMetaDescription') ? document.getElementById('editItemMetaDescription').value.trim() : (existing.metaDescription || '');
+            let item = items.find(i => i.id === itemId);
+            let posterImage = item ? (item.posterImage || '') : '';
 
-            let posterImage = existing.posterImage || '';
-            let posterInput = document.getElementById('editItemPosterFileInput');
-            if(posterInput && posterInput.files[0]) {
-                posterImage = await compressImage(posterInput.files[0]);
+            let posterFileInput = document.getElementById('editItemPosterFileInput');
+            if(posterFileInput && posterFileInput.files[0]) {
+                posterImage = await compressImage(posterFileInput.files[0]);
             }
 
             let updatedItem = {
@@ -1435,118 +1417,81 @@
                 seoTitle: seoTitle,
                 metaDescription: metaDescription,
                 textColor: textColor,
+                dates: dates,
+                fee: fee,
+                age: age,
+                total: total,
+                applyLink: applyLink,
+                notificationLink: notificationLink,
+                pdfUrl: pdfUrl,
                 posterImage: posterImage,
                 intro: intro,
-                eligibility: eligibility,
                 details: details,
-                pdfUrl: pdfUrl,
-                date: existing.date || new Date().toLocaleDateString('en-IN'),
                 updatedAt: new Date().toLocaleDateString('en-IN')
             };
-
-            if(cat === 'yojana') {
-                updatedItem.applyLink = document.getElementById('editItemYojanaApply').value.trim();
-            } else if(cat !== 'offline' && cat !== 'news') {
-                updatedItem.dates = document.getElementById('editItemDates').value.trim();
-                updatedItem.fee = document.getElementById('editItemFee').value.trim();
-                updatedItem.age = document.getElementById('editItemAge').value.trim();
-                updatedItem.total = document.getElementById('editItemTotal').value.trim();
-                updatedItem.applyLink = document.getElementById('editItemApply').value.trim();
-                updatedItem.notificationLink = document.getElementById('editItemNotification').value.trim();
-            }
 
             db.ref('box_items_' + cat + '/' + itemId).update(updatedItem).then(() => {
                 alert('Post successfully update ho gayi!');
                 openAdminDashboard();
             }).catch((error) => {
-                alert('Error: ' + error.message);
+                alert('Update karne mein error aayi: ' + error.message);
             });
         }
 
-        function uploadLogoFromAdmin() {
+        async function uploadLogoFromAdmin() {
             let fileInput = document.getElementById('adminLogoFileInput');
-            if(!fileInput.files[0]) { alert('Kripya logo image chunein!'); return; }
-            compressImage(fileInput.files[0]).then(base64 => {
-                db.ref('general_settings/logo').set(base64).then(() => {
-                    localStorage.setItem('custom_site_logo', base64);
-                    alert('Logo updated successfully!');
-                    applySavedSiteContent();
-                    openAdminDashboard();
-                });
-            });
+            if(!fileInput.files[0]) { alert('Kripya Logo image select karein!'); return; }
+            let compressedBase64 = await compressImage(fileInput.files[0]);
+
+            db.ref('general_settings').update({ logo: compressedBase64 }).then(() => {
+                localStorage.setItem('custom_site_logo', compressedBase64);
+                applySavedSiteContent();
+                alert('Website Logo safalpurvak update ho gaya!');
+                openAdminDashboard();
+            }).catch(err => alert('Error: ' + err.message));
         }
 
-        function uploadProfilePhotoFromAdmin() {
+        async function uploadProfilePhotoFromAdmin() {
             let fileInput = document.getElementById('adminProfileFileInput');
-            if(!fileInput.files[0]) { alert('Kripya profile photo chunein!'); return; }
-            compressImage(fileInput.files[0]).then(base64 => {
-                db.ref('general_settings/profilePhoto').set(base64).then(() => {
-                    localStorage.setItem('custom_profile_photo', base64);
-                    alert('Profile photo updated successfully!');
-                    applySavedSiteContent();
-                    openAdminDashboard();
-                });
-            });
+            if(!fileInput.files[0]) { alert('Kripya Profile photo select karein!'); return; }
+            let compressedBase64 = await compressImage(fileInput.files[0]);
+
+            db.ref('general_settings').update({ profilePhoto: compressedBase64 }).then(() => {
+                localStorage.setItem('custom_profile_photo', compressedBase64);
+                applySavedSiteContent();
+                alert('Profile Photo safalpurvak update ho gayi!');
+                openAdminDashboard();
+            }).catch(err => alert('Error: ' + err.message));
         }
 
         async function uploadAdBannerFromAdmin() {
             let fileInput = document.getElementById('adminAdFileInput');
-            if(!fileInput.files || fileInput.files.length === 0) { alert('Kripya kam se kam ek ad banner image chunein!'); return; }
-            let banners = [];
+            if(!fileInput.files || fileInput.files.length === 0) { alert('Kripya kam se kam ek ad banner image select karein!'); return; }
+
+            let base64List = [];
             for(let i=0; i<fileInput.files.length; i++) {
-                let compressed = await compressImage(fileInput.files[i]);
-                banners.push(compressed);
+                let comp = await compressImage(fileInput.files[i]);
+                base64List.push(comp);
             }
-            db.ref('general_settings/adBanners').set(banners).then(() => {
-                localStorage.setItem('custom_ad_banners', JSON.stringify(banners));
-                alert('Ad Banners updated successfully!');
+
+            db.ref('general_settings').update({ adBanners: base64List }).then(() => {
+                localStorage.setItem('custom_ad_banners', JSON.stringify(base64List));
                 renderActiveAd();
+                alert('Advertisement Banners Slider safalpurvak update ho gaye!');
                 openAdminDashboard();
-            });
+            }).catch(err => alert('Error: ' + err.message));
         }
 
         function saveGeneralSettingsToFirebase() {
             let tagline = document.getElementById('adminTaglineInput').value.trim();
-            if(!tagline) { alert('Tagline bharein!'); return; }
-            db.ref('general_settings/desc').set(tagline).then(() => {
+            if(!tagline) { alert('Kripya Tagline bharein!'); return; }
+
+            db.ref('general_settings').update({ desc: tagline }).then(() => {
                 localStorage.setItem('custom_site_desc', tagline);
-                alert('Tagline updated successfully!');
-                applySavedSiteContent();
+                document.getElementById('header-subtitle').innerText = tagline;
+                alert('Tagline update ho gayi!');
                 openAdminDashboard();
-            });
-        }
-
-        function saveSocialLinksToFirebase() {
-            let links = {
-                wa: document.getElementById('adminWaLink').value.trim(),
-                tg: document.getElementById('adminTgLink').value.trim(),
-                yt: document.getElementById('adminYtLink').value.trim(),
-                fb: document.getElementById('adminFbLink').value.trim(),
-                ig: document.getElementById('adminIgLink').value.trim()
-            };
-            db.ref('social_links').set(links).then(() => {
-                alert('Social links updated successfully!');
-                openAdminDashboard();
-            });
-        }
-
-        function addNewPortalToFirebase() {
-            let name = document.getElementById('adminPortalName').value.trim();
-            let link = document.getElementById('adminPortalLink').value.trim();
-            if(!name || !link) { alert('Portal Name aur URL dono bharein!'); return; }
-            db.ref('custom_portals_list').push({ name: name, link: link }).then(() => {
-                alert('Portal link successfully add ho gaya!');
-                openAdminDashboard();
-            });
-        }
-
-        function deletePortalFromFirebase(portalId) {
-            if(confirm('Kya aap is portal link ko delete karna chahte hain?')) {
-                db.ref('custom_portals_list/' + portalId).remove().then(() => {
-                    alert('Portal link delete ho gaya!');
-                    openAdminDashboard();
-                });
-            }
+            }).catch(err => alert('Error: ' + err.message));
         }
 
         function saveFooterPagesToFirebase() {
@@ -1557,40 +1502,418 @@
             let advertise = document.getElementById('editPageAdvertise').value;
 
             let footerData = { about: about, terms: terms, contact: contact, privacy: privacy, advertise: advertise };
+
             db.ref('footer_pages').set(footerData).then(() => {
                 localStorage.setItem('page_about', about);
                 localStorage.setItem('page_terms', terms);
                 localStorage.setItem('page_contact', contact);
                 localStorage.setItem('page_privacy', privacy);
                 localStorage.setItem('page_advertise', advertise);
-                alert('Footer pages updated successfully!');
-                closePageModal();
-            }).catch((error) => {
-                alert('Error: ' + error.message);
+                alert('Footer pages successfully save ho gaye!');
+                openAdminDashboard();
+            }).catch(err => alert('Error: ' + err.message));
+        }
+
+        function addNewPortalToFirebase() {
+            let name = document.getElementById('adminPortalName').value.trim();
+            let link = document.getElementById('adminPortalLink').value.trim();
+            if(!name || !link) { alert('Kripya Portal Name aur Link dono bharein!'); return; }
+
+            db.ref('custom_portals_list').push({ name: name, link: link }).then(() => {
+                alert('Portal link successfully jod diya gaya!');
+                openAdminDashboard();
+            }).catch(err => alert('Error: ' + err.message));
+        }
+
+        function deletePortalFromFirebase(portalId) {
+            if(confirm('Kya aap is portal link ko delete karna chahte hain?')) {
+                db.ref('custom_portals_list/' + portalId).remove().then(() => {
+                    alert('Portal link delete ho gaya!');
+                    openAdminDashboard();
+                }).catch(err => alert('Error: ' + err.message));
+            }
+        }
+
+        function editPortalPrompt(portalId, currentName, currentLink) {
+            let newName = prompt('Enter new Portal Name:', currentName);
+            if(newName === null) return;
+            let newLink = prompt('Enter new Portal URL:', currentLink);
+            if(newLink === null) return;
+
+            if(!newName.trim() || !newLink.trim()) {
+                alert('Name aur Link khali nahi ho sakte!');
+                return;
+            }
+
+            db.ref('custom_portals_list/' + portalId).update({ name: newName.trim(), link: newLink.trim() }).then(() => {
+                alert('Portal link update ho gaya!');
+                openAdminDashboard();
+            }).catch(err => alert('Error: ' + err.message));
+        }
+
+        function saveSocialLinksToFirebase() {
+            let wa = document.getElementById('adminWaLink').value.trim();
+            let tg = document.getElementById('adminTgLink').value.trim();
+            let yt = document.getElementById('adminYtLink').value.trim();
+            let fb = document.getElementById('adminFbLink').value.trim();
+            let ig = document.getElementById('adminIgLink').value.trim();
+
+            let socialObj = { wa: wa, tg: tg, yt: yt, fb: fb, ig: ig };
+            db.ref('social_links').set(socialObj).then(() => {
+                alert('Social links successfully update ho gaye!');
+                openAdminDashboard();
+            }).catch(err => alert('Error: ' + err.message));
+        }
+
+        // Online Utility Tools Modals Logic
+        function openToolModal(toolType, skipHistory = false) {
+            if(!skipHistory) {
+                updateToolShareUrl(toolType);
+            }
+
+            let title = '';
+            let bodyHtml = '';
+
+            if(toolType === 'crop') {
+                title = '📷 Photo Crop & Passport Size Photo Maker';
+                bodyHtml = `
+                    <h2>${title}</h2>
+                    <hr style="margin:10px 0 15px 0;">
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:8px; text-align:center;">
+                        <input type="file" id="toolCropFileInput" accept="image/*" style="margin-bottom:10px;" onchange="previewCropImage(event)">
+                        <div id="cropPreviewContainer" style="margin:15px 0; display:none;">
+                            <img id="cropTargetImage" style="max-width:100%; max-height:250px; border:2px solid #2a5298; border-radius:6px;" alt="Source Preview">
+                            <p style="font-size:12px; color:#64748b; margin-top:5px;">Passport size ratio (3.5 cm x 4.5 cm) crop ready.</p>
+                            <button type="button" onclick="downloadCroppedPhoto()" style="background:#16a34a; width:auto; padding:10px 20px;">⬇️ Download Cropped Photo</button>
+                        </div>
+                    </div>
+                `;
+            } else if(toolType === 'pdf') {
+                title = '📄 JPG to PDF Converter';
+                bodyHtml = `
+                    <h2>${title}</h2>
+                    <hr style="margin:10px 0 15px 0;">
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:8px; text-align:center;">
+                        <input type="file" id="toolPdfFileInput" accept="image/*" multiple style="margin-bottom:10px;" onchange="previewPdfImages(event)">
+                        <div id="pdfImageListContainer" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:15px 0;"></div>
+                        <button type="button" id="convertToPdfBtn" onclick="generatePdfFromImages()" style="background:#dc2626; display:none; width:auto; padding:10px 20px;">📄 Convert & Download PDF</button>
+                    </div>
+                `;
+            } else if(toolType === 'bg') {
+                title = '✨ Background Remove / Color Change Tool';
+                bodyHtml = `
+                    <h2>${title}</h2>
+                    <hr style="margin:10px 0 15px 0;">
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:8px; text-align:center;">
+                        <p style="font-size:13px; color:#334155; margin-bottom:10px;">अपनी फोटो अपलोड करें और बैकग्राउंड का रंग चुनें (White, Blue, Red आदि):</p>
+                        <input type="file" id="toolBgFileInput" accept="image/*" style="margin-bottom:10px;" onchange="previewBgImage(event)">
+                        <div style="margin:10px 0; display:flex; justify-content:center; gap:10px; align-items:center;">
+                            <label style="font-weight:bold; font-size:13px;">Background Color:</label>
+                            <input type="color" id="toolBgColorPick" value="#ffffff" style="width:50px; height:32px; padding:0; cursor:pointer;">
+                        </div>
+                        <div id="bgResultContainer" style="margin:15px 0; display:none;">
+                            <canvas id="bgCanvas" style="max-width:100%; border:2px solid #2a5298; border-radius:6px; background:#fff;"></canvas>
+                            <br>
+                            <button type="button" onclick="downloadBgProcessedImage()" style="background:#16a34a; width:auto; padding:10px 20px; margin-top:10px;">⬇️ Download Processed Image</button>
+                        </div>
+                    </div>
+                `;
+            } else if(toolType === 'bankid') {
+                title = '💳 Bank Identity Card Maker';
+                bodyHtml = `
+                    <h2>${title}</h2>
+                    <hr style="margin:10px 0 15px 0;">
+                    <div class="bankid-help">
+                        यहाँ से आप किसी भी बैंक या कियोस्क (CSC / MP Online / BC) के लिए प्रोफेशनल आइडेंटिटी कार्ड (ID Card) ऑनलाइन तैयार कर सकते हैं और उसे तुरंत प्रिंट या PDF/Image के रूप में डाउनलोड कर सकते हैं।
+                    </div>
+                    <div class="bankid-editor" id="bankIdEditorSection">
+                        <div class="bankid-editor-grid">
+                            <div>
+                                <label style="font-weight:bold; font-size:12px;">Bank / Company Name:</label>
+                                <input type="text" id="biBankName" value="STATE BANK OF INDIA" oninput="updateBankIdPreview()">
+                            </div>
+                            <div>
+                                <label style="font-weight:bold; font-size:12px;">Card Subtitle / Role:</label>
+                                <input type="text" id="biSubtitle" value="CUSTOMER SERVICE POINT (CSP)" oninput="updateBankIdPreview()">
+                            </div>
+                            <div>
+                                <label style="font-weight:bold; font-size:12px;">Agent / Employee Name:</label>
+                                <input type="text" id="biAgentName" value="PRADEEP KUMAR" oninput="updateBankIdPreview()">
+                            </div>
+                            <div>
+                                <label style="font-weight:bold; font-size:12px;">ID / Code Number:</label>
+                                <input type="text" id="biAgentId" value="SBI/CSP/MP/8842" oninput="updateBankIdPreview()">
+                            </div>
+                            <div>
+                                <label style="font-weight:bold; font-size:12px;">Mobile Number:</label>
+                                <input type="text" id="biMobile" value="+91 7869346045" oninput="updateBankIdPreview()">
+                            </div>
+                            <div>
+                                <label style="font-weight:bold; font-size:12px;">Branch / Location:</label>
+                                <input type="text" id="biBranch" value="Jabalpur, Madhya Pradesh" oninput="updateBankIdPreview()">
+                            </div>
+                            <div class="full">
+                                <label style="font-weight:bold; font-size:12px;">Upload Agent Photo (Passport Size):</label>
+                                <input type="file" id="biPhotoFile" accept="image/*" onchange="loadBankIdPhoto(event)">
+                            </div>
+                        </div>
+                        <button type="button" onclick="generateBankIdCard()" style="background:#1e3c72; margin-top:12px;">Generate ID Card Preview</button>
+                    </div>
+
+                    <div class="bankid-result" id="bankIdResultSection">
+                        <h3 style="text-align:center; color:#1e3c72; margin:10px 0;">ID Card Preview</h3>
+                        <div style="overflow-x:auto;">
+                            <div class="idcard-preview" id="bankIdCardCanvas">
+                                <div class="idcard-watermark">
+                                    <img src="" id="biWatermarkImg" alt="Watermark">
+                                </div>
+                                <div class="idcard-header">
+                                    <img src="" class="idcard-logo" id="biCardLogoImg" alt="Logo">
+                                    <div class="idcard-bankblock">
+                                        <div class="idcard-bankname" id="biCardBankText">STATE BANK OF INDIA</div>
+                                        <div class="idcard-subtitle" id="biCardSubtitleText">CUSTOMER SERVICE POINT (CSP)</div>
+                                    </div>
+                                </div>
+                                <div class="idcard-body">
+                                    <div class="idcard-details">
+                                        <div class="row"><div class="label">Name:</div><span id="biCardNameText">PRADEEP KUMAR</span></div>
+                                        <div class="row"><div class="label">ID / Code:</div><span id="biCardIdText">SBI/CSP/MP/8842</span></div>
+                                        <div class="row"><div class="label">Mobile:</div><span id="biCardMobileText">+91 7869346045</span></div>
+                                        <div class="row"><div class="label">Location:</div><span id="biCardBranchText">Jabalpur, Madhya Pradesh</span></div>
+                                        <div class="row"><div class="label">Valid Upto:</div><span>31/12/2028</span></div>
+                                    </div>
+                                    <div class="idcard-photo-wrap">
+                                        <img src="" class="idcard-photo" id="biCardPhotoImg" alt="Agent Photo">
+                                        <div class="idcard-photo-label">AUTHORIZED AGENT</div>
+                                    </div>
+                                </div>
+                                <div class="idcard-footer">
+                                    CENTRAL AUTHORIZED BANKING & CYBER SEVA PORTAL ID
+                                </div>
+                                <div class="idcard-disclaimer">
+                                    Note: This is an authorized digital identity card generated via Pradeep E Services Portal. In case of misuse, return to issuing authority.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bankid-actions">
+                            <button type="button" class="bankid-edit-btn" onclick="editBankIdForm()">✏️ Edit Details</button>
+                            <button type="button" class="bankid-pdf-btn" onclick="downloadBankIdPdf()">📥 Download as PDF</button>
+                            <button type="button" class="bankid-image-btn" onclick="downloadBankIdImage()">🖼️ Download as Image</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modalBodyContent').innerHTML = bodyHtml;
+            openPageModal();
+            if(toolType === 'bankid') {
+                updateBankIdPreview();
+            }
+        }
+
+        // Tool 1: Crop helper
+        let selectedCropImageBase64 = '';
+        function previewCropImage(event) {
+            let file = event.target.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                selectedCropImageBase64 = e.target.result;
+                let imgElem = document.getElementById('cropTargetImage');
+                imgElem.src = selectedCropImageBase64;
+                document.getElementById('cropPreviewContainer').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+        function downloadCroppedPhoto() {
+            if(!selectedCropImageBase64) return;
+            let a = document.createElement('a');
+            a.href = selectedCropImageBase64;
+            a.download = 'passport_size_photo_cropped.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Tool 2: JPG to PDF helper
+        let pdfImagesArray = [];
+        function previewPdfImages(event) {
+            let files = event.target.files;
+            if(!files || files.length === 0) return;
+            pdfImagesArray = [];
+            let container = document.getElementById('pdfImageListContainer');
+            container.innerHTML = '';
+
+            for(let i=0; i<files.length; i++) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    pdfImagesArray.push(e.target.result);
+                    container.innerHTML += `<img src="${e.target.result}" style="width:70px; height:70px; object-fit:cover; border:1px solid #ccc; border-radius:4px;" alt="img">`;
+                    if(pdfImagesArray.length > 0) {
+                        document.getElementById('convertToPdfBtn').style.display = 'inline-block';
+                    }
+                }
+                reader.readAsDataURL(files[i]);
+            }
+        }
+        async function generatePdfFromImages() {
+            if(pdfImagesArray.length === 0) return;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            for(let i=0; i<pdfImagesArray.length; i++) {
+                if(i > 0) doc.addPage();
+                let imgData = pdfImagesArray[i];
+                let img = new Image();
+                img.src = imgData;
+                await new Promise((resolve) => { img.onload = resolve; });
+
+                let pageWidth = doc.internal.pageSize.getWidth();
+                let pageHeight = doc.internal.pageSize.getHeight();
+                let widthRatio = pageWidth / img.width;
+                let heightRatio = pageHeight / img.height;
+                let ratio = Math.min(widthRatio, heightRatio);
+                let imgWidth = img.width * ratio;
+                let imgHeight = img.height * ratio;
+                let marginX = (pageWidth - imgWidth) / 2;
+                let marginY = (pageHeight - imgHeight) / 2;
+
+                doc.addImage(imgData, 'JPEG', marginX, marginY, imgWidth, imgHeight);
+            }
+
+            doc.save('converted_documents.pdf');
+            alert('PDF successfully generated & downloaded!');
+        }
+
+        // Tool 3: Background Remove / Change Helper
+        let bgSourceImageBase64 = '';
+        function previewBgImage(event) {
+            let file = event.target.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                bgSourceImageBase64 = e.target.result;
+                processBgChange();
+            }
+            reader.readAsDataURL(file);
+        }
+        function processBgChange() {
+            if(!bgSourceImageBase64) return;
+            let img = new Image();
+            img.src = bgSourceImageBase64;
+            img.onload = function() {
+                let canvas = document.getElementById('bgCanvas');
+                let ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                let bgColor = document.getElementById('toolBgColorPick').value;
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+
+                document.getElementById('bgResultContainer').style.display = 'block';
+            }
+        }
+        function downloadBgProcessedImage() {
+            let canvas = document.getElementById('bgCanvas');
+            let dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            let a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = 'background_changed_photo.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Tool 4: Bank Identity Card Maker Logic
+        let bankIdPhotoBase64 = '';
+        function loadBankIdPhoto(event) {
+            let file = event.target.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                bankIdPhotoBase64 = e.target.result;
+                let pImg = document.getElementById('biCardPhotoImg');
+                if(pImg) pImg.src = bankIdPhotoBase64;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function updateBankIdPreview() {
+            let bName = document.getElementById('biBankName').value || 'BANK NAME';
+            let sub = document.getElementById('biSubtitle').value || '';
+            let aName = document.getElementById('biAgentName').value || '';
+            let aId = document.getElementById('biAgentId').value || '';
+            let mob = document.getElementById('biMobile').value || '';
+            let branch = document.getElementById('biBranch').value || '';
+
+            let cBank = document.getElementById('biCardBankText');
+            let cSub = document.getElementById('biCardSubtitleText');
+            let cName = document.getElementById('biCardNameText');
+            let cId = document.getElementById('biCardIdText');
+            let cMob = document.getElementById('biCardMobileText');
+            let cBranch = document.getElementById('biCardBranchText');
+
+            if(cBank) cBank.innerText = bName;
+            if(cSub) cSub.innerText = sub;
+            if(cName) cName.innerText = aName;
+            if(cId) cId.innerText = aId;
+            if(cMob) cMob.innerText = mob;
+            if(cBranch) cBranch.innerText = branch;
+
+            let logoSrc = localStorage.getItem('custom_site_logo') || '93da493e-387b-4805-b014-8f9c326a4326.png';
+            let logoImg = document.getElementById('biCardLogoImg');
+            let wmImg = document.getElementById('biWatermarkImg');
+            if(logoImg) logoImg.src = logoSrc;
+            if(wmImg) wmImg.src = logoSrc;
+        }
+
+        function generateBankIdCard() {
+            updateBankIdPreview();
+            document.getElementById('bankIdEditorSection').style.display = 'none';
+            document.getElementById('bankIdResultSection').style.display = 'block';
+        }
+
+        function editBankIdForm() {
+            document.getElementById('bankIdResultSection').style.display = 'none';
+            document.getElementById('bankIdEditorSection').style.display = 'block';
+        }
+
+        function downloadBankIdImage() {
+            let cardElement = document.getElementById('bankIdCardCanvas');
+            html2canvas(cardElement, { scale: 2, useCORS: true }).then(canvas => {
+                let link = document.createElement('a');
+                link.download = 'bank_identity_card.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 1.0);
+                link.click();
             });
         }
 
+        function downloadBankIdPdf() {
+            let cardElement = document.getElementById('bankIdCardCanvas');
+            html2canvas(cardElement, { scale: 2, useCORS: true }).then(canvas => {
+                let imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const { jsPDF } = window.jspdf;
+                let pdf = new jsPDF('landscape', 'mm', 'a4');
+                let pdfWidth = pdf.internal.pageSize.getWidth();
+                let pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'JPEG', 10, 20, pdfWidth - 20, pdfHeight);
+                pdf.save('bank_identity_card.pdf');
+            });
+        }
+
+        // Language Switcher Placeholder
         function changeLanguage() {
             let lang = document.getElementById('languageSwitcher').value;
-            if(lang === 'en') {
+            if(lang === 'hi') {
                 document.getElementById('header-title').innerText = 'Pradeep E Services';
-                document.getElementById('box-jobs').innerText = 'Latest Jobs';
-                document.getElementById('box-admit').innerText = 'Admit Card';
-                document.getElementById('box-result').innerText = 'Results';
-                document.getElementById('box-yojana').innerText = 'Sarkari Yojana';
-                document.getElementById('box-offline').innerText = 'Offline Forms (PDF Link)';
-                document.getElementById('box-news').innerText = 'News / Updates';
-                document.getElementById('portals-heading').innerText = '🌐 Important Portal Links';
+                document.getElementById('portals-heading').innerText = '🌐 Important Portal Links (महत्वपूर्ण पोर्टल)';
                 document.getElementById('tools-heading').innerText = '🛠️ Online Utility Tools';
             } else {
                 document.getElementById('header-title').innerText = 'Pradeep E Services';
-                document.getElementById('box-jobs').innerText = 'Latest Jobs';
-                document.getElementById('box-admit').innerText = 'Admit Card';
-                document.getElementById('box-result').innerText = 'Results';
-                document.getElementById('box-yojana').innerText = 'Sarkari Yojana (संबल, ई-श्रम आदि)';
-                document.getElementById('box-offline').innerText = 'Offline Forms (PDF Link)';
-                document.getElementById('box-news').innerText = 'News / सूचना';
-                document.getElementById('portals-heading').innerText = '🌐 Important Portal Links (महत्वपूर्ण पोर्टल)';
+                document.getElementById('portals-heading').innerText = '🌐 Important Portal Links';
                 document.getElementById('tools-heading').innerText = '🛠️ Online Utility Tools';
             }
         }
