@@ -1688,6 +1688,12 @@
         }
 
         function openToolModal(toolType, fromSharedUrl = false) {
+            // When a user opens a tool normally, put that tool in the URL so the
+            // exact tool page can be copied/shared. When opening from an existing
+            // shared URL, do not push another history entry.
+            if(!fromSharedUrl && SHAREABLE_TOOLS.includes(toolType)) {
+                updateToolShareUrl(toolType);
+            }
             let html = '';
             if(toolType === 'crop') {
                 html = `
