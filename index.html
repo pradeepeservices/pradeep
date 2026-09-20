@@ -105,7 +105,6 @@
         
         /* Bank ID Card Preview Styling */
         .bankid-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bankid-editor-grid .full{grid-column:1/-1}
-        .bankid-suggestion-page{max-width:980px;margin:0 auto}.bankid-suggestion-head{text-align:center;margin-bottom:18px}.bankid-suggestion-head h2{margin:0 0 7px;color:#173a9c}.bankid-suggestion-head p{margin:0;color:#64748b;font-size:13px}.bankid-suggestion-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.bankid-suggestion-card{border:1px solid #dbe4f0;background:#fff;border-radius:14px;padding:15px;cursor:pointer;text-align:center;transition:.2s;box-shadow:0 4px 14px rgba(15,23,42,.06)}.bankid-suggestion-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(15,23,42,.10);border-color:#8fb1ef}.bankid-suggestion-logo{width:54px;height:54px;object-fit:contain;margin:0 auto 8px;display:block}.bankid-suggestion-name{font-weight:800;color:#1e293b;font-size:14px;min-height:36px;display:flex;align-items:center;justify-content:center}.bankid-suggestion-btn{margin-top:9px!important;width:100%!important;background:#173a9c!important;padding:9px 10px!important;font-size:12px!important}.bankid-suggestion-back{margin-bottom:14px!important;background:#64748b!important;width:auto!important;padding:9px 14px!important}
         .bankid-help{font-size:12px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;padding:9px 11px;border-radius:8px;margin:8px 0 12px;line-height:1.5}.bankid-result{display:none}.bankid-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.bankid-actions button{flex:1;min-width:140px!important;width:auto!important;margin-top:0!important}.bankid-edit-btn{background:#475569!important}.bankid-pdf-btn{background:#dc2626!important}.bankid-image-btn{background:#16a34a!important}
         .idcard-preview{width:720px;max-width:100%;min-height:405px;background:#fff;border:3px solid #183b8c;border-radius:18px;padding:18px 22px;margin:15px auto;box-shadow:0 7px 25px rgba(15,23,42,.16);box-sizing:border-box;text-align:left;position:relative;overflow:hidden;color:#111827}.idcard-preview:before{content:"";position:absolute;inset:58px 120px 45px 120px;background:radial-gradient(circle at center,rgba(30,64,175,.10),rgba(30,64,175,.02) 55%,transparent 70%);border-radius:50%;pointer-events:none}.idcard-watermark{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:270px;height:190px;display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none;opacity:.075}.idcard-watermark img{width:190px;height:140px;object-fit:contain;filter:grayscale(100%)}.idcard-header{display:flex;align-items:center;gap:14px;border-bottom:2px solid #183b8c;padding-bottom:10px;margin-bottom:13px;position:relative;z-index:1}.idcard-logo{width:62px;height:62px;object-fit:contain;flex:0 0 62px;background:#fff;border-radius:8px}.idcard-bankblock{flex:1;text-align:center}.idcard-bankname{font-size:27px;font-weight:800;color:#111;line-height:1.05}.idcard-subtitle{font-size:18px;color:#333;margin-top:3px}.idcard-body{display:flex;gap:18px;align-items:center;position:relative;z-index:1}.idcard-details{font-size:14px;line-height:1.62;color:#111;flex:1}.idcard-details .row{display:grid;grid-template-columns:155px 1fr;gap:8px}.idcard-details .label{font-weight:700}.idcard-details span{font-weight:500;color:#111;word-break:break-word}.idcard-photo-wrap{order:2;display:flex;flex-direction:column;align-items:center;gap:5px}.idcard-photo{width:112px;height:138px;border:2px solid #183b8c;border-radius:6px;object-fit:cover;background:#f1f5f9}.idcard-photo-label{font-size:10px;color:#555;font-weight:700}.idcard-footer{margin-top:13px;border-top:1px dashed #64748b;padding-top:8px;font-size:12px;text-align:center;color:#333;font-weight:700;position:relative;z-index:1}.idcard-disclaimer{font-size:9px;text-align:center;color:#64748b;margin-top:5px;position:relative;z-index:1}@media(max-width:760px){.bankid-editor-grid{grid-template-columns:1fr}.bankid-editor-grid .full{grid-column:auto}.idcard-preview{width:720px;transform:scale(.94);transform-origin:top left;margin-right:-43px;margin-bottom:-25px}.idcard-bankname{font-size:24px}.idcard-subtitle{font-size:16px}}
         /* Sarkari Result style post page */
@@ -398,9 +397,6 @@
             syncFooterPagesFromFirebase();
 
             // Set the Home page as the first browser-history entry.
-            // This ensures that pressing the browser/Android Back button from
-            // a Post/Vacancy Details page returns to Home instead of leaving
-            // the website.
             const initialHash = window.location.hash || '';
             const initialToolHash = initialHash.toLowerCase().startsWith('#tool-');
             const initialPostHash = initialHash.toLowerCase().startsWith('#post-');
@@ -415,14 +411,10 @@
                 history.replaceState({ page: 'home' }, '', homeUrl);
             }
 
-            // Open a specific post/tool when its share URL/hash is opened directly.
             handleSharedPostUrl();
             handleSharedToolUrl();
-
-            // Track Visitor and Location upon visiting website
             trackVisitorAndLocation();
 
-            // Handle browser Back / Forward button navigation history
             window.addEventListener('popstate', function(event) {
                 if(event.state && event.state.page === 'vacancy') {
                     showVacancyDirect(event.state.cat, event.state.itemId, false);
@@ -517,8 +509,6 @@
                         localStorage.removeItem('box_items_' + cat);
                     }
                     loadBoxItemsIntoSite(cat);
-                    // Firebase data can arrive after the first page load, so check the
-                    // shared-post URL again whenever a category finishes syncing.
                     handleSharedPostUrl();
                 });
             });
@@ -671,24 +661,17 @@
         }
 
         function openVacancyPage(cat, itemId) {
-            // Keep the post URL shareable while avoiding GitHub Pages 404s.
             const shareHash = '#post-' + encodeURIComponent(cat) + '-' + encodeURIComponent(itemId);
             history.pushState({ page: 'vacancy', cat: cat, itemId: itemId }, '', shareHash);
             showVacancyDirect(cat, itemId, true);
         }
 
-        // Supports both the new format (#post-category-itemId) and the older
-        // #post-itemId format, so previously shared links continue to work.
-        // Tool deep-linking: each utility can be opened directly from a shared URL.
-        // Example: https://your-site.com/#tool-bankid
         const SHAREABLE_TOOLS = ['crop', 'pdf', 'bg', 'bankid'];
 
         function updateToolShareUrl(toolType) {
             if(!SHAREABLE_TOOLS.includes(toolType)) return;
             const baseUrl = window.location.pathname + window.location.search;
             const newUrl = baseUrl + '#tool-' + encodeURIComponent(toolType);
-            // This complete website URL is shareable. Opening it directly
-            // loads the same utility tool automatically.
             history.pushState({ page: 'tool', tool: toolType }, '', newUrl);
         }
 
@@ -699,7 +682,6 @@
             const toolType = decodeURIComponent(hash.substring(6));
             if(!SHAREABLE_TOOLS.includes(toolType)) return;
 
-            // Render the same utility tool when the shared URL is opened.
             document.getElementById('appHome').style.display = 'block';
             document.getElementById('vacancyPage').style.display = 'none';
             openToolModal(toolType, true);
@@ -716,7 +698,6 @@
             let foundCat = '';
             let foundId = '';
 
-            // New URL format: #post-category-itemId
             for(const cat of categories) {
                 const prefix = encodeURIComponent(cat) + '-';
                 if(raw.startsWith(prefix)) {
@@ -726,7 +707,6 @@
                 }
             }
 
-            // Backward compatibility: #post-itemId
             if(!foundId) {
                 const possibleId = decodeURIComponent(raw);
                 for(const cat of categories) {
@@ -841,9 +821,6 @@
         }
 
         function goHome() {
-            // Return to the existing Home history entry instead of creating
-            // another one. Browser/Android Back will therefore stay within
-            // the website when moving from Post Details to Home.
             if(history.state && history.state.page === 'vacancy') {
                 history.back();
             } else {
@@ -1048,7 +1025,6 @@
                 managePortalsHtml = `<p style="font-size:13px; color:#666;">No portal links added yet.</p>`;
             }
 
-            // Fetch Visitors Stats for Admin Dashboard
             db.ref('website_visitors').once('value', (snapshot) => {
                 let visitorsData = snapshot.val();
                 let visitorCount = 0;
@@ -1080,7 +1056,6 @@
                 if(visitorListElem) visitorListElem.innerHTML = visitorListHtml;
             });
 
-            // Fetch Feedbacks for Admin Dashboard
             db.ref('user_feedbacks').once('value', (snapshot) => {
                 let fbData = snapshot.val();
                 let feedbacksHtml = '';
@@ -1109,7 +1084,6 @@
                 <h2>Admin Control Panel</h2>
                 <hr style="margin:10px 0 15px 0;">
 
-                <!-- Website Visitor Statistics Card -->
                 <div class="admin-card" style="border: 2px solid #2563eb; background: #eff6ff;">
                     <div class="admin-title" style="color: #1e40af; display: flex; justify-content: space-between; align-items: center;">
                         <span>📊 Website Visitor Statistics & Locations</span>
@@ -1152,7 +1126,6 @@
                     <div class="admin-title" style="color:#173a9c;">📋 Vacancy / Post Details Manager</div>
                     <p style="font-size:12px;color:#64748b;margin-top:0;">
                         यहाँ से आप दूसरे पेज पर खुलने वाली Vacancy / Post Details की जानकारी को Edit या Delete कर सकते हैं।
-                        SEO Title, Meta Description, Poster, Dates, Fee, Age, Total Posts, Eligibility, Full Details और Links भी manage किए जा सकते हैं।
                     </p>
                     <div style="max-height:260px;overflow-y:auto;border:1px solid #cbd5e1;padding:10px;border-radius:6px;background:#fff;">
                         ${manageItemsHtml}
@@ -1161,8 +1134,6 @@
 
                 <div class="admin-card">
                     <div class="admin-title">📄 Footer Pages Content Manager</div>
-                    <p style="font-size:12px; color:#666; margin-top:0;">Edit text content for footer links below:</p>
-                    
                     <label style="font-weight:bold; font-size:13px;">About Us Content:</label>
                     <textarea id="editPageAbout" rows="3">${aboutVal}</textarea>
 
@@ -1200,7 +1171,6 @@
                     <div style="margin:10px 0; border:1px dashed #16803c; padding:10px; border-radius:6px; background:#f8fff9;">
                         <label style="font-weight:bold; font-size:13px; color:#16803c;">🖼️ Post / Vacancy Poster (Optional):</label>
                         <input type="file" id="newItemPosterFileInput" accept="image/*" style="margin-top:6px;">
-                        <div style="font-size:11px;color:#666;margin-top:4px;">Poster upload karein — ye post ke detail page par users ko dikhega.</div>
                     </div>
                     
                     <div style="display: flex; align-items: center; gap: 10px; margin: 6px 0 12px 0;">
@@ -1221,7 +1191,6 @@
                         <input type="text" id="newItemYojanaApply" placeholder="Apply Online Link (URL)">
                     </div>
 
-                    <!-- Offline Form PDF Upload Box -->
                     <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9;" id="pdfUploadBoxWrapper">
                         <label style="font-weight:bold; font-size:13px; color:#2a5298;">Upload Form PDF (Offline Form ke liye):</label>
                         <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
@@ -1373,7 +1342,6 @@
                     <label style="font-weight:bold; font-size:13px; color:#16803c;">🖼️ Post / Vacancy Poster (Optional):</label>
                     <input type="file" id="editItemPosterFileInput" accept="image/*" style="margin-top:6px;">
                     ${item.posterImage ? `<div style="margin-top:8px;text-align:center;"><img src="${item.posterImage}" alt="Current Poster" style="max-width:180px;max-height:220px;object-fit:contain;border:1px solid #ddd;border-radius:4px;"></div>` : ''}
-                    <div style="font-size:11px;color:#666;margin-top:4px;">Naya poster upload karenge to purana poster replace ho jayega.</div>
                 </div>
                 
                 <div style="display: flex; align-items: center; gap: 10px; margin: 6px 0 12px 0;">
@@ -1406,7 +1374,6 @@
                     <input type="text" id="editItemYojanaApply" value="${item.applyLink || ''}">
                 </div>
 
-                <!-- Update PDF for Offline / Jobs -->
                 <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9; display:${(isSimpleCat || isYojanaCat) ? 'none' : 'block'};" id="editPdfBoxWrapper">
                     <label style="font-weight:bold; font-size:13px; color:#2a5298;">Update PDF File (Nayi PDF Upload Karein):</label>
                     <input type="file" id="editItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
@@ -1701,35 +1668,6 @@
             });
         }
 
-        let selectedBankForIdCard = '';
-
-        function openBankIdSuggestionsPage() {
-            const banks = Object.keys(bankIdBrandData);
-            const cards = banks.map(bank => {
-                const logo = makeBuiltInBankLogo(bank);
-                return `<div class=\"bankid-suggestion-card\" onclick=\"openSelectedBankIdCard(${JSON.stringify(bank)})\">
-                    <img class=\"bankid-suggestion-logo\" src=\"${logo}\" alt=\"${bank}\" onerror=\"this.style.display='none'\">
-                    <div class=\"bankid-suggestion-name\">${bank}</div>
-                    <button type=\"button\" class=\"bankid-suggestion-btn\">Create ID Card</button>
-                </div>`;
-            }).join('');
-            document.getElementById('modalBodyContent').innerHTML = `
-                <div class=\"bankid-suggestion-page\">
-                    <button type=\"button\" class=\"bankid-suggestion-back\" onclick=\"closePageModal()\">← Back</button>
-                    <div class=\"bankid-suggestion-head\">
-                        <h2>💳 Bank ID Card Maker</h2>
-                        <p>Bank select karein aur apna ID card banayein. Neeche aur bhi banks ke options diye gaye hain.</p>
-                    </div>
-                    <div class=\"bankid-suggestion-grid\">${cards}</div>
-                </div>`;
-            openPageModal();
-        }
-
-        function openSelectedBankIdCard(bankName) {
-            selectedBankForIdCard = bankName || '';
-            openToolModal('bankid-maker', true);
-        }
-
         function openToolModal(toolType, fromSharedUrl = false) {
             let html = '';
             if(toolType === 'crop') {
@@ -1760,111 +1698,204 @@
                     <button type="button" onclick="alert('Background updated successfully!')">Download Processed Photo</button>
                 `;
             } else if(toolType === 'bankid') {
-                openBankIdSuggestionsPage();
-                return;
-            } else if(toolType === 'bankid-maker') {
+                updateToolShareUrl('bankid');
                 html = `
                     <h2>💳 Bank Identity Card Maker</h2>
-                    <p style="font-size:13px;color:#666;">Bank select karein, details aur customer photo bharein. Bank logo automatically aa jayega. Generate ke baad card ko Edit karke dobara badal sakte hain aur PDF download kar sakte hain.</p>
+                    <p style="font-size:13px;color:#666;">Bank select karein, details aur customer photo bharein. Generate ke baad card ko Edit karke dobara badal sakte hain aur PDF ya Image download kar sakte hain.</p>
                     <div class="bankid-help">⚠️ यह tool केवल आपके द्वारा दर्ज की गई जानकारी का printable card बनाता है। किसी बैंक का official ID/Passbook document होने का दावा नहीं करता।</div>
-                    <div id="bankIdEditor"><div class="bankid-editor-grid">
-                        <div class="full"><label style="font-weight:bold;font-size:13px;">Select Bank / Institution:</label><select id="cardBankSelect" onchange="updateIdCardPreview()">
-                            <option value="UCO Bank">UCO Bank</option><option value="State Bank of India (SBI)">State Bank of India (SBI)</option><option value="Bank of Baroda (BOB)">Bank of Baroda (BOB)</option><option value="Punjab National Bank (PNB)">Punjab National Bank (PNB)</option><option value="Central Bank of India">Central Bank of India</option><option value="Canara Bank">Canara Bank</option><option value="Union Bank of India">Union Bank of India</option><option value="Bank of India (BOI)">Bank of India (BOI)</option><option value="HDFC Bank">HDFC Bank</option><option value="ICICI Bank">ICICI Bank</option><option value="Axis Bank">Axis Bank</option><option value="MP Online / CSC Kiosk">MP Online / CSC Kiosk</option>
-                        </select></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Customer ID:</label><input type="text" id="cardCustomerId" placeholder="Customer ID" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Account Number:</label><input type="text" id="cardAccNo" placeholder="Bank Account Number" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">IFSC Code:</label><input type="text" id="cardIfsc" placeholder="IFSC Code" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Customer Name:</label><input type="text" id="cardCustName" placeholder="Customer Full Name" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Father's / Husband's Name:</label><input type="text" id="cardRelName" placeholder="Father's or Husband's Name" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">UID ID:</label><input type="text" id="cardUidId" placeholder="UID / Other ID (optional)" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">PIN Code:</label><input type="text" id="cardPin" placeholder="PIN Code" oninput="updateIdCardPreview()"></div>
-                        <div class="full"><label style="font-weight:bold;font-size:13px;">Address:</label><input type="text" id="cardAddress" placeholder="Customer Residential Address" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Kiosk Name:</label><input type="text" id="cardKioskName" placeholder="Kiosk / Service Centre Name" oninput="updateIdCardPreview()"></div>
-                        <div><label style="font-weight:bold;font-size:13px;">Kiosk Location:</label><input type="text" id="cardKioskLoc" placeholder="Kiosk Location / Branch" oninput="updateIdCardPreview()"></div>
-                        <div class="full"><label style="font-weight:bold;font-size:13px;">Customer Photo:</label><input type="file" id="cardPhotoInput" accept="image/*" onchange="previewCardPhoto(event)"></div>
+                    
+                    <div id="bankIdEditor">
+                        <div class="bankid-editor-grid">
+                            <div class="full">
+                                <label style="font-weight:bold;font-size:13px;">Select Bank / Institution:</label>
+                                <select id="cardBankSelect" onchange="updateIdCardPreview()">
+                                    <option value="UCO Bank">UCO Bank</option>
+                                    <option value="State Bank of India (SBI)">State Bank of India (SBI)</option>
+                                    <option value="Bank of Baroda (BOB)">Bank of Baroda (BOB)</option>
+                                    <option value="Punjab National Bank (PNB)">Punjab National Bank (PNB)</option>
+                                    <option value="Central Bank of India">Central Bank of India</option>
+                                    <option value="Canara Bank">Canara Bank</option>
+                                    <option value="Union Bank of India">Union Bank of India</option>
+                                    <option value="Bank of India (BOI)">Bank of India (BOI)</option>
+                                    <option value="HDFC Bank">HDFC Bank</option>
+                                    <option value="ICICI Bank">ICICI Bank</option>
+                                    <option value="Axis Bank">Axis Bank</option>
+                                    <option value="MP Online / CSC Kiosk">MP Online / CSC Kiosk</option>
+                                </select>
+                            </div>
+                            <div><label style="font-weight:bold;font-size:13px;">Customer ID:</label><input type="text" id="cardCustomerId" placeholder="Customer ID" oninput="updateIdCardPreview()"></div>
+                            <div><label style="font-weight:bold;font-size:13px;">Account Number:</label><input type="text" id="cardAccNo" placeholder="Bank Account Number" oninput="updateIdCardPreview()"></div>
+                            <div><label style="font-weight:bold;font-size:13px;">IFSC Code:</label><input type="text" id="cardIfsc" placeholder="IFSC Code" oninput="updateIdCardPreview()"></div>
+                            <div><label style="font-weight:bold;font-size:13px;">Customer Name:</label><input type="text" id="cardCustName" placeholder="Customer Full Name" oninput="updateIdCardPreview()"></div>
+                            <div><label style="font-weight:bold;font-size:13px;">Father's / Husband's Name:</label><input type="text" id="cardRelName" placeholder="Father's or Husband's Name" oninput="updateIdCardPreview()"></div>
+                            <div><label style="font-weight:bold;font-size:13px;">Other ID (Optional):</label><input type="text" id="cardUidId" placeholder="Other ID / Code" oninput="updateIdCardPreview()"></div>
+                            <div><label style="font-weight:bold;font-size:13px;">PIN Code:</label><input type="text" id="cardPin" placeholder="PIN Code" oninput="updateIdCardPreview()"></div>
+                            <div class="full"><label style="font-weight:bold;font-size:13px;">Address:</label><input type="text" id="cardAddress" placeholder="Customer Residential Address" oninput="updateIdCardPreview()"></div>
+                            <div><label style="font-weight:bold;font-size:13px;">Kiosk Name:</label><input type="text" id="cardKioskName" placeholder="Kiosk / Service Centre Name" oninput="updateIdCardPreview()"></div>
+                            <div><label style="font-weight:bold;font-size:13px;">Kiosk Location:</label><input type="text" id="cardKioskLoc" placeholder="Location / Branch City" oninput="updateIdCardPreview()"></div>
+                            <div class="full">
+                                <label style="font-weight:bold;font-size:13px;">Customer Photo:</label>
+                                <input type="file" id="cardPhotoInput" accept="image/*" onchange="previewCardPhoto(event)">
+                            </div>
+                        </div>
+                        <button type="button" onclick="generateBankIdCard()" style="background:#16a34a; margin-top:12px;">Generate ID Card Preview</button>
                     </div>
-                    <h4 style="margin:15px 0 5px;color:#1e3c72;text-align:center;">Card Live Preview</h4>
-                    <div id="captureCardArea" class="idcard-preview"><div class="idcard-watermark" id="watermarkBankName"><img id="watermarkBankLogo" alt="Bank Watermark Logo"></div><div class="idcard-header"><img id="prevLogoImg" class="idcard-logo" alt="Bank Logo"><div class="idcard-bankblock"><div class="idcard-bankname" id="prevBankName">UCO BANK</div><div class="idcard-subtitle" id="prevBankSubtitle">UCO Bank Passbook</div></div></div><div class="idcard-body"><div class="idcard-details">
-                        <div class="row"><div class="label">Customer ID:</div><span id="lblCustomerId">---</span></div><div class="row"><div class="label">Account Number:</div><span id="lblAccNo">---</span></div><div class="row"><div class="label">IFSC Code:</div><span id="lblIfsc">---</span></div><div class="row"><div class="label">Customer Name:</div><span id="lblCustName">---</span></div><div class="row"><div class="label">Father/Husband:</div><span id="lblRelName">---</span></div><div class="row"><div class="label">UID ID:</div><span id="lblUidId">---</span></div><div class="row"><div class="label">Address:</div><span id="lblAddress">---</span></div><div class="row"><div class="label">Pin Code:</div><span id="lblPin">---</span></div>
-                    </div><div class="idcard-photo-wrap"><img id="prevCustPhoto" src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="112" height="138"><rect width="100%" height="100%" fill="#f1f5f9"/><circle cx="56" cy="48" r="25" fill="#94a3b8"/><path d="M18 128c5-29 22-43 38-43s33 14 38 43" fill="#94a3b8"/></svg>')}" class="idcard-photo" alt="Customer Photo"><div class="idcard-photo-label">Customer Photo</div></div></div><div class="idcard-footer">Kiosk: <span id="lblKioskName">---</span> &nbsp;|&nbsp; Loc: <span id="lblKioskLoc">---</span></div><div class="idcard-disclaimer">For identification / service reference only</div></div>
-                    <button type="button" onclick="generateBankIdCard()" style="background:#1e3c72;margin-top:12px;">✅ Generate ID Card</button></div>
-                    <div id="bankIdResult" class="bankid-result"><h4 style="margin:8px 0;text-align:center;color:#1e3c72;">✅ ID Card Ready</h4><div id="resultCardMount"></div><div class="bankid-actions"><button type="button" class="bankid-edit-btn" onclick="editBankIdCard()">✏️ Edit Card</button><button type="button" class="bankid-image-btn" onclick="downloadBankIdCardAsImage()">🖼️ Download PNG</button><button type="button" class="bankid-pdf-btn" onclick="downloadBankIdCardAsPDF()">📄 Download PDF</button></div></div>`;
-                customCardLogoBase64 = ''; customCardPhotoBase64 = '';
-                if(selectedBankForIdCard && document.getElementById('cardBankSelect')) { document.getElementById('cardBankSelect').value = selectedBankForIdCard; }
-                selectedBankForIdCard = '';
-                setTimeout(updateIdCardPreview,100);
+
+                    <div id="bankIdResult" class="bankid-result">
+                        <div id="idCardPrintArea" class="idcard-preview">
+                            <div class="idcard-watermark"><img id="previewWatermarkLogo" src="" alt="Watermark"></div>
+                            <div class="idcard-header">
+                                <img id="previewBankLogo" src="" class="idcard-logo" alt="Bank Logo">
+                                <div class="idcard-bankblock">
+                                    <div class="idcard-bankname" id="previewBankName">BANK NAME</div>
+                                    <div class="idcard-subtitle" id="previewSubtitle">CUSTOMER IDENTITY CARD</div>
+                                </div>
+                            </div>
+                            <div class="idcard-body">
+                                <div class="idcard-photo-wrap">
+                                    <img id="previewCustPhoto" class="idcard-photo" src="" alt="Photo">
+                                    <div class="idcard-photo-label">PASSPORT PHOTO</div>
+                                </div>
+                                <div class="idcard-details">
+                                    <div class="row"><div class="label">Customer Name</div><div>: <span id="pName">-</span></div></div>
+                                    <div class="row"><div class="label">Father/Husband Name</div><div>: <span id="pRel">-</span></div></div>
+                                    <div class="row"><div class="label">Customer ID</div><div>: <span id="pCustId">-</span></div></div>
+                                    <div class="row"><div class="label">Account Number</div><div>: <span id="pAccNo">-</span></div></div>
+                                    <div class="row"><div class="label">IFSC Code</div><div>: <span id="pIfsc">-</span></div></div>
+                                    <div class="row"><div class="label">Address / PIN</div><div>: <span id="pAddr">-</span></div></div>
+                                    <div class="row"><div class="label">Issued By (Kiosk)</div><div>: <span id="pKiosk">-</span></div></div>
+                                </div>
+                            </div>
+                            <div class="idcard-footer">AUTHORIZED BANKING CORRESPONDENT / CYBER SEVA KIOSK CARD</div>
+                            <div class="idcard-disclaimer">Disclaimer: This identity card is generated for operational identification reference purposes via authorized digital service portal.</div>
+                        </div>
+
+                        <div class="bankid-actions">
+                            <button type="button" class="bankid-edit-btn" onclick="editBankIdCard()">✏️ Edit Details</button>
+                            <button type="button" class="bankid-image-btn" onclick="downloadBankIdImage()">📥 Download Image (JPG)</button>
+                            <button type="button" class="bankid-pdf-btn" onclick="downloadBankIdPdf()">📄 Download PDF</button>
+                        </div>
+                    </div>
+                `;
             }
-            document.getElementById('modalBodyContent').innerHTML = html; openPageModal();
+            document.getElementById('modalBodyContent').innerHTML = html;
+            openPageModal();
         }
 
-        let customCardLogoBase64 = ''; let customCardPhotoBase64 = ''; let generatedBankIdCard = false;
-        const bankIdBrandData = {'UCO Bank':{short:'UCO',subtitle:'UCO Bank Passbook',bg:'#123b9b'},'State Bank of India (SBI)':{short:'SBI',subtitle:'State Bank of India',bg:'#0b5cab'},'Bank of Baroda (BOB)':{short:'BOB',subtitle:'Bank of Baroda',bg:'#e56b1f'},'Punjab National Bank (PNB)':{short:'PNB',subtitle:'Punjab National Bank',bg:'#a40000'},'Central Bank of India':{short:'CBI',subtitle:'Central Bank of India',bg:'#0b6eaa'},'Canara Bank':{short:'CANARA',subtitle:'Canara Bank',bg:'#0b4a8b'},'Union Bank of India':{short:'UNION',subtitle:'Union Bank of India',bg:'#0055a5'},'Bank of India (BOI)':{short:'BOI',subtitle:'Bank of India',bg:'#0057a8'},'HDFC Bank':{short:'HDFC',subtitle:'HDFC Bank',bg:'#004c97'},'ICICI Bank':{short:'ICICI',subtitle:'ICICI Bank',bg:'#f58220'},'Axis Bank':{short:'AXIS',subtitle:'Axis Bank',bg:'#8b1e3f'},'MP Online / CSC Kiosk':{short:'CSC',subtitle:'MP Online / CSC Kiosk',bg:'#0b6fa4'}};
-        function makeBuiltInBankLogo(bankName){const logoMap={'UCO Bank':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/uco.svg','State Bank of India (SBI)':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/sbi.svg','Bank of Baroda (BOB)':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/bob.svg','Punjab National Bank (PNB)':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/pnb.svg','Central Bank of India':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/cbi.svg','Canara Bank':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/canara.svg','Union Bank of India':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/ubi.svg','Bank of India (BOI)':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/boi.svg','HDFC Bank':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/hdfc.svg','ICICI Bank':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/icici.svg','Axis Bank':'https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/axis.svg'};return logoMap[bankName]||logoMap['UCO Bank'];}
-        function previewCardPhoto(event){let file=event.target.files[0];if(file){let reader=new FileReader();reader.onload=e=>{customCardPhotoBase64=e.target.result;let img=document.getElementById('prevCustPhoto');if(img)img.src=customCardPhotoBase64;};reader.readAsDataURL(file);}}
-        function updateIdCardPreview(){const bankName=document.getElementById('cardBankSelect')?.value||'UCO Bank';const brand=bankIdBrandData[bankName]||bankIdBrandData['UCO Bank'];const vals={customerId:document.getElementById('cardCustomerId')?.value||'',custName:document.getElementById('cardCustName')?.value||'',relName:document.getElementById('cardRelName')?.value||'',accNo:document.getElementById('cardAccNo')?.value||'',ifsc:document.getElementById('cardIfsc')?.value||'',uidId:document.getElementById('cardUidId')?.value||'',address:document.getElementById('cardAddress')?.value||'',pin:document.getElementById('cardPin')?.value||'',kioskName:document.getElementById('cardKioskName')?.value||'',kioskLoc:document.getElementById('cardKioskLoc')?.value||''};const set=(id,val)=>{const el=document.getElementById(id);if(el)el.innerText=val||'---';};set('prevBankName',bankName.toUpperCase());set('prevBankSubtitle',brand.subtitle);set('lblCustomerId',vals.customerId);set('lblCustName',vals.custName);set('lblRelName',vals.relName);set('lblAccNo',vals.accNo);set('lblIfsc',vals.ifsc);set('lblUidId',vals.uidId);set('lblAddress',vals.address);set('lblPin',vals.pin);set('lblKioskName',vals.kioskName);set('lblKioskLoc',vals.kioskLoc);const logoUrl=makeBuiltInBankLogo(bankName);const logo=document.getElementById('prevLogoImg');const watermarkLogo=document.getElementById('watermarkBankLogo');if(logo&&!customCardLogoBase64){logo.crossOrigin='anonymous';logo.src=logoUrl;logo.onerror=function(){this.onerror=null;this.src='https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/uco.svg';};}if(watermarkLogo){watermarkLogo.crossOrigin='anonymous';watermarkLogo.src=logoUrl;watermarkLogo.onerror=function(){this.onerror=null;this.src='https://raw.githubusercontent.com/auraveni/global-bank-logos/main/assets/bank/indian-bank/uco.svg';};}}
-        function generateBankIdCard(){updateIdCardPreview();const name=document.getElementById('cardCustName')?.value.trim();if(!name){alert('कृपया Customer Name भरें।');return;}const source=document.getElementById('captureCardArea'),mount=document.getElementById('resultCardMount');if(!source||!mount)return;mount.innerHTML='';const clone=source.cloneNode(true);clone.id='captureCardAreaResult';clone.style.transform='none';clone.style.margin='15px auto';mount.appendChild(clone);document.getElementById('bankIdEditor').style.display='none';document.getElementById('bankIdResult').style.display='block';generatedBankIdCard=true;}
-        function editBankIdCard(){document.getElementById('bankIdResult').style.display='none';document.getElementById('bankIdEditor').style.display='block';generatedBankIdCard=false;}
-        function getBankIdCaptureElement(){return document.getElementById('captureCardAreaResult')||document.getElementById('captureCardArea');}
-        function downloadBankIdCardAsImage(){const cardElement=getBankIdCaptureElement();if(!cardElement)return;html2canvas(cardElement,{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(canvas=>{const link=document.createElement('a');link.download='Bank_Identity_Card.png';link.href=canvas.toDataURL('image/png');link.click();}).catch(err=>alert('ID Card download karne mein error aayi: '+err.message));}
-        function downloadBankIdCardAsPDF(){const cardElement=getBankIdCaptureElement();if(!cardElement)return;html2canvas(cardElement,{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(canvas=>{const imgData=canvas.toDataURL('image/png');const {jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});const pageW=297,pageH=210,margin=12,maxW=pageW-margin*2,maxH=pageH-margin*2,ratio=Math.min(maxW/canvas.width,maxH/canvas.height),w=canvas.width*ratio,h=canvas.height*ratio,x=(pageW-w)/2,y=(pageH-h)/2;pdf.addImage(imgData,'PNG',x,y,w,h,undefined,'FAST');pdf.save('Bank_Identity_Card.pdf');}).catch(err=>alert('PDF banane mein error aayi: '+err.message));}
-
-        function previewToolImage(event) {
-            let reader = new FileReader();
-            reader.onload = function(){
-                let output = document.getElementById('toolPreviewImage');
-                if(output) output.src = reader.result;
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-
-        async function convertImagesToPDF() {
-            let fileInput = document.getElementById('pdfImageInput');
-            if(!fileInput.files || fileInput.files.length === 0) {
-                alert('Please select at least one image!');
-                return;
-            }
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            for(let i = 0; i < fileInput.files.length; i++) {
-                let file = fileInput.files[i];
-                let base64 = await readFileAsDataURL(file);
-                if(i > 0) doc.addPage();
-                doc.addImage(base64, 'JPEG', 10, 10, 190, 270);
-            }
-            doc.save('PradeepEServices_Document.pdf');
-            alert('PDF downloaded successfully!');
-            closePageModal();
-        }
-
-        function readFileAsDataURL(file) {
-            return new Promise((resolve, reject) => {
-                let reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
+        // Bank ID Card Maker Helper Functions
+        let cardBase64Photo = '';
+        function previewCardPhoto(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    cardBase64Photo = e.target.result;
+                }
                 reader.readAsDataURL(file);
+            }
+        }
+
+        function getBankLogoUrl(bankName) {
+            // Using reliable emblem / financial icons or placeholders
+            if(bankName.includes('SBI')) return 'https://upload.wikimedia.org/wikipedia/commons/c/cc/State_Bank_of_India_logo.svg';
+            if(bankName.includes('UCO')) return 'https://upload.wikimedia.org/wikipedia/commons/e/e4/UCO_Bank_Logo.svg';
+            if(bankName.includes('Baroda')) return 'https://upload.wikimedia.org/wikipedia/commons/5/52/Bank_of_Baroda_Logo.svg';
+            if(bankName.includes('Punjab')) return 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Punjab_National_Bank_Logo.svg';
+            if(bankName.includes('HDFC')) return 'https://upload.wikimedia.org/wikipedia/commons/2/28/HDFC_Bank_Logo.svg';
+            if(bankName.includes('ICICI')) return 'https://upload.wikimedia.org/wikipedia/commons/1/12/ICICI_Bank_Logo.svg';
+            if(bankName.includes('Axis')) return 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Axis_Bank_logo.svg';
+            return 'https://upload.wikimedia.org/wikipedia/commons/4/41/Emblem_of_India.svg';
+        }
+
+        function updateIdCardPreview() {
+            // Live typing update if needed
+        }
+
+        function generateBankIdCard() {
+            const bankName = document.getElementById('cardBankSelect').value;
+            const custId = document.getElementById('cardCustomerId').value || 'N/A';
+            const accNo = document.getElementById('cardAccNo').value || 'N/A';
+            const ifsc = document.getElementById('cardIfsc').value || 'N/A';
+            const custName = document.getElementById('cardCustName').value || 'Customer Name';
+            const relName = document.getElementById('cardRelName').value || 'N/A';
+            const pin = document.getElementById('cardPin').value || '';
+            const address = document.getElementById('cardAddress').value || 'Madhya Pradesh';
+            const kiosk = document.getElementById('cardKioskName').value || 'Pradeep E Services';
+            const kioskLoc = document.getElementById('cardKioskLoc').value || 'MP';
+
+            document.getElementById('previewBankName').innerText = bankName;
+            document.getElementById('previewSubtitle').innerText = bankName.includes('MP Online') ? 'CSC DIGITAL SEVA & KIOSK CARD' : 'CUSTOMER IDENTITY CARD';
+            document.getElementById('pName').innerText = custName;
+            document.getElementById('pRel').innerText = relName;
+            document.getElementById('pCustId').innerText = custId;
+            document.getElementById('pAccNo').innerText = accNo;
+            document.getElementById('pIfsc').innerText = ifsc;
+            document.getElementById('pAddr').innerText = address + (pin ? ' - ' + pin : '');
+            document.getElementById('pKiosk').innerText = kiosk + ' (' + kioskLoc + ')';
+
+            const logoUrl = getBankLogoUrl(bankName);
+            document.getElementById('previewBankLogo').src = logoUrl;
+            document.getElementById('previewWatermarkLogo').src = logoUrl;
+
+            if(cardBase64Photo) {
+                document.getElementById('previewCustPhoto').src = cardBase64Photo;
+            } else {
+                document.getElementById('previewCustPhoto').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="112" height="138" fill="%23cbd5e1"><rect width="112" height="138"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2364748b" font-size="12" font-family="Arial">NO PHOTO</text></svg>';
+            }
+
+            document.getElementById('bankIdEditor').style.display = 'none';
+            document.getElementById('bankIdResult').style.display = 'block';
+        }
+
+        function editBankIdCard() {
+            document.getElementById('bankIdResult').style.display = 'none';
+            document.getElementById('bankIdEditor').style.display = 'block';
+        }
+
+        function downloadBankIdImage() {
+            const element = document.getElementById('idCardPrintArea');
+            html2canvas(element, { scale: 3, useCORS: true }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Bank_ID_Card.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.click();
+            });
+        }
+
+        function downloadBankIdPdf() {
+            const element = document.getElementById('idCardPrintArea');
+            html2canvas(element, { scale: 3, useCORS: true }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                const imgWidth = 210;
+                const pageHeight = 148;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, 'JPEG', 15, 20, imgWidth - 30, imgHeight);
+                pdf.save('Bank_ID_Card.pdf');
             });
         }
 
         function changeLanguage() {
             let lang = document.getElementById('languageSwitcher').value;
             if(lang === 'hi') {
-                document.getElementById('header-subtitle').innerText = 'आपका अपना साइबर कैफे & ऑनलाइन सेवा केंद्र';
-                document.getElementById('box-jobs').innerText = 'लेटेस्ट जॉब्स (Latest Jobs)';
-                document.getElementById('box-admit').innerText = 'एडमिट कार्ड (Admit Card)';
-                document.getElementById('box-result').innerText = 'रिजल्ट्स (Results)';
-                document.getElementById('box-yojana').innerText = 'सरकारी योजना (संबल, ई-श्रम आदि)';
-                document.getElementById('box-offline').innerText = 'ऑफलाइन फॉर्म (PDF Download)';
-                document.getElementById('box-news').innerText = 'न्यूज़ / सूचना (News)';
-                document.getElementById('portals-heading').innerText = '🌐 महत्वपूर्ण पोर्टल लिंक्स';
-                document.getElementById('tools-heading').innerText = '🛠️ ऑनलाइन यूटिलिटी टूल्स';
-            } else {
-                document.getElementById('header-subtitle').innerText = 'Aapka Apna Cyber Cafe & Online Seva Kendra';
+                document.getElementById('header-title').innerText = 'Pradeep E Services';
                 document.getElementById('box-jobs').innerText = 'Latest Jobs';
                 document.getElementById('box-admit').innerText = 'Admit Card';
                 document.getElementById('box-result').innerText = 'Results';
-                document.getElementById('box-yojana').innerText = 'Sarkari Yojana (Sambal, e-Shram etc.)';
-                document.getElementById('box-offline').innerText = 'Offline Forms (FROM DOWNLOAD)';
+                document.getElementById('box-yojana').innerText = 'Sarkari Yojana (संबल, ई-श्रम आदि)';
+                document.getElementById('box-offline').innerText = 'Offline Forms (PDF Download)';
                 document.getElementById('box-news').innerText = 'News / सूचना';
+                document.getElementById('portals-heading').innerText = '🌐 Important Portal Links (महत्वपूर्ण पोर्टल)';
+                document.getElementById('tools-heading').innerText = '🛠️ Online Utility Tools';
+            } else {
+                document.getElementById('header-title').innerText = 'Pradeep E Services';
+                document.getElementById('box-jobs').innerText = 'Latest Jobs';
+                document.getElementById('box-admit').innerText = 'Admit Card';
+                document.getElementById('box-result').innerText = 'Results';
+                document.getElementById('box-yojana').innerText = 'Sarkari Yojana & Schemes';
+                document.getElementById('box-offline').innerText = 'Offline Forms PDF';
+                document.getElementById('box-news').innerText = 'News / Updates';
                 document.getElementById('portals-heading').innerText = '🌐 Important Portal Links';
                 document.getElementById('tools-heading').innerText = '🛠️ Online Utility Tools';
             }
