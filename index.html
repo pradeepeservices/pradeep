@@ -400,12 +400,21 @@
             // This ensures that pressing the browser/Android Back button from
             // a Post/Vacancy Details page returns to Home instead of leaving
             // the website.
-            if(!history.state || history.state.page !== 'home') {
-                history.replaceState({ page: 'home' }, '', window.location.pathname + window.location.search + window.location.hash);
+            const initialHash = window.location.hash || '';
+            const initialToolHash = initialHash.toLowerCase().startsWith('#tool-');
+            const initialPostHash = initialHash.toLowerCase().startsWith('#post-');
+            const homeUrl = window.location.pathname + window.location.search;
+            if(initialToolHash) {
+                history.replaceState({ page: 'home' }, '', homeUrl);
+                history.pushState({ page: 'tool', tool: decodeURIComponent(initialHash.substring(6)) }, '', homeUrl + initialHash);
+            } else if(initialPostHash) {
+                history.replaceState({ page: 'home' }, '', homeUrl);
+                history.pushState({ page: 'vacancy' }, '', homeUrl + initialHash);
+            } else if(!history.state || history.state.page !== 'home') {
+                history.replaceState({ page: 'home' }, '', homeUrl);
             }
 
-            // Open a specific post when its share URL/hash is opened directly.
-            // Hash-based URLs are used so GitHub Pages does not return a 404.
+            // Open a specific post/tool when its share URL/hash is opened directly.
             handleSharedPostUrl();
             handleSharedToolUrl();
 
@@ -675,7 +684,10 @@
 
         function updateToolShareUrl(toolType) {
             if(!SHAREABLE_TOOLS.includes(toolType)) return;
-            const newUrl = window.location.pathname + window.location.search + '#tool-' + encodeURIComponent(toolType);
+            const baseUrl = window.location.pathname + window.location.search;
+            const newUrl = baseUrl + '#tool-' + encodeURIComponent(toolType);
+            // This complete website URL is shareable. Opening it directly
+            // loads the same utility tool automatically.
             history.pushState({ page: 'tool', tool: toolType }, '', newUrl);
         }
 
@@ -686,7 +698,9 @@
             const toolType = decodeURIComponent(hash.substring(6));
             if(!SHAREABLE_TOOLS.includes(toolType)) return;
 
-            // Let the existing tool renderer build the exact same UI as a normal click.
+            // Render the same utility tool when the shared URL is opened.
+            document.getElementById('appHome').style.display = 'block';
+            document.getElementById('vacancyPage').style.display = 'none';
             openToolModal(toolType, true);
         }
 
@@ -895,7 +909,7 @@
         window.onclick = function(event) {
             let modal = document.getElementById('pageModal');
             if (event.target == modal) {
-                modal.style.display = 'none';
+                closePageModal();
             }
         }
 
@@ -925,7 +939,6 @@
             let html = `<h2>${titleMap[pageKey] || 'Information'}</h2><hr style="margin:10px 0 15px 0;"><p style="white-space: pre-line; line-height:1.6;">${content}</p>`;
             document.getElementById('modalBodyContent').innerHTML = html;
             openPageModal();
-            if(!fromSharedUrl) updateToolShareUrl(toolType);
         }
 
         function submitUserFeedback() {
