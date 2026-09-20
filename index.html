@@ -105,6 +105,7 @@
         
         /* Bank ID Card Preview Styling */
         .bankid-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bankid-editor-grid .full{grid-column:1/-1}
+        .bankid-suggestion-page{max-width:980px;margin:0 auto}.bankid-suggestion-head{text-align:center;margin-bottom:18px}.bankid-suggestion-head h2{margin:0 0 7px;color:#173a9c}.bankid-suggestion-head p{margin:0;color:#64748b;font-size:13px}.bankid-suggestion-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.bankid-suggestion-card{border:1px solid #dbe4f0;background:#fff;border-radius:14px;padding:15px;cursor:pointer;text-align:center;transition:.2s;box-shadow:0 4px 14px rgba(15,23,42,.06)}.bankid-suggestion-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(15,23,42,.10);border-color:#8fb1ef}.bankid-suggestion-logo{width:54px;height:54px;object-fit:contain;margin:0 auto 8px;display:block}.bankid-suggestion-name{font-weight:800;color:#1e293b;font-size:14px;min-height:36px;display:flex;align-items:center;justify-content:center}.bankid-suggestion-btn{margin-top:9px!important;width:100%!important;background:#173a9c!important;padding:9px 10px!important;font-size:12px!important}.bankid-suggestion-back{margin-bottom:14px!important;background:#64748b!important;width:auto!important;padding:9px 14px!important}
         .bankid-help{font-size:12px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;padding:9px 11px;border-radius:8px;margin:8px 0 12px;line-height:1.5}.bankid-result{display:none}.bankid-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.bankid-actions button{flex:1;min-width:140px!important;width:auto!important;margin-top:0!important}.bankid-edit-btn{background:#475569!important}.bankid-pdf-btn{background:#dc2626!important}.bankid-image-btn{background:#16a34a!important}
         .idcard-preview{width:720px;max-width:100%;min-height:405px;background:#fff;border:3px solid #183b8c;border-radius:18px;padding:18px 22px;margin:15px auto;box-shadow:0 7px 25px rgba(15,23,42,.16);box-sizing:border-box;text-align:left;position:relative;overflow:hidden;color:#111827}.idcard-preview:before{content:"";position:absolute;inset:58px 120px 45px 120px;background:radial-gradient(circle at center,rgba(30,64,175,.10),rgba(30,64,175,.02) 55%,transparent 70%);border-radius:50%;pointer-events:none}.idcard-watermark{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:270px;height:190px;display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none;opacity:.075}.idcard-watermark img{width:190px;height:140px;object-fit:contain;filter:grayscale(100%)}.idcard-header{display:flex;align-items:center;gap:14px;border-bottom:2px solid #183b8c;padding-bottom:10px;margin-bottom:13px;position:relative;z-index:1}.idcard-logo{width:62px;height:62px;object-fit:contain;flex:0 0 62px;background:#fff;border-radius:8px}.idcard-bankblock{flex:1;text-align:center}.idcard-bankname{font-size:27px;font-weight:800;color:#111;line-height:1.05}.idcard-subtitle{font-size:18px;color:#333;margin-top:3px}.idcard-body{display:flex;gap:18px;align-items:center;position:relative;z-index:1}.idcard-details{font-size:14px;line-height:1.62;color:#111;flex:1}.idcard-details .row{display:grid;grid-template-columns:155px 1fr;gap:8px}.idcard-details .label{font-weight:700}.idcard-details span{font-weight:500;color:#111;word-break:break-word}.idcard-photo-wrap{order:2;display:flex;flex-direction:column;align-items:center;gap:5px}.idcard-photo{width:112px;height:138px;border:2px solid #183b8c;border-radius:6px;object-fit:cover;background:#f1f5f9}.idcard-photo-label{font-size:10px;color:#555;font-weight:700}.idcard-footer{margin-top:13px;border-top:1px dashed #64748b;padding-top:8px;font-size:12px;text-align:center;color:#333;font-weight:700;position:relative;z-index:1}.idcard-disclaimer{font-size:9px;text-align:center;color:#64748b;margin-top:5px;position:relative;z-index:1}@media(max-width:760px){.bankid-editor-grid{grid-template-columns:1fr}.bankid-editor-grid .full{grid-column:auto}.idcard-preview{width:720px;transform:scale(.94);transform-origin:top left;margin-right:-43px;margin-bottom:-25px}.idcard-bankname{font-size:24px}.idcard-subtitle{font-size:16px}}
         /* Sarkari Result style post page */
@@ -1700,6 +1701,35 @@
             });
         }
 
+        let selectedBankForIdCard = '';
+
+        function openBankIdSuggestionsPage() {
+            const banks = Object.keys(bankIdBrandData);
+            const cards = banks.map(bank => {
+                const logo = makeBuiltInBankLogo(bank);
+                return `<div class=\"bankid-suggestion-card\" onclick=\"openSelectedBankIdCard(${JSON.stringify(bank)})\">
+                    <img class=\"bankid-suggestion-logo\" src=\"${logo}\" alt=\"${bank}\" onerror=\"this.style.display='none'\">
+                    <div class=\"bankid-suggestion-name\">${bank}</div>
+                    <button type=\"button\" class=\"bankid-suggestion-btn\">Create ID Card</button>
+                </div>`;
+            }).join('');
+            document.getElementById('modalBodyContent').innerHTML = `
+                <div class=\"bankid-suggestion-page\">
+                    <button type=\"button\" class=\"bankid-suggestion-back\" onclick=\"closePageModal()\">← Back</button>
+                    <div class=\"bankid-suggestion-head\">
+                        <h2>💳 Bank ID Card Maker</h2>
+                        <p>Bank select karein aur apna ID card banayein. Neeche aur bhi banks ke options diye gaye hain.</p>
+                    </div>
+                    <div class=\"bankid-suggestion-grid\">${cards}</div>
+                </div>`;
+            openPageModal();
+        }
+
+        function openSelectedBankIdCard(bankName) {
+            selectedBankForIdCard = bankName || '';
+            openToolModal('bankid-maker', true);
+        }
+
         function openToolModal(toolType, fromSharedUrl = false) {
             let html = '';
             if(toolType === 'crop') {
@@ -1730,6 +1760,9 @@
                     <button type="button" onclick="alert('Background updated successfully!')">Download Processed Photo</button>
                 `;
             } else if(toolType === 'bankid') {
+                openBankIdSuggestionsPage();
+                return;
+            } else if(toolType === 'bankid-maker') {
                 html = `
                     <h2>💳 Bank Identity Card Maker</h2>
                     <p style="font-size:13px;color:#666;">Bank select karein, details aur customer photo bharein. Bank logo automatically aa jayega. Generate ke baad card ko Edit karke dobara badal sakte hain aur PDF download kar sakte hain.</p>
@@ -1756,7 +1789,10 @@
                     </div><div class="idcard-photo-wrap"><img id="prevCustPhoto" src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="112" height="138"><rect width="100%" height="100%" fill="#f1f5f9"/><circle cx="56" cy="48" r="25" fill="#94a3b8"/><path d="M18 128c5-29 22-43 38-43s33 14 38 43" fill="#94a3b8"/></svg>')}" class="idcard-photo" alt="Customer Photo"><div class="idcard-photo-label">Customer Photo</div></div></div><div class="idcard-footer">Kiosk: <span id="lblKioskName">---</span> &nbsp;|&nbsp; Loc: <span id="lblKioskLoc">---</span></div><div class="idcard-disclaimer">For identification / service reference only</div></div>
                     <button type="button" onclick="generateBankIdCard()" style="background:#1e3c72;margin-top:12px;">✅ Generate ID Card</button></div>
                     <div id="bankIdResult" class="bankid-result"><h4 style="margin:8px 0;text-align:center;color:#1e3c72;">✅ ID Card Ready</h4><div id="resultCardMount"></div><div class="bankid-actions"><button type="button" class="bankid-edit-btn" onclick="editBankIdCard()">✏️ Edit Card</button><button type="button" class="bankid-image-btn" onclick="downloadBankIdCardAsImage()">🖼️ Download PNG</button><button type="button" class="bankid-pdf-btn" onclick="downloadBankIdCardAsPDF()">📄 Download PDF</button></div></div>`;
-                customCardLogoBase64 = ''; customCardPhotoBase64 = ''; setTimeout(updateIdCardPreview,100);
+                customCardLogoBase64 = ''; customCardPhotoBase64 = '';
+                if(selectedBankForIdCard && document.getElementById('cardBankSelect')) { document.getElementById('cardBankSelect').value = selectedBankForIdCard; }
+                selectedBankForIdCard = '';
+                setTimeout(updateIdCardPreview,100);
             }
             document.getElementById('modalBodyContent').innerHTML = html; openPageModal();
         }
