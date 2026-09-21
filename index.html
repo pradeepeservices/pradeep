@@ -138,7 +138,7 @@
         .post-poster-area img{display:block;width:100%;max-width:700px;max-height:850px;object-fit:contain;margin:0 auto;border:1px solid #d1d5db;border-radius:4px;background:#fff;}
         .post-poster-label{font-size:12px;font-weight:800;color:#174b2e;margin-bottom:7px;}
 
-        /* Bank ID Card CSS Styles matching reference screenshot */
+        /* Bank ID Card CSS Styles */
         .bankid-editor { background:#fff; padding:15px; border-radius:8px; }
         .bankid-result { display:none; background:#fff; padding:15px; border-radius:8px; margin-top:15px; }
         .idcard-preview { width:100%; max-width:680px; margin:0 auto; background:#ffffff; border:2px solid #1e3c72; border-radius:12px; padding:16px; box-sizing:border-box; box-shadow:0 4px 15px rgba(0,0,0,0.15); position:relative; overflow:hidden; font-family:Arial, sans-serif; }
@@ -1354,7 +1354,7 @@
                         </div>
 
                         <label style="font-weight:bold;font-size:12px;">Select Bank / Institution:</label>
-                        <select id="cardBankSelect" onchange="updateIdCardPreview()">
+                        <select id="cardBankSelect" onchange="updateIdCardPreview()" crossorigin="anonymous">
                             <option value="UCO Bank">UCO Bank</option>
                             <option value="State Bank of India (SBI)">State Bank of India (SBI)</option>
                             <option value="Bank of Baroda (BOB)">Bank of Baroda (BOB)</option>
@@ -1428,9 +1428,9 @@
 
                         <h4 style="margin:10px 0 5px 0;color:#1e3c72;text-align:center;">Card Live Preview</h4>
                         <div id="captureCardArea" class="idcard-preview">
-                            <img id="watermarkBankLogo" class="idcard-watermark" src="" alt="">
+                            <img id="watermarkBankLogo" class="idcard-watermark" src="" alt="" crossorigin="anonymous">
                             <div class="idcard-header">
-                                <img id="prevLogoImg" class="idcard-logo" src="" alt="Logo">
+                                <img id="prevLogoImg" class="idcard-logo" src="" alt="Logo" crossorigin="anonymous">
                                 <div class="idcard-title-area">
                                     <h2 id="prevBankName">UCO BANK</h2>
                                     <p id="prevBankSubtitle">UCO Bank Passbook</p>
@@ -1447,7 +1447,7 @@
                                     <div class="row"><div class="label">Address:</div><span id="lblAddress">---</span></div>
                                     <div class="row"><div class="label">Pin Code:</div><span id="lblPin">---</span></div>
                                 </div>
-                                <div class="idcard-photo-wrap"><img id="prevUserPhoto" class="idcard-photo" alt="Photo"><div class="idcard-photo-label">Customer Photo</div></div>
+                                <div class="idcard-photo-wrap"><img id="prevUserPhoto" class="idcard-photo" alt="Photo" crossorigin="anonymous"><div class="idcard-photo-label">Customer Photo</div></div>
                             </div>
                             <div class="idcard-footer-box">
                                 <div class="idcard-footer-kiosk">Kiosk: <span id="lblKioskName">---</span> | Loc: <span id="lblKioskLoc">---</span></div>
@@ -1493,18 +1493,18 @@
         }
 
         const BANK_LOGOS = {
-            'UCO Bank': 'https://upload.wikimedia.org/wikipedia/en/thumb/f/fa/UCO_Bank_Logo.svg/1200px-UCO_Bank_Logo.svg.png',
-            'State Bank of India (SBI)': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/State_Bank_of_India_logo.svg/1200px-State_Bank_of_India_logo.svg.png',
-            'Bank of Baroda (BOB)': 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5e/Bank_of_Baroda_Logo.svg/1200px-Bank_of_Baroda_Logo.svg.png',
-            'Punjab National Bank (PNB)': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Punjab_National_Bank_Logo.svg/1200px-Punjab_National_Bank_Logo.svg.png',
-            'Central Bank of India': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/29/Central_Bank_of_India_logo.svg/1200px-Central_Bank_of_India_logo.svg.png',
-            'Canara Bank': 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e3/Canara_Bank_Logo.svg/1200px-Canara_Bank_Logo.svg.png',
-            'Union Bank of India': 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5a/Union_Bank_of_India_Logo.svg/1200px-Union_Bank_of_India_Logo.svg.png',
-            'Bank of India (BOI)': 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6f/Bank_of_India_Logo.svg/1200px-Bank_of_India_Logo.svg.png',
-            'HDFC Bank': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/HDFC_Bank_Logo.svg/1200px-HDFC_Bank_Logo.svg.png',
-            'ICICI Bank': 'https://upload.wikimedia.org/wikipedia/en/thumb/1/12/ICICI_Bank_Logo.svg/1200px-ICICI_Bank_Logo.svg.png',
-            'Axis Bank': 'https://upload.wikimedia.org/wikipedia/en/thumb/8/82/Axis_Bank_%28logo%29.svg/1200px-Axis_Bank_%28logo%29.svg.png',
-            'MP Online / CSC Kiosk': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Digital_India_logo.svg/1200px-Digital_India_logo.svg.png'
+            'UCO Bank': 'https://upload.wikimedia.org/wikipedia/commons/f/fa/UCO_Bank_Logo.svg',
+            'State Bank of India (SBI)': 'https://upload.wikimedia.org/wikipedia/commons/c/cc/State_Bank_of_India_logo.svg',
+            'Bank of Baroda (BOB)': 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Bank_of_Baroda_Logo.svg',
+            'Punjab National Bank (PNB)': 'https://upload.wikimedia.org/wikipedia/commons/9/9e/Punjab_National_Bank_Logo.svg',
+            'Central Bank of India': 'https://upload.wikimedia.org/wikipedia/commons/2/29/Central_Bank_of_India_logo.svg',
+            'Canara Bank': 'https://upload.wikimedia.org/wikipedia/commons/e/e3/Canara_Bank_Logo.svg',
+            'Union Bank of India': 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Union_Bank_of_India_Logo.svg',
+            'Bank of India (BOI)': 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Bank_of_India_Logo.svg',
+            'HDFC Bank': 'https://upload.wikimedia.org/wikipedia/commons/2/28/HDFC_Bank_Logo.svg',
+            'ICICI Bank': 'https://upload.wikimedia.org/wikipedia/commons/1/12/ICICI_Bank_Logo.svg',
+            'Axis Bank': 'https://upload.wikimedia.org/wikipedia/commons/8/82/Axis_Bank_%28logo%29.svg',
+            'MP Online / CSC Kiosk': 'https://upload.wikimedia.org/wikipedia/commons/9/95/Digital_India_logo.svg'
         };
 
         function updateIdCardPreview() {
