@@ -138,26 +138,27 @@
         .post-poster-area img{display:block;width:100%;max-width:700px;max-height:850px;object-fit:contain;margin:0 auto;border:1px solid #d1d5db;border-radius:4px;background:#fff;}
         .post-poster-label{font-size:12px;font-weight:800;color:#174b2e;margin-bottom:7px;}
 
-        /* Bank ID Card CSS Styles */
+        /* Bank ID Card CSS Styles matching uploaded reference photo */
         .bankid-editor { background:#fff; padding:15px; border-radius:8px; }
         .bankid-result { display:none; background:#fff; padding:15px; border-radius:8px; margin-top:15px; }
-        .idcard-preview { width:100%; max-width:650px; margin:0 auto; background:linear-gradient(135deg, #f8fafc, #edf2f7); border:2px solid #1e3c72; border-radius:12px; padding:18px; box-sizing:border-box; box-shadow:0 4px 15px rgba(0,0,0,0.15); position:relative; overflow:hidden; font-family:Arial, sans-serif; }
-        .idcard-watermark { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); opacity:0.06; width:280px; pointer-events:none; z-index:0; }
-        .idcard-header { display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid #1e3c72; padding-bottom:10px; margin-bottom:12px; position:relative; z-index:1; }
+        .idcard-preview { width:100%; max-width:680px; margin:0 auto; background:#ffffff; border:2px solid #1e3c72; border-radius:12px; padding:16px; box-sizing:border-box; box-shadow:0 4px 15px rgba(0,0,0,0.15); position:relative; overflow:hidden; font-family:Arial, sans-serif; }
+        .idcard-watermark { position:absolute; top:52%; left:50%; transform:translate(-50%, -50%); opacity:0.06; width:220px; pointer-events:none; z-index:0; }
+        .idcard-header { display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid #1e3c72; padding-bottom:8px; margin-bottom:12px; position:relative; z-index:1; }
         .idcard-logo { width:45px; height:45px; object-fit:contain; background:white; border-radius:50%; padding:2px; border:1px solid #ccc; }
         .idcard-title-area { text-align:center; flex-grow:1; margin:0 10px; }
-        .idcard-title-area h2 { margin:0; font-size:17px; color:#1e3c72; font-weight:800; letter-spacing:0.5px; }
-        .idcard-title-area p { margin:2px 0 0; font-size:11px; color:#555; font-weight:bold; }
-        .idcard-body { display:flex; gap:15px; position:relative; z-index:1; align-items:center; }
-        .idcard-details { flex-grow:1; display:flex; flex-direction:column; gap:5px; }
-        .idcard-details .row { display:flex; font-size:12px; border-bottom:1px dotted #cbd5e1; padding-bottom:3px; }
-        .idcard-details .row .label { width:115px; font-weight:bold; color:#334155; }
-        .idcard-details .row span { color:#0f172a; font-weight:600; }
-        .idcard-photo-wrap { width:100px; text-align:center; flex-shrink:0; }
-        .idcard-photo { width:90px; height:110px; object-fit:cover; border:2px solid #1e3c72; border-radius:6px; background:#e2e8f0; display:block; margin:0 auto; }
-        .idcard-photo-label { font-size:9px; font-weight:bold; color:#1e3c72; margin-top:3px; }
-        .idcard-footer { margin-top:12px; text-align:center; font-size:10px; font-weight:bold; color:#64748b; border-top:1px solid #cbd5e1; padding-top:6px; position:relative; z-index:1; }
-        .idcard-disclaimer { font-size:8px; color:#94a3b8; text-align:center; margin-top:3px; position:relative; z-index:1; }
+        .idcard-title-area h2 { margin:0; font-size:18px; color:#000; font-weight:800; letter-spacing:0.5px; }
+        .idcard-title-area p { margin:2px 0 0; font-size:12px; color:#333; font-weight:700; }
+        .idcard-body { display:flex; gap:15px; position:relative; z-index:1; align-items:flex-start; }
+        .idcard-details { flex-grow:1; display:flex; flex-direction:column; gap:4px; }
+        .idcard-details .row { display:flex; font-size:12px; padding:2px 0; }
+        .idcard-details .row .label { width:140px; font-weight:bold; color:#000; }
+        .idcard-details .row span { color:#000; font-weight:normal; }
+        .idcard-photo-wrap { width:105px; text-align:center; flex-shrink:0; }
+        .idcard-photo { width:95px; height:115px; object-fit:cover; border:1px solid #1e3c72; border-radius:4px; background:#e2e8f0; display:block; margin:0 auto; }
+        .idcard-photo-label { font-size:9px; font-weight:bold; color:#333; margin-top:3px; }
+        .idcard-footer-box { margin-top:10px; border-top:1px dashed #1e3c72; padding-top:6px; text-align:center; position:relative; z-index:1; }
+        .idcard-footer-kiosk { font-size:11px; font-weight:bold; color:#000; margin-bottom:2px; }
+        .idcard-disclaimer { font-size:8px; color:#555; text-align:center; }
         .bankid-actions { display:flex; gap:10px; justify-content:center; margin-top:15px; flex-wrap:wrap; }
         .bankid-actions button { width:auto; padding:10px 16px; font-size:13px; font-weight:bold; border-radius:6px; border:none; cursor:pointer; }
         .bankid-edit-btn { background:#0284c7; color:white; }
@@ -1366,7 +1367,7 @@
 
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                             <div>
-                                <label style="font-weight:bold;font-size:12px;">Customer ID / CIF No:</label>
+                                <label style="font-weight:bold;font-size:12px;">Customer ID:</label>
                                 <input type="text" id="cardCustomerId" placeholder="e.g. 123456789" oninput="updateIdCardPreview()">
                             </div>
                             <div>
@@ -1388,31 +1389,36 @@
 
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                             <div>
-                                <label style="font-weight:bold;font-size:12px;">Father's / Husband's Name:</label>
+                                <label style="font-weight:bold;font-size:12px;">Father/Husband:</label>
                                 <input type="text" id="cardRelName" placeholder="Relative Name" oninput="updateIdCardPreview()">
                             </div>
                             <div>
-                                <label style="font-weight:bold;font-size:12px;">[Redacted] ID / Ref No:</label>
-                                <input type="text" id="cardUidId" placeholder="Ref Number" oninput="updateIdCardPreview()">
+                                <label style="font-weight:bold;font-size:12px;">UID ID:</label>
+                                <input type="text" id="cardUidId" placeholder="UID Number" oninput="updateIdCardPreview()">
                             </div>
                         </div>
 
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                             <div>
-                                <label style="font-weight:bold;font-size:12px;">PIN Code:</label>
+                                <label style="font-weight:bold;font-size:12px;">Address:</label>
+                                <input type="text" id="cardAddress" placeholder="Village / Ward, District" oninput="updateIdCardPreview()">
+                            </div>
+                            <div>
+                                <label style="font-weight:bold;font-size:12px;">Pin Code:</label>
                                 <input type="text" id="cardPin" placeholder="e.g. 450001" oninput="updateIdCardPreview()">
                             </div>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                             <div>
                                 <label style="font-weight:bold;font-size:12px;">Kiosk Name:</label>
                                 <input type="text" id="cardKioskName" placeholder="Pradeep E Services" value="Pradeep E Services" oninput="updateIdCardPreview()">
                             </div>
+                            <div>
+                                <label style="font-weight:bold;font-size:12px;">Kiosk Location / Branch:</label>
+                                <input type="text" id="cardKioskLoc" placeholder="Location Name" oninput="updateIdCardPreview()">
+                            </div>
                         </div>
-
-                        <label style="font-weight:bold;font-size:12px;">Address:</label>
-                        <input type="text" id="cardAddress" placeholder="Village / Ward, Post, District" oninput="updateIdCardPreview()">
-
-                        <label style="font-weight:bold;font-size:12px;">Kiosk Location / Branch:</label>
-                        <input type="text" id="cardKioskLoc" placeholder="Location Name" oninput="updateIdCardPreview()">
 
                         <label style="font-weight:bold;font-size:12px;">Customer Photo:</label>
                         <input type="file" id="cardPhotoInput" accept="image/*" onchange="previewCardPhoto(event)" style="margin-bottom:10px;">
@@ -1424,26 +1430,26 @@
                                 <img id="prevLogoImg" class="idcard-logo" src="" alt="Logo">
                                 <div class="idcard-title-area">
                                     <h2 id="prevBankName">UCO BANK</h2>
-                                    <p id="prevBankSubtitle">UCO Bank Account Identity Card</p>
+                                    <p id="prevBankSubtitle">UCO Bank Passbook</p>
                                 </div>
                             </div>
                             <div class="idcard-body">
                                 <div class="idcard-details">
                                     <div class="row"><div class="label">Customer ID:</div><span id="lblCustomerId">---</span></div>
-                                    <div class="row"><div class="label">Account No:</div><span id="lblAccNo">---</span></div>
+                                    <div class="row"><div class="label">Account Number:</div><span id="lblAccNo">---</span></div>
                                     <div class="row"><div class="label">IFSC Code:</div><span id="lblIfsc">---</span></div>
                                     <div class="row"><div class="label">Customer Name:</div><span id="lblCustName">---</span></div>
-                                    <div class="row"><div class="label">Relative Name:</div><span id="lblRelName">---</span></div>
-                                    <div class="row"><div class="label">Ref ID:</div><span id="lblUidId">---</span></div>
-                                    <div class="row"><div class="label">PIN Code:</div><span id="lblPin">---</span></div>
+                                    <div class="row"><div class="label">Father/Husband:</div><span id="lblRelName">---</span></div>
+                                    <div class="row"><div class="label">UID ID:</div><span id="lblUidId">---</span></div>
                                     <div class="row"><div class="label">Address:</div><span id="lblAddress">---</span></div>
-                                    <div class="row"><div class="label">Kiosk Name:</div><span id="lblKioskName">---</span></div>
-                                    <div class="row"><div class="label">Kiosk Location:</div><span id="lblKioskLoc">---</span></div>
+                                    <div class="row"><div class="label">Pin Code:</div><span id="lblPin">---</span></div>
                                 </div>
-                                <div class="idcard-photo-wrap"><img id="prevUserPhoto" class="idcard-photo" alt="Photo"><div class="idcard-photo-label">CUSTOMER PHOTO</div></div>
+                                <div class="idcard-photo-wrap"><img id="prevUserPhoto" class="idcard-photo" alt="Photo"><div class="idcard-photo-label">Customer Photo</div></div>
                             </div>
-                            <div class="idcard-footer">Authorized Kiosk Banking Service Partner • Pradeep E Services</div>
-                            <div class="idcard-disclaimer">Disclaimer: This card is generated for customer reference and ease of service representation only.</div>
+                            <div class="idcard-footer-box">
+                                <div class="idcard-footer-kiosk">Kiosk: <span id="lblKioskName">---</span> | Loc: <span id="lblKioskLoc">---</span></div>
+                                <div class="idcard-disclaimer">For identification / service reference only</div>
+                            </div>
                         </div>
                         <button type="button" onclick="generateBankIdCard()" style="background:#16a34a;margin-top:15px;font-size:15px;padding:12px;">✅ Generate & Lock Card for Download</button>
                     </div>
@@ -1503,7 +1509,7 @@
             const logoUrl = BANK_LOGOS[bankName] || BANK_LOGOS['UCO Bank'];
 
             document.getElementById('prevBankName').innerText = bankName.toUpperCase();
-            document.getElementById('prevBankSubtitle').innerText = bankName + ' Account Identity Card';
+            document.getElementById('prevBankSubtitle').innerText = bankName + ' Passbook';
             document.getElementById('prevLogoImg').src = logoUrl;
             document.getElementById('watermarkBankLogo').src = logoUrl;
 
@@ -1513,8 +1519,8 @@
             document.getElementById('lblCustName').innerText = document.getElementById('cardCustName').value || '---';
             document.getElementById('lblRelName').innerText = document.getElementById('cardRelName').value || '---';
             document.getElementById('lblUidId').innerText = document.getElementById('cardUidId').value || '---';
-            document.getElementById('lblPin').innerText = document.getElementById('cardPin').value || '---';
             document.getElementById('lblAddress').innerText = document.getElementById('cardAddress').value || '---';
+            document.getElementById('lblPin').innerText = document.getElementById('cardPin').value || '---';
             document.getElementById('lblKioskName').innerText = document.getElementById('cardKioskName').value || '---';
             document.getElementById('lblKioskLoc').innerText = document.getElementById('cardKioskLoc').value || '---';
 
