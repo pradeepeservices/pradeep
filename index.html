@@ -138,7 +138,7 @@
         .post-poster-area img{display:block;width:100%;max-width:700px;max-height:850px;object-fit:contain;margin:0 auto;border:1px solid #d1d5db;border-radius:4px;background:#fff;}
         .post-poster-label{font-size:12px;font-weight:800;color:#174b2e;margin-bottom:7px;}
 
-        /* Bank ID Card CSS Styles matching uploaded reference photo */
+        /* Bank ID Card CSS Styles matching reference screenshot */
         .bankid-editor { background:#fff; padding:15px; border-radius:8px; }
         .bankid-result { display:none; background:#fff; padding:15px; border-radius:8px; margin-top:15px; }
         .idcard-preview { width:100%; max-width:680px; margin:0 auto; background:#ffffff; border:2px solid #1e3c72; border-radius:12px; padding:16px; box-sizing:border-box; box-shadow:0 4px 15px rgba(0,0,0,0.15); position:relative; overflow:hidden; font-family:Arial, sans-serif; }
@@ -1347,8 +1347,12 @@
                 html = `
                     <div class="bankid-editor" id="bankIdEditor">
                         <h2 style="color:#1e3c72;margin-top:0;text-align:center;">💳 Bank Identity Card Maker</h2>
-                        <p style="font-size:12px;color:#666;text-align:center;">बैंक अकाउंट या कियोस्क सर्विस के लिए प्रोफेशनल आईडी कार्ड बनाएं।</p>
+                        <p style="font-size:12px;color:#666;text-align:center;">Bank select karein, details aur customer photo bharein. Bank logo automatically aa jayega. Generate ke baad card ko Edit karke dobara badal sakte hain aur PDF download kar sakte hain.</p>
                         
+                        <div style="background:#fffbeb;border:1px solid #fde68a;padding:8px;border-radius:4px;font-size:11px;color:#92400e;margin-bottom:10px;">
+                            ⚠️ यह tool केवल आपके द्वारा दर्ज की गई जानकारी का printable card बनाता है। किसी बैंक का official ID/Passbook document होने का दावा नहीं करता।
+                        </div>
+
                         <label style="font-weight:bold;font-size:12px;">Select Bank / Institution:</label>
                         <select id="cardBankSelect" onchange="updateIdCardPreview()">
                             <option value="UCO Bank">UCO Bank</option>
@@ -1368,62 +1372,61 @@
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                             <div>
                                 <label style="font-weight:bold;font-size:12px;">Customer ID:</label>
-                                <input type="text" id="cardCustomerId" placeholder="e.g. 123456789" oninput="updateIdCardPreview()">
+                                <input type="text" id="cardCustomerId" placeholder="Customer ID" oninput="updateIdCardPreview()">
                             </div>
                             <div>
                                 <label style="font-weight:bold;font-size:12px;">Account Number:</label>
-                                <input type="text" id="cardAccNo" placeholder="e.g. 301201000..." oninput="updateIdCardPreview()">
+                                <input type="text" id="cardAccNo" placeholder="Bank Account Number" oninput="updateIdCardPreview()">
                             </div>
                         </div>
 
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                             <div>
                                 <label style="font-weight:bold;font-size:12px;">IFSC Code:</label>
-                                <input type="text" id="cardIfsc" placeholder="e.g. UCBA0001234" oninput="updateIdCardPreview()">
+                                <input type="text" id="cardIfsc" placeholder="IFSC Code" oninput="updateIdCardPreview()">
                             </div>
                             <div>
                                 <label style="font-weight:bold;font-size:12px;">Customer Name:</label>
-                                <input type="text" id="cardCustName" placeholder="Full Name" oninput="updateIdCardPreview()">
+                                <input type="text" id="cardCustName" placeholder="Customer Full Name" oninput="updateIdCardPreview()">
                             </div>
                         </div>
 
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                             <div>
-                                <label style="font-weight:bold;font-size:12px;">Father/Husband:</label>
-                                <input type="text" id="cardRelName" placeholder="Relative Name" oninput="updateIdCardPreview()">
+                                <label style="font-weight:bold;font-size:12px;">Father's / Husband's Name:</label>
+                                <input type="text" id="cardRelName" placeholder="Father's or Husband's Name" oninput="updateIdCardPreview()">
                             </div>
                             <div>
                                 <label style="font-weight:bold;font-size:12px;">UID ID:</label>
-                                <input type="text" id="cardUidId" placeholder="UID Number" oninput="updateIdCardPreview()">
+                                <input type="text" id="cardUidId" placeholder="UID / Other ID (optional)" oninput="updateIdCardPreview()">
                             </div>
                         </div>
 
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                            <div>
-                                <label style="font-weight:bold;font-size:12px;">Address:</label>
-                                <input type="text" id="cardAddress" placeholder="Village / Ward, District" oninput="updateIdCardPreview()">
-                            </div>
-                            <div>
-                                <label style="font-weight:bold;font-size:12px;">Pin Code:</label>
-                                <input type="text" id="cardPin" placeholder="e.g. 450001" oninput="updateIdCardPreview()">
-                            </div>
+                        <div>
+                            <label style="font-weight:bold;font-size:12px;">PIN Code:</label>
+                            <input type="text" id="cardPin" placeholder="PIN Code" oninput="updateIdCardPreview()">
+                        </div>
+
+                        <div>
+                            <label style="font-weight:bold;font-size:12px;">Address:</label>
+                            <input type="text" id="cardAddress" placeholder="Customer Residential Address" oninput="updateIdCardPreview()">
                         </div>
 
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                             <div>
                                 <label style="font-weight:bold;font-size:12px;">Kiosk Name:</label>
-                                <input type="text" id="cardKioskName" placeholder="Pradeep E Services" value="Pradeep E Services" oninput="updateIdCardPreview()">
+                                <input type="text" id="cardKioskName" placeholder="Kiosk / Service Centre Name" value="Pradeep E Services" oninput="updateIdCardPreview()">
                             </div>
                             <div>
-                                <label style="font-weight:bold;font-size:12px;">Kiosk Location / Branch:</label>
-                                <input type="text" id="cardKioskLoc" placeholder="Location Name" oninput="updateIdCardPreview()">
+                                <label style="font-weight:bold;font-size:12px;">Kiosk Location:</label>
+                                <input type="text" id="cardKioskLoc" placeholder="Kiosk Location / Branch" oninput="updateIdCardPreview()">
                             </div>
                         </div>
 
                         <label style="font-weight:bold;font-size:12px;">Customer Photo:</label>
                         <input type="file" id="cardPhotoInput" accept="image/*" onchange="previewCardPhoto(event)" style="margin-bottom:10px;">
 
-                        <h4 style="margin:10px 0 5px 0;color:#1e3c72;text-align:center;">🆔 Card Live Preview</h4>
+                        <h4 style="margin:10px 0 5px 0;color:#1e3c72;text-align:center;">Card Live Preview</h4>
                         <div id="captureCardArea" class="idcard-preview">
                             <img id="watermarkBankLogo" class="idcard-watermark" src="" alt="">
                             <div class="idcard-header">
@@ -1451,7 +1454,7 @@
                                 <div class="idcard-disclaimer">For identification / service reference only</div>
                             </div>
                         </div>
-                        <button type="button" onclick="generateBankIdCard()" style="background:#16a34a;margin-top:15px;font-size:15px;padding:12px;">✅ Generate & Lock Card for Download</button>
+                        <button type="button" onclick="generateBankIdCard()" style="background:#16a34a;margin-top:15px;font-size:15px;padding:12px;">✅ Generate ID Card</button>
                     </div>
                     <div id="bankIdResultSection" class="bankid-result">
                         <h3 style="color:#16a34a;text-align:center;margin-top:0;">🎉 Bank Identity Card Successfully Generated!</h3>
