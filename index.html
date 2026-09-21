@@ -103,10 +103,6 @@
         .back-home { display:inline-flex; align-items:center; gap:8px; border:0; background:#fff; color:#173a9c; padding:10px 15px; border-radius:10px; font-weight:800; cursor:pointer; }
         .vacancy-apply { display:inline-block; margin-top:18px; padding:13px 20px; border-radius:11px; background:#16a34a; color:#fff; text-decoration:none; font-weight:800; }
         
-        /* Bank ID Card Preview Styling */
-        .bankid-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bankid-editor-grid .full{grid-column:1/-1}
-        .bankid-help{font-size:12px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;padding:9px 11px;border-radius:8px;margin:8px 0 12px;line-height:1.5}.bankid-result{display:none}.bankid-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.bankid-actions button{flex:1;min-width:140px!important;width:auto!important;margin-top:0!important}.bankid-edit-btn{background:#475569!important}.bankid-pdf-btn{background:#dc2626!important}.bankid-image-btn{background:#16a34a!important}
-        .idcard-preview{width:720px;max-width:100%;min-height:405px;background:#fff;border:3px solid #183b8c;border-radius:18px;padding:18px 22px;margin:15px auto;box-shadow:0 7px 25px rgba(15,23,42,.16);box-sizing:border-box;text-align:left;position:relative;overflow:hidden;color:#111827}.idcard-preview:before{content:"";position:absolute;inset:58px 120px 45px 120px;background:radial-gradient(circle at center,rgba(30,64,175,.10),rgba(30,64,175,.02) 55%,transparent 70%);border-radius:50%;pointer-events:none}.idcard-watermark{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:270px;height:190px;display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none;opacity:.075}.idcard-watermark img{width:190px;height:140px;object-fit:contain;filter:grayscale(100%)}.idcard-header{display:flex;align-items:center;gap:14px;border-bottom:2px solid #183b8c;padding-bottom:10px;margin-bottom:13px;position:relative;z-index:1}.idcard-logo{width:62px;height:62px;object-fit:contain;flex:0 0 62px;background:#fff;border-radius:8px}.idcard-bankblock{flex:1;text-align:center}.idcard-bankname{font-size:27px;font-weight:800;color:#111;line-height:1.05}.idcard-subtitle{font-size:18px;color:#333;margin-top:3px}.idcard-body{display:flex;gap:18px;align-items:center;position:relative;z-index:1}.idcard-details{font-size:14px;line-height:1.62;color:#111;flex:1}.idcard-details .row{display:grid;grid-template-columns:155px 1fr;gap:8px}.idcard-details .label{font-weight:700}.idcard-details span{font-weight:500;color:#111;word-break:break-word}.idcard-photo-wrap{order:2;display:flex;flex-direction:column;align-items:center;gap:5px}.idcard-photo{width:112px;height:138px;border:2px solid #183b8c;border-radius:6px;object-fit:cover;background:#f1f5f9}.idcard-photo-label{font-size:10px;color:#555;font-weight:700}.idcard-footer{margin-top:13px;border-top:1px dashed #64748b;padding-top:8px;font-size:12px;text-align:center;color:#333;font-weight:700;position:relative;z-index:1}.idcard-disclaimer{font-size:9px;text-align:center;color:#64748b;margin-top:5px;position:relative;z-index:1}@media(max-width:760px){.bankid-editor-grid{grid-template-columns:1fr}.bankid-editor-grid .full{grid-column:auto}.idcard-preview{width:720px;transform:scale(.94);transform-origin:top left;margin-right:-43px;margin-bottom:-25px}.idcard-bankname{font-size:24px}.idcard-subtitle{font-size:16px}}
         /* Sarkari Result style post page */
         .result-post-page{background:#fff;min-height:75vh;padding:10px 0 40px;}
         .result-post-shell{width:min(980px,96%);margin:auto;background:#fff;border:1px solid #c9c9c9;box-shadow:0 2px 8px rgba(0,0,0,.08);}
@@ -115,7 +111,8 @@
         .result-post-updated{font-size:12px;color:#b91c1c;font-weight:700;margin-bottom:8px;}
         .result-post-intro{font-size:14px;line-height:1.7;text-align:left;color:#222;margin:8px 0 2px;}
         .result-post-nav{background:#07075f;color:#fff;display:flex;flex-wrap:wrap;justify-content:center;gap:0;border-bottom:2px solid #111;}
-        .result-post-nav span{padding:8px 13px;font-size:12px;font-weight:700;border-right:1px solid rgba(255,255,255,.18);}
+        .result-post-nav span{padding:8px 13px;font-size:12px;font-weight:700;border-right:1px solid rgba(255,255,255,.18);cursor:pointer;transition:background 0.2s;}
+        .result-post-nav span:hover{background:rgba(255,255,255,0.15);}
         .post-social{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:6px 8px 12px;}
         .post-social a{color:#fff;text-decoration:none;padding:8px 18px;border-radius:4px;font-size:12px;font-weight:700;}
         .post-wa{background:#20c76b}.post-tg{background:#0088cc}
@@ -193,7 +190,7 @@
     <!-- Main Section Boxes -->
     <div class="container" id="mainBoxesContainer">
         <!-- Latest Jobs -->
-        <div class="box">
+        <div class="box" id="section-jobs">
             <div class="box-header" id="box-jobs">Latest Jobs</div>
             <div class="box-content" id="content-jobs">
                 <ul><li>Sarkari Result & Online Form Updates</li></ul>
@@ -201,7 +198,7 @@
         </div>
 
         <!-- Admit Card -->
-        <div class="box">
+        <div class="box" id="section-admit">
             <div class="box-header" id="box-admit">Admit Card</div>
             <div class="box-content" id="content-admit">
                 <ul><li>Download Hall Tickets & Exam Dates</li></ul>
@@ -209,7 +206,7 @@
         </div>
 
         <!-- Results -->
-        <div class="box">
+        <div class="box" id="section-result">
             <div class="box-header" id="box-result">Results</div>
             <div class="box-content" id="content-result">
                 <ul><li>Check Exam Results & Merit Lists</li></ul>
@@ -217,7 +214,7 @@
         </div>
 
         <!-- Sarkari Yojana -->
-        <div class="box" style="border-color: #28a745;">
+        <div class="box" style="border-color: #28a745;" id="section-yojana">
             <div class="box-header" style="background: linear-gradient(135deg, #134e5e, #71b280);" id="box-yojana">Sarkari Yojana (संबल, ई-श्रम आदि)</div>
             <div class="box-content" id="content-yojana">
                 <ul>
@@ -229,7 +226,7 @@
         </div>
 
         <!-- Offline Forms -->
-        <div class="box" style="border-color: #ff8c00;">
+        <div class="box" style="border-color: #ff8c00;" id="section-offline">
             <div class="box-header" style="background: linear-gradient(135deg, #f2994a, #f2c94c);" id="box-offline">Offline Forms (PDF Link)</div>
             <div class="box-content" id="content-offline">
                 <ul>
@@ -240,7 +237,7 @@
         </div>
 
         <!-- News / सूचना -->
-        <div class="box" style="border-color: #8b5cf6;">
+        <div class="box" style="border-color: #8b5cf6;" id="section-news">
             <div class="box-header" style="background: linear-gradient(135deg, #6d28d9, #8b5cf6);" id="box-news">News / सूचना</div>
             <div class="box-content" id="content-news">
                 <ul>
@@ -292,7 +289,13 @@
     <section id="vacancyPage" class="full-page result-post-page">
         <div class="result-post-shell">
             <div class="result-post-nav">
-                <span>Home</span><span>Latest Job</span><span>Admit Card</span><span>Result</span><span>Admission</span><span>Syllabus</span><span>Answer Key</span>
+                <span onclick="goHome()">Home</span>
+                <span onclick="navigateFromPost('jobs')">Latest Job</span>
+                <span onclick="navigateFromPost('admit')">Admit Card</span>
+                <span onclick="navigateFromPost('result')">Result</span>
+                <span onclick="navigateFromPost('yojana')">Sarkari Yojana</span>
+                <span onclick="navigateFromPost('offline')">Offline Forms</span>
+                <span onclick="navigateFromPost('news')">News</span>
             </div>
             <div class="result-post-top">
                 <button class="back-home" onclick="goHome()" style="float:left;margin-bottom:8px;">← Home</button>
@@ -340,7 +343,6 @@
     </div>
 
     <script>
-        // Firebase Initialization & Sync Setup
         const firebaseConfig = {
             apiKey: "AIzaSyCs1CPb7USB15Tg2VkSTQCehjotyPfrbxE",
             authDomain: "pradeep-e-services.firebaseapp.com",
@@ -359,7 +361,6 @@
         window.onload = function() {
             if(!localStorage.getItem('admin_pass')) { localStorage.setItem('admin_pass', 'guru82'); }
 
-            // Default Footer Page Contents Setup
             if(!localStorage.getItem('page_about')) {
                 localStorage.setItem('page_about', 'Pradeep E Services is a trusted online portal providing accurate updates on MP Online, CSC services, Government Jobs, and various welfare schemes.');
             }
@@ -406,7 +407,6 @@
             });
         }
 
-        // Visitor Tracking & Location Function using ipapi.co
         function trackVisitorAndLocation() {
             if(sessionStorage.getItem('visited_tracked')) return;
 
@@ -757,6 +757,16 @@
             document.getElementById('appHome').style.display = 'block';
             setPostMeta('Pradeep E Services - Online Job & Cyber Cafe Portal', 'Pradeep E Services - Latest Government Jobs, Admit Card, Results, Sarkari Yojana and online service updates.');
             if(scrollToTop) window.scrollTo(0,0);
+        }
+
+        function navigateFromPost(catKey) {
+            goHomeDirect(false);
+            const targetEl = document.getElementById('section-' + catKey);
+            if(targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                window.scrollTo(0, 0);
+            }
         }
 
         let currentSlideIndex = 0;
