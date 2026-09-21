@@ -115,7 +115,8 @@
         .result-post-updated{font-size:12px;color:#b91c1c;font-weight:700;margin-bottom:8px;}
         .result-post-intro{font-size:14px;line-height:1.7;text-align:left;color:#222;margin:8px 0 2px;}
         .result-post-nav{background:#07075f;color:#fff;display:flex;flex-wrap:wrap;justify-content:center;gap:0;border-bottom:2px solid #111;}
-        .result-post-nav span{padding:8px 13px;font-size:12px;font-weight:700;border-right:1px solid rgba(255,255,255,.18);}
+        .result-post-nav span{padding:8px 13px;font-size:12px;font-weight:700;border-right:1px solid rgba(255,255,255,.18);cursor:pointer;}
+        .result-post-nav span:hover{background:#111d8c;}
         .post-social{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:6px 8px 12px;}
         .post-social a{color:#fff;text-decoration:none;padding:8px 18px;border-radius:4px;font-size:12px;font-weight:700;}
         .post-wa{background:#20c76b}.post-tg{background:#0088cc}
@@ -292,7 +293,13 @@
     <section id="vacancyPage" class="full-page result-post-page">
         <div class="result-post-shell">
             <div class="result-post-nav">
-                <span>Home</span><span>Latest Job</span><span>Admit Card</span><span>Result</span><span>Admission</span><span>Syllabus</span><span>Answer Key</span>
+                <span onclick="goHome()">Home</span>
+                <span onclick="scrollToSectionOrFilter('jobs')">Latest Jobs</span>
+                <span onclick="scrollToSectionOrFilter('admit')">Admit Card</span>
+                <span onclick="scrollToSectionOrFilter('result')">Results</span>
+                <span onclick="scrollToSectionOrFilter('yojana')">Sarkari Yojana</span>
+                <span onclick="scrollToSectionOrFilter('offline')">Offline Forms</span>
+                <span onclick="scrollToSectionOrFilter('news')">News / सूचना</span>
             </div>
             <div class="result-post-top">
                 <button class="back-home" onclick="goHome()" style="float:left;margin-bottom:8px;">← Home</button>
@@ -404,6 +411,17 @@
                     goHomeDirect(false);
                 }
             });
+        }
+
+        // Helper function for second page nav clicks
+        function scrollToSectionOrFilter(boxKey) {
+            goHome();
+            setTimeout(() => {
+                let targetBox = document.getElementById('box-' + boxKey) || document.getElementById('content-' + boxKey);
+                if(targetBox) {
+                    targetBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
         }
 
         // Visitor Tracking & Location Function using ipapi.co
