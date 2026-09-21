@@ -115,8 +115,9 @@
         .result-post-updated{font-size:12px;color:#b91c1c;font-weight:700;margin-bottom:8px;}
         .result-post-intro{font-size:14px;line-height:1.7;text-align:left;color:#222;margin:8px 0 2px;}
         .result-post-nav{background:#07075f;color:#fff;display:flex;flex-wrap:wrap;justify-content:center;gap:0;border-bottom:2px solid #111;}
-        .result-post-nav span{padding:8px 13px;font-size:12px;font-weight:700;border-right:1px solid rgba(255,255,255,.18);cursor:pointer;}
-        .result-post-nav span:hover{background:#111d8c;}
+        .result-post-nav span{padding:8px 13px;font-size:12px;font-weight:700;border-right:1px solid rgba(255,255,255,.18);}
+        .post-ad-area{text-align:center;padding:12px 8px 4px;}
+        .post-ad-label{color:#c00;font-weight:700;font-size:13px;margin-bottom:8px;}
         .post-social{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:6px 8px 12px;}
         .post-social a{color:#fff;text-decoration:none;padding:8px 18px;border-radius:4px;font-size:12px;font-weight:700;}
         .post-wa{background:#20c76b}.post-tg{background:#0088cc}
@@ -293,13 +294,7 @@
     <section id="vacancyPage" class="full-page result-post-page">
         <div class="result-post-shell">
             <div class="result-post-nav">
-                <span onclick="goHome()">Home</span>
-                <span onclick="scrollToSectionOrFilter('jobs')">Latest Jobs</span>
-                <span onclick="scrollToSectionOrFilter('admit')">Admit Card</span>
-                <span onclick="scrollToSectionOrFilter('result')">Results</span>
-                <span onclick="scrollToSectionOrFilter('yojana')">Sarkari Yojana</span>
-                <span onclick="scrollToSectionOrFilter('offline')">Offline Forms</span>
-                <span onclick="scrollToSectionOrFilter('news')">News / सूचना</span>
+                <span>Home</span><span>Latest Job</span><span>Admit Card</span><span>Result</span><span>Admission</span><span>Syllabus</span><span>Answer Key</span>
             </div>
             <div class="result-post-top">
                 <button class="back-home" onclick="goHome()" style="float:left;margin-bottom:8px;">← Home</button>
@@ -307,11 +302,15 @@
                 <h1 id="vacancyPageTitle">Vacancy Details</h1>
                 <div class="result-post-updated" id="vacancyPageUpdated">Post Update: Updated Information</div>
                 <span id="vacancyPageCategory" style="display:none;"></span>
-                <div class="result-post-intro" id="vacancyPageIntro">Pradeep E Services par is post se judi latest jankari, important dates, fee aur application links ki details yahan di gayi hain.</div>
+                <div class="result-post-intro" id="vacancyPageIntro">Pradeep E Services par is post se judi latest jankari, important dates, eligibility, fee aur application links ki details yahan di gayi hain.</div>
             </div>
             <div id="postPosterArea" class="post-poster-area">
                 <div class="post-poster-label">📌 Post / Vacancy Poster</div>
                 <img id="postPosterImage" src="" alt="Post Vacancy Poster">
+            </div>
+            <div class="post-ad-area">
+                <div class="post-ad-label">Download Pradeep E Services App / Latest Updates</div>
+                <div id="postAdBanner" style="max-width:760px;margin:auto;"></div>
             </div>
             <div class="post-social">
                 <a id="postWhatsApp" class="post-wa" href="https://whatsapp.com" target="_blank" rel="noopener">🟢 WhatsApp</a>
@@ -326,6 +325,12 @@
                 <div class="post-summary-cell" id="cardTotalGrid"><h3>Total Posts</h3><div id="vacancyPageTotal">Not specified</div></div>
             </div>
             <div class="post-content-wrap">
+                <div class="post-details-title">Vacancy / Post Details</div>
+                <table class="post-detail-table">
+                    <tr><th style="width:42%;">Post Name</th><th>Details</th></tr>
+                    <tr><td id="postDetailPostName">Update</td><td id="postDetailTotal">As per notification</td></tr>
+                    <tr><td>Eligibility / Qualification</td><td id="postDetailEligibility">Please check the official notification and the details given below.</td></tr>
+                </table>
                 <div class="post-details-title">Full Notification / Important Information</div>
                 <div class="post-details-text" id="vacancyPageDetails">No additional details provided.</div>
                 <div class="post-actions">
@@ -333,7 +338,7 @@
                     <a id="vacancyPageNotification" class="post-notify" href="#" target="_blank" rel="noopener" style="display:none;">🔔 Notification</a>
                     <a id="vacancyPagePdf" class="post-pdf" href="#" target="_blank" rel="noopener" style="display:none;">📄 Download Form PDF</a>
                 </div>
-                <div class="post-disclaimer">नोट: आवेदन करने से पहले संबंधित विभाग की आधिकारिक अधिसूचना में आयु, शुल्क, तिथियां और अन्य शर्तें अवश्य जांच लें।</div>
+                <div class="post-disclaimer">नोट: आवेदन करने से पहले संबंधित विभाग की आधिकारिक अधिसूचना में पात्रता, आयु, शुल्क, तिथियां और अन्य शर्तें अवश्य जांच लें।</div>
             </div>
         </div>
     </section>
@@ -411,17 +416,6 @@
                     goHomeDirect(false);
                 }
             });
-        }
-
-        // Helper function for second page nav clicks
-        function scrollToSectionOrFilter(boxKey) {
-            goHome();
-            setTimeout(() => {
-                let targetBox = document.getElementById('box-' + boxKey) || document.getElementById('content-' + boxKey);
-                if(targetBox) {
-                    targetBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }, 100);
         }
 
         // Visitor Tracking & Location Function using ipapi.co
@@ -693,6 +687,16 @@
             if(ogDesc) ogDesc.setAttribute('content', safeDescription);
         }
 
+        function renderPostAd() {
+            const postAd = document.getElementById('postAdBanner');
+            if(!postAd) return;
+            let banners = [];
+            try { banners = JSON.parse(localStorage.getItem('custom_ad_banners')) || []; } catch(e) { banners = []; }
+            if(!banners.length) banners = ['93da493e-387b-4805-b014-8f9c326a4326.png'];
+            const src = banners[0];
+            postAd.innerHTML = `<img src="${src}" alt="Pradeep E Services Advertisement" style="width:100%;max-height:170px;object-fit:contain;border:1px solid #ddd;border-radius:4px;" onerror="this.style.display='none'">`;
+        }
+
         function showVacancyDirect(cat, itemId, scrollToTop = true) {
             let items = JSON.parse(localStorage.getItem('box_items_' + cat));
             if(!items) return;
@@ -721,6 +725,9 @@
                 }
             }
             document.getElementById('vacancyPageShortTitle').innerText = title + ' : Short Details';
+            document.getElementById('postDetailPostName').innerText = title;
+            document.getElementById('postDetailTotal').innerText = item.total || 'As per official notification';
+            document.getElementById('postDetailEligibility').innerText = item.eligibility || 'Please check the official notification and the full details given below.';
 
             let isSimpleCat = (cat === 'offline' || cat === 'news' || cat === 'yojana');
             let infoGrid = document.getElementById('vacancyInfoGrid');
@@ -739,6 +746,7 @@
             }
 
             document.getElementById('vacancyPageDetails').innerText = item.details || 'No additional details provided.';
+            renderPostAd();
 
             document.getElementById('postWhatsApp').href = localStorage.getItem('social_wa') || 'https://whatsapp.com';
             document.getElementById('postTelegram').href = localStorage.getItem('social_tg') || 'https://telegram.org';
@@ -1143,6 +1151,9 @@
                     <label style="font-weight:bold;font-size:13px;">Post Intro / Short Description:</label>
                     <textarea id="newItemIntro" placeholder="Short introduction shown at the top of Vacancy / Post Details page" rows="3"></textarea>
 
+                    <label style="font-weight:bold;font-size:13px;">Eligibility / Qualification:</label>
+                    <textarea id="newItemEligibility" placeholder="Eligibility / Qualification details" rows="3"></textarea>
+
                     <label style="font-weight:bold;font-size:13px;">Full Details / Description:</label>
                     <textarea id="newItemDetails" placeholder="Full Details / Description" rows="5"></textarea>
 
@@ -1252,6 +1263,7 @@
             let metaDescription = document.getElementById('newItemMetaDescription').value.trim();
             let textColor = document.getElementById('newItemColor').value;
             let intro = document.getElementById('newItemIntro').value.trim();
+            let eligibility = document.getElementById('newItemEligibility').value.trim();
             let details = document.getElementById('newItemDetails').value.trim();
             let pdfUrl = document.getElementById('newItemPdfUrl') ? document.getElementById('newItemPdfUrl').value.trim() : '';
 
@@ -1287,6 +1299,7 @@
                 pdfUrl: pdfUrl,
                 posterImage: posterImage,
                 intro: intro,
+                eligibility: eligibility,
                 details: details,
                 date: new Date().toLocaleDateString('en-IN')
             };
@@ -1307,6 +1320,278 @@
                 }).catch((error) => {
                     alert('Delete karne mein error aayi: ' + error.message);
                 });
+            }
+        }
+
+        function editItemPrompt(cat, itemId) {
+            let items = JSON.parse(localStorage.getItem('box_items_' + cat)) || [];
+            let item = items.find(i => i.id === itemId);
+            if(!item) {
+                alert('Item nahi mila!');
+                return;
+            }
+
+            let isSimpleCat = (cat === 'offline' || cat === 'news');
+            let isYojanaCat = (cat === 'yojana');
+
+            let html = `
+                <h2>✏️ Edit Post Details</h2>
+                <hr style="margin:10px 0 15px 0;">
+                <input type="hidden" id="editCatKey" value="${cat}">
+                <input type="hidden" id="editItemId" value="${itemId}">
+                
+                <label style="font-weight:bold; font-size:13px;">Post Title:</label>
+                <input type="text" id="editItemTitle" value="${item.title || ''}">
+                
+                <label style="font-weight:bold; font-size:13px;color:#172554;">SEO Title:</label>
+                <input type="text" id="editItemSeoTitle" value="${item.seoTitle || ''}" placeholder="SEO Title (Google Search Title)">
+                <label style="font-weight:bold; font-size:13px;color:#172554;">Meta Description:</label>
+                <textarea id="editItemMetaDescription" rows="3" placeholder="Meta Description (150-160 characters recommended)">${item.metaDescription || ''}</textarea>
+
+                <div style="margin:10px 0; border:1px dashed #16803c; padding:10px; border-radius:6px; background:#f8fff9;">
+                    <label style="font-weight:bold; font-size:13px; color:#16803c;">🖼️ Post / Vacancy Poster (Optional):</label>
+                    <input type="file" id="editItemPosterFileInput" accept="image/*" style="margin-top:6px;">
+                    ${item.posterImage ? `<div style="margin-top:8px;text-align:center;"><img src="${item.posterImage}" alt="Current Poster" style="max-width:180px;max-height:220px;object-fit:contain;border:1px solid #ddd;border-radius:4px;"></div>` : ''}
+                    <div style="font-size:11px;color:#666;margin-top:4px;">Naya poster upload karenge to purana poster replace ho jayega.</div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 10px; margin: 6px 0 12px 0;">
+                    <label style="font-weight: bold; font-size: 13px; color: #172554;">Text Color Pick:</label>
+                    <input type="color" id="editItemColor" value="${item.textColor || '#2a5298'}" style="width: 60px; height: 35px; padding: 2px; cursor: pointer; margin: 0;">
+                </div>
+
+                <div id="editExtraFieldsContainer" style="${isSimpleCat || isYojanaCat ? 'display:none;' : 'display:block;'}">
+                    <label style="font-weight:bold; font-size:13px;">Important Dates:</label>
+                    <textarea id="editItemDates" rows="2">${item.dates || ''}</textarea>
+                    
+                    <label style="font-weight:bold; font-size:13px;">Application Fee:</label>
+                    <textarea id="editItemFee" rows="2">${item.fee || ''}</textarea>
+                    
+                    <label style="font-weight:bold; font-size:13px;">Age Limit:</label>
+                    <input type="text" id="editItemAge" value="${item.age || ''}">
+                    
+                    <label style="font-weight:bold; font-size:13px;">Total Posts:</label>
+                    <input type="text" id="editItemTotal" value="${item.total || ''}">
+                    
+                    <label style="font-weight:bold; font-size:13px;">Apply Online Link:</label>
+                    <input type="text" id="editItemApply" value="${item.applyLink || ''}">
+                    
+                    <label style="font-weight:bold; font-size:13px;">Notification Link:</label>
+                    <input type="text" id="editItemNotification" value="${item.notificationLink || ''}">
+                </div>
+
+                <div id="editYojanaFieldsContainer" style="${isYojanaCat ? 'display:block;' : 'display:none;'}">
+                    <label style="font-weight:bold; font-size:13px;">Apply Online Link:</label>
+                    <input type="text" id="editItemYojanaApply" value="${item.applyLink || ''}">
+                </div>
+
+                <!-- Update PDF URL for Offline / Jobs -->
+                <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9; display:${(isSimpleCat || isYojanaCat) ? 'none' : 'block'};" id="editPdfUrlBoxWrapper">
+                    <label style="font-weight:bold; font-size:13px; color:#2a5298;">Form PDF Link (URL):</label>
+                    <input type="text" id="editItemPdfUrl" value="${item.pdfUrl || ''}" placeholder="https://example.com/form.pdf" style="margin-top:5px;">
+                </div>
+
+                <label style="font-weight:bold; font-size:13px;">Post Intro / Short Description:</label>
+                <textarea id="editItemIntro" rows="3" placeholder="Short introduction shown at the top of Vacancy / Post Details page">${item.intro || ''}</textarea>
+
+                <label style="font-weight:bold; font-size:13px;">Eligibility / Qualification:</label>
+                <textarea id="editItemEligibility" rows="3" placeholder="Eligibility / Qualification details">${item.eligibility || ''}</textarea>
+
+                <label style="font-weight:bold; font-size:13px;">Full Details:</label>
+                <textarea id="editItemDetails" rows="5">${item.details || ''}</textarea>
+
+                <button type="button" onclick="saveEditedItemToFirebase()">Update & Save Changes</button>
+                <button type="button" onclick="openAdminDashboard()" style="background:#64748b; margin-top:8px;">Back to Dashboard</button>
+            `;
+            document.getElementById('modalBodyContent').innerHTML = html;
+        }
+
+        async function saveEditedItemToFirebase() {
+            let cat = document.getElementById('editCatKey').value;
+            let itemId = document.getElementById('editItemId').value;
+            
+            let title = document.getElementById('editItemTitle').value;
+            let textColor = document.getElementById('editItemColor').value;
+            let intro = document.getElementById('editItemIntro') ? document.getElementById('editItemIntro').value.trim() : '';
+            let eligibility = document.getElementById('editItemEligibility') ? document.getElementById('editItemEligibility').value.trim() : '';
+            let details = document.getElementById('editItemDetails').value;
+            let pdfUrl = document.getElementById('editItemPdfUrl') ? document.getElementById('editItemPdfUrl').value.trim() : '';
+
+            if(!title) { alert('Title mandatory hai!'); return; }
+
+            let items = JSON.parse(localStorage.getItem('box_items_' + cat)) || [];
+            let existing = items.find(i => i.id === itemId) || {};
+            let seoTitle = document.getElementById('editItemSeoTitle') ? document.getElementById('editItemSeoTitle').value.trim() : (existing.seoTitle || '');
+            let metaDescription = document.getElementById('editItemMetaDescription') ? document.getElementById('editItemMetaDescription').value.trim() : (existing.metaDescription || '');
+
+            let posterImage = existing.posterImage || '';
+            let posterInput = document.getElementById('editItemPosterFileInput');
+            if(posterInput && posterInput.files[0]) {
+                posterImage = await compressImage(posterInput.files[0]);
+            }
+
+            let updatedItem = {
+                title: title,
+                seoTitle: seoTitle,
+                metaDescription: metaDescription,
+                textColor: textColor,
+                posterImage: posterImage,
+                intro: intro,
+                eligibility: eligibility,
+                details: details,
+                pdfUrl: pdfUrl,
+                date: existing.date || new Date().toLocaleDateString('en-IN'),
+                updatedAt: new Date().toLocaleDateString('en-IN')
+            };
+
+            if(cat === 'yojana') {
+                updatedItem.applyLink = document.getElementById('editItemYojanaApply').value.trim();
+            } else if(cat !== 'offline' && cat !== 'news') {
+                updatedItem.dates = document.getElementById('editItemDates').value.trim();
+                updatedItem.fee = document.getElementById('editItemFee').value.trim();
+                updatedItem.age = document.getElementById('editItemAge').value.trim();
+                updatedItem.total = document.getElementById('editItemTotal').value.trim();
+                updatedItem.applyLink = document.getElementById('editItemApply').value.trim();
+                updatedItem.notificationLink = document.getElementById('editItemNotification').value.trim();
+            }
+
+            db.ref('box_items_' + cat + '/' + itemId).update(updatedItem).then(() => {
+                alert('Post successfully update ho gayi!');
+                openAdminDashboard();
+            }).catch((error) => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        function uploadLogoFromAdmin() {
+            let fileInput = document.getElementById('adminLogoFileInput');
+            if(!fileInput.files[0]) { alert('Kripya logo image chunein!'); return; }
+            compressImage(fileInput.files[0]).then(base64 => {
+                db.ref('general_settings/logo').set(base64).then(() => {
+                    localStorage.setItem('custom_site_logo', base64);
+                    alert('Logo updated successfully!');
+                    applySavedSiteContent();
+                    openAdminDashboard();
+                });
+            });
+        }
+
+        function uploadProfilePhotoFromAdmin() {
+            let fileInput = document.getElementById('adminProfileFileInput');
+            if(!fileInput.files[0]) { alert('Kripya profile photo chunein!'); return; }
+            compressImage(fileInput.files[0]).then(base64 => {
+                db.ref('general_settings/profilePhoto').set(base64).then(() => {
+                    localStorage.setItem('custom_profile_photo', base64);
+                    alert('Profile photo updated successfully!');
+                    applySavedSiteContent();
+                    openAdminDashboard();
+                });
+            });
+        }
+
+        async function uploadAdBannerFromAdmin() {
+            let fileInput = document.getElementById('adminAdFileInput');
+            if(!fileInput.files || fileInput.files.length === 0) { alert('Kripya kam se kam ek ad banner image chunein!'); return; }
+            let banners = [];
+            for(let i=0; i<fileInput.files.length; i++) {
+                let compressed = await compressImage(fileInput.files[i]);
+                banners.push(compressed);
+            }
+            db.ref('general_settings/adBanners').set(banners).then(() => {
+                localStorage.setItem('custom_ad_banners', JSON.stringify(banners));
+                alert('Ad Banners updated successfully!');
+                renderActiveAd();
+                openAdminDashboard();
+            });
+        }
+
+        function saveGeneralSettingsToFirebase() {
+            let tagline = document.getElementById('adminTaglineInput').value.trim();
+            if(!tagline) { alert('Tagline bharein!'); return; }
+            db.ref('general_settings/desc').set(tagline).then(() => {
+                localStorage.setItem('custom_site_desc', tagline);
+                alert('Tagline updated successfully!');
+                applySavedSiteContent();
+                openAdminDashboard();
+            });
+        }
+
+        function saveSocialLinksToFirebase() {
+            let links = {
+                wa: document.getElementById('adminWaLink').value.trim(),
+                tg: document.getElementById('adminTgLink').value.trim(),
+                yt: document.getElementById('adminYtLink').value.trim(),
+                fb: document.getElementById('adminFbLink').value.trim(),
+                ig: document.getElementById('adminIgLink').value.trim()
+            };
+            db.ref('social_links').set(links).then(() => {
+                alert('Social links updated successfully!');
+                openAdminDashboard();
+            });
+        }
+
+        function addNewPortalToFirebase() {
+            let name = document.getElementById('adminPortalName').value.trim();
+            let link = document.getElementById('adminPortalLink').value.trim();
+            if(!name || !link) { alert('Portal Name aur URL dono bharein!'); return; }
+            db.ref('custom_portals_list').push({ name: name, link: link }).then(() => {
+                alert('Portal link successfully add ho gaya!');
+                openAdminDashboard();
+            });
+        }
+
+        function deletePortalFromFirebase(portalId) {
+            if(confirm('Kya aap is portal link ko delete karna chahte hain?')) {
+                db.ref('custom_portals_list/' + portalId).remove().then(() => {
+                    alert('Portal link delete ho gaya!');
+                    openAdminDashboard();
+                });
+            }
+        }
+
+        function saveFooterPagesToFirebase() {
+            let about = document.getElementById('editPageAbout').value;
+            let terms = document.getElementById('editPageTerms').value;
+            let contact = document.getElementById('editPageContact').value;
+            let privacy = document.getElementById('editPagePrivacy').value;
+            let advertise = document.getElementById('editPageAdvertise').value;
+
+            let footerData = { about: about, terms: terms, contact: contact, privacy: privacy, advertise: advertise };
+            db.ref('footer_pages').set(footerData).then(() => {
+                localStorage.setItem('page_about', about);
+                localStorage.setItem('page_terms', terms);
+                localStorage.setItem('page_contact', contact);
+                localStorage.setItem('page_privacy', privacy);
+                localStorage.setItem('page_advertise', advertise);
+                alert('Footer pages updated successfully!');
+                closePageModal();
+            }).catch((error) => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        function changeLanguage() {
+            let lang = document.getElementById('languageSwitcher').value;
+            if(lang === 'en') {
+                document.getElementById('header-title').innerText = 'Pradeep E Services';
+                document.getElementById('box-jobs').innerText = 'Latest Jobs';
+                document.getElementById('box-admit').innerText = 'Admit Card';
+                document.getElementById('box-result').innerText = 'Results';
+                document.getElementById('box-yojana').innerText = 'Sarkari Yojana';
+                document.getElementById('box-offline').innerText = 'Offline Forms (PDF Link)';
+                document.getElementById('box-news').innerText = 'News / Updates';
+                document.getElementById('portals-heading').innerText = '🌐 Important Portal Links';
+                document.getElementById('tools-heading').innerText = '🛠️ Online Utility Tools';
+            } else {
+                document.getElementById('header-title').innerText = 'Pradeep E Services';
+                document.getElementById('box-jobs').innerText = 'Latest Jobs';
+                document.getElementById('box-admit').innerText = 'Admit Card';
+                document.getElementById('box-result').innerText = 'Results';
+                document.getElementById('box-yojana').innerText = 'Sarkari Yojana (संबल, ई-श्रम आदि)';
+                document.getElementById('box-offline').innerText = 'Offline Forms (PDF Link)';
+                document.getElementById('box-news').innerText = 'News / सूचना';
+                document.getElementById('portals-heading').innerText = '🌐 Important Portal Links (महत्वपूर्ण पोर्टल)';
+                document.getElementById('tools-heading').innerText = '🛠️ Online Utility Tools';
             }
         }
     </script>
