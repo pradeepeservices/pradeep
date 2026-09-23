@@ -325,6 +325,16 @@
                     <tr><td id="postDetailPostName">Update</td><td id="postDetailTotal">As per notification</td></tr>
                     <tr><td>Eligibility / Qualification</td><td id="postDetailEligibility">Please check the official notification and the details given below.</td></tr>
                 </table>
+                <div id="onlineFormSection" style="display:none;">
+                    <div class="post-details-title" id="onlineFormSectionTitle">How To Fill Online Form</div>
+                    <div class="post-details-text" id="vacancyPageOnlineForm">
+                    </div>
+                </div>
+                <div id="modeSelectionSection" style="display:none;">
+                    <div class="post-details-title" id="modeSelectionSectionTitle">Recruitment 2026 : Mode Of Selection</div>
+                    <div class="post-details-text" id="vacancyPageModeSelection">
+                    </div>
+                </div>
                 <div class="post-details-title">Full Notification / Important Information</div>
                 <div class="post-details-text" id="vacancyPageDetails">No additional details provided.</div>
                 <div class="post-actions">
@@ -662,6 +672,8 @@
                         applyLink: job.admitCardLink || job.applyLink || '',
                         notificationLink: job.admitCardLink || job.notificationLink || '',
                         intro: (job.intro || '') + (job.admitCardLink ? '' : ' Admit Card जारी है।'),
+                        onlineFormDetails: job.onlineFormDetails || '',
+                        modeOfSelection: job.modeOfSelection || '',
                         updatedAt: job.updatedAt
                     });
                 }
@@ -675,6 +687,8 @@
                         applyLink: job.resultLink || '',
                         notificationLink: job.resultLink || job.notificationLink || '',
                         intro: (job.intro || '') + (job.resultLink ? '' : ' Result जारी है।'),
+                        onlineFormDetails: job.onlineFormDetails || '',
+                        modeOfSelection: job.modeOfSelection || '',
                         updatedAt: job.updatedAt
                     });
                 }
@@ -850,6 +864,36 @@
             }
 
             document.getElementById('vacancyPageDetails').innerText = item.details || 'No additional details provided.';
+
+            const isJobStageCat = (cat === 'jobs' || cat === 'admit' || cat === 'result');
+            const onlineFormSection = document.getElementById('onlineFormSection');
+            const modeSelectionSection = document.getElementById('modeSelectionSection');
+            const onlineFormTitle = document.getElementById('onlineFormSectionTitle');
+            const modeSelectionTitle = document.getElementById('modeSelectionSectionTitle');
+            const onlineFormText = document.getElementById('vacancyPageOnlineForm');
+            const modeSelectionText = document.getElementById('vacancyPageModeSelection');
+
+            if(onlineFormSection && onlineFormText) {
+                if(isJobStageCat && item.onlineFormDetails) {
+                    if(onlineFormTitle) onlineFormTitle.innerText = 'How To Fill ' + title + ' Online Form';
+                    onlineFormText.innerText = item.onlineFormDetails;
+                    onlineFormSection.style.display = 'block';
+                } else {
+                    onlineFormText.innerText = '';
+                    onlineFormSection.style.display = 'none';
+                }
+            }
+            if(modeSelectionSection && modeSelectionText) {
+                if(isJobStageCat && item.modeOfSelection) {
+                    if(modeSelectionTitle) modeSelectionTitle.innerText = title + ' : Mode Of Selection';
+                    modeSelectionText.innerText = item.modeOfSelection;
+                    modeSelectionSection.style.display = 'block';
+                } else {
+                    modeSelectionText.innerText = '';
+                    modeSelectionSection.style.display = 'none';
+                }
+            }
+
             document.getElementById('postWhatsApp').href = localStorage.getItem('social_wa') || 'https://whatsapp.com';
             document.getElementById('postTelegram').href = localStorage.getItem('social_tg') || 'https://telegram.org';
 
@@ -1268,6 +1312,27 @@
                         </div>
                     </div>
 
+                    <div id="onlineFormSelectionFieldsContainer" style="margin:10px 0; border:1px dashed #8b5cf6; padding:10px; border-radius:6px; background:#fbf9ff;">
+                        <label style="font-weight:bold;font-size:13px;color:#5b21b6;">📝 How To Fill Online Form (Optional):</label>
+                        <textarea id="newItemOnlineFormDetails" placeholder="Online Form ka pura matter yahan likhein...
+
+Example:
+• Interested Candidates...
+• Use The Click Here Link...
+• Alternatively, Visit The Official Website...
+• Make Sure To Complete The Application Before The Deadline..." rows="7"></textarea>
+
+                        <label style="font-weight:bold;font-size:13px;color:#5b21b6;display:block;margin-top:8px;">🎯 Mode Of Selection (Optional):</label>
+                        <textarea id="newItemModeOfSelection" placeholder="Mode Of Selection ka pura matter yahan likhein...
+
+Example:
+• Written Exam
+• Physical Test
+• Document Verification
+• Medical Examination" rows="5"></textarea>
+                        <div style="font-size:11px;color:#666;margin-top:4px;">Ye dono sections Vacancy ke second page par Vacancy / Post Details ke niche dikhेंगे aur Vacancy se linked Admit Card / Result page par bhi automatically दिखाई देंगे.</div>
+                    </div>
+
                     <div id="yojanaFieldsContainer" style="display:none;">
                         <input type="text" id="newItemYojanaApply" placeholder="Apply Online Link (URL)">
                     </div>
@@ -1323,6 +1388,9 @@
         }
 
         function toggleFormFieldsBasedOnCategory() {
+            let onlineSelectionWrap = document.getElementById('onlineFormSelectionFieldsContainer');
+            let currentCat = document.getElementById('selectBoxCategory') ? document.getElementById('selectBoxCategory').value : 'jobs';
+            if(onlineSelectionWrap) onlineSelectionWrap.style.display = (currentCat === 'offline' || currentCat === 'news' || currentCat === 'yojana') ? 'none' : 'block';
             let cat = document.getElementById('selectBoxCategory').value;
             let extraContainer = document.getElementById('extraFieldsContainer');
             let yojanaContainer = document.getElementById('yojanaFieldsContainer');
@@ -1498,6 +1566,15 @@
                     <textarea id="editItemEligibility" rows="3" placeholder="Eligibility / Qualification details">${item.eligibility || ''}</textarea>
                 </div>
 
+                <div id="editOnlineFormSelectionFieldsContainer" style="margin:10px 0; border:1px dashed #8b5cf6; padding:10px; border-radius:6px; background:#fbf9ff; display:${(isSimpleCat || isYojanaCat) ? 'none' : 'block'};">
+                    <label style="font-weight:bold;font-size:13px;color:#5b21b6;">📝 How To Fill Online Form (Optional):</label>
+                    <textarea id="editItemOnlineFormDetails" rows="7" placeholder="Online Form ka pura matter yahan likhein...">${item.onlineFormDetails || ''}</textarea>
+
+                    <label style="font-weight:bold;font-size:13px;color:#5b21b6;display:block;margin-top:8px;">🎯 Mode Of Selection (Optional):</label>
+                    <textarea id="editItemModeOfSelection" rows="5" placeholder="Mode Of Selection ka pura matter yahan likhein...">${item.modeOfSelection || ''}</textarea>
+                    <div style="font-size:11px;color:#666;margin-top:4px;">Ye content Vacancy ke second page par Vacancy / Post Details ke niche aur linked Admit Card / Result page par bhi दिखाई देगा.</div>
+                </div>
+
                 <label style="font-weight:bold; font-size:13px;">Full Details:</label>
                 <textarea id="editItemDetails" rows="5">${item.details || ''}</textarea>
 
@@ -1515,6 +1592,8 @@
             let textColor = document.getElementById('editItemColor').value;
             let intro = document.getElementById('editItemIntro') ? document.getElementById('editItemIntro').value.trim() : '';
             let eligibility = document.getElementById('editItemEligibility') ? document.getElementById('editItemEligibility').value.trim() : '';
+            let onlineFormDetails = document.getElementById('editItemOnlineFormDetails') ? document.getElementById('editItemOnlineFormDetails').value.trim() : (existing.onlineFormDetails || '');
+            let modeOfSelection = document.getElementById('editItemModeOfSelection') ? document.getElementById('editItemModeOfSelection').value.trim() : (existing.modeOfSelection || '');
             let details = document.getElementById('editItemDetails').value;
 
             if(!title) { alert('Title mandatory hai!'); return; }
@@ -1556,6 +1635,8 @@
                 textColor,
                 intro,
                 eligibility,
+                onlineFormDetails: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : onlineFormDetails,
+                modeOfSelection: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : modeOfSelection,
                 details,
                 seoTitle,
                 metaDescription,
@@ -1660,6 +1741,8 @@
             let textColor = document.getElementById('newItemColor').value;
             let intro = document.getElementById('newItemIntro') ? document.getElementById('newItemIntro').value.trim() : '';
             let eligibility = document.getElementById('newItemEligibility') ? document.getElementById('newItemEligibility').value.trim() : '';
+            let onlineFormDetails = document.getElementById('newItemOnlineFormDetails') ? document.getElementById('newItemOnlineFormDetails').value.trim() : '';
+            let modeOfSelection = document.getElementById('newItemModeOfSelection') ? document.getElementById('newItemModeOfSelection').value.trim() : '';
             let details = document.getElementById('newItemDetails').value;
             let seoTitle = document.getElementById('newItemSeoTitle') ? document.getElementById('newItemSeoTitle').value.trim() : '';
             let metaDescription = document.getElementById('newItemMetaDescription') ? document.getElementById('newItemMetaDescription').value.trim() : '';
@@ -1699,7 +1782,7 @@
                 posterImage = await compressImage(posterInput.files[0]);
             }
 
-            let newItem = { title, textColor, intro, eligibility, dates, fee, age, total, details, applyLink, notificationLink, pdfId, seoTitle, metaDescription, posterImage, admitCardStatus, admitCardLink, resultStatus, resultLink, updatedAt: new Date().toLocaleDateString("en-IN") };
+            let newItem = { title, textColor, intro, eligibility, onlineFormDetails: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : onlineFormDetails, modeOfSelection: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : modeOfSelection, dates, fee, age, total, details, applyLink, notificationLink, pdfId, seoTitle, metaDescription, posterImage, admitCardStatus, admitCardLink, resultStatus, resultLink, updatedAt: new Date().toLocaleDateString("en-IN") };
 
             db.ref('box_items_' + cat).push(newItem).then(() => {
                 alert('Successfully added and synced with Firebase!');
