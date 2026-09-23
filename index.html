@@ -1460,14 +1460,47 @@ Example:
         }
 
         function deleteItemFromFirebase(cat, itemId) {
-            if(confirm('Kya aap is post ko delete karna chahte hain?')) {
-                db.ref('box_items_' + cat + '/' + itemId).remove().then(() => {
-                    alert('Post successfully delete ho gayi!');
-                    openAdminDashboard(); 
-                }).catch((error) => {
-                    alert('Delete karne mein error aayi: ' + error.message);
-                });
+            if(!confirm('Kya aap is post ko delete karna chahte hain?')) return;
+
+            // Admit Card / Result entries created automatically from a Vacancy
+            // are linked to the original Latest Job. Delete them by updating
+            // the parent Vacancy status, so they do not come back on sync.
+            let items = JSON.parse(localStorage.getItem('box_items_' + cat) || '[]');
+            let item = items.find(i => String(i.id) === String(itemId));
+
+            if(item && item.autoLinkedVacancy && item.linkedVacancyId) {
+                const parentId = item.linkedVacancyId;
+                const fieldUpdate = {};
+
+                if(cat === 'admit') {
+                    fieldUpdate.admitCardStatus = 'no';
+                    fieldUpdate.admitCardLink = '';
+                } else if(cat === 'result') {
+                    fieldUpdate.resultStatus = 'no';
+                    fieldUpdate.resultLink = '';
+                }
+
+                if(Object.keys(fieldUpdate).length > 0) {
+                    db.ref('box_items_jobs/' + parentId).update(fieldUpdate).then(() => {
+                        // Remove the generated entry immediately from the current view.
+                        localStorage.setItem('box_items_' + cat, JSON.stringify(items.filter(i => String(i.id) !== String(itemId))));
+                        loadBoxItemsIntoSite(cat);
+                        alert('Post successfully delete ho gayi!');
+                        openAdminDashboard();
+                    }).catch((error) => {
+                        alert('Delete karne mein error aayi: ' + error.message);
+                    });
+                    return;
+                }
             }
+
+            // Normal/manual posts are deleted directly from Firebase as before.
+            db.ref('box_items_' + cat + '/' + itemId).remove().then(() => {
+                alert('Post successfully delete ho gayi!');
+                openAdminDashboard();
+            }).catch((error) => {
+                alert('Delete karne mein error aayi: ' + error.message);
+            });
         }
 
         function editItemPrompt(cat, itemId) {
