@@ -339,6 +339,7 @@
                 <div class="post-details-text" id="vacancyPageDetails">No additional details provided.</div>
                 <div class="post-actions">
                     <a id="vacancyPageApply" class="post-apply" href="#" target="_blank" rel="noopener" style="display:none;">📝 Apply Online</a>
+                    <a id="vacancyPageStageDownload" class="post-apply" href="#" target="_blank" rel="noopener" style="display:none;">⬇️ Download</a>
                     <a id="vacancyPageNotification" class="post-notify" href="#" target="_blank" rel="noopener" style="display:none;">🔔 Notification</a>
                     <a id="vacancyPagePdf" class="post-pdf" href="#" target="_blank" rel="noopener" style="display:none;">📄 Download Form PDF</a>
                 </div>
@@ -899,6 +900,29 @@
 
             let applyBtn = document.getElementById('vacancyPageApply');
             if(item.applyLink) { applyBtn.style.display='inline-block'; applyBtn.href=item.applyLink; } else { applyBtn.style.display='none'; }
+
+            // Stage-specific download button: Admit Card and Result keep their
+            // own download link while the normal Apply Online button remains.
+            let stageDownloadBtn = document.getElementById('vacancyPageStageDownload');
+            if(stageDownloadBtn) {
+                let stageLink = '';
+                let stageLabel = '';
+                if(cat === 'admit') {
+                    stageLink = item.admitCardLink || item.applyLink || '';
+                    stageLabel = '⬇️ Download Admit Card';
+                } else if(cat === 'result') {
+                    stageLink = item.resultLink || item.applyLink || '';
+                    stageLabel = '⬇️ Download Result';
+                }
+                if(stageLink && stageLabel) {
+                    stageDownloadBtn.style.display='inline-block';
+                    stageDownloadBtn.href=stageLink;
+                    stageDownloadBtn.innerText=stageLabel;
+                } else {
+                    stageDownloadBtn.style.display='none';
+                    stageDownloadBtn.removeAttribute('href');
+                }
+            }
 
             let notificationBtn = document.getElementById('vacancyPageNotification');
             if(item.notificationLink) { notificationBtn.style.display='inline-block'; notificationBtn.href=item.notificationLink; } else { notificationBtn.style.display='none'; }
