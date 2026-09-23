@@ -829,6 +829,11 @@
             document.getElementById('postDetailEligibility').innerText = item.eligibility || 'Please check the official notification and the full details given below.';
 
             let isSimpleCat = (cat === 'offline' || cat === 'news' || cat === 'yojana');
+            const vacancyPostDetailsTitle = document.getElementById('vacancyPostDetailsTitle');
+            const vacancyPostDetailsTable = document.getElementById('vacancyPostDetailsTable');
+            if(vacancyPostDetailsTitle) vacancyPostDetailsTitle.style.display = isSimpleCat ? 'none' : 'block';
+            if(vacancyPostDetailsTable) vacancyPostDetailsTable.style.display = isSimpleCat ? 'none' : 'table';
+
             let infoGrid = document.getElementById('vacancyInfoGrid');
             if(isSimpleCat && !item.dates && !item.fee && !item.age && !item.total) {
                 infoGrid.style.display = 'none';
