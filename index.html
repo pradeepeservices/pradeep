@@ -147,6 +147,8 @@
             .result-post-top h1{font-size:18px}.post-summary-table{grid-template-columns:1fr}.post-summary-cell{border-right:0!important;border-bottom:1px solid #bbb!important}.post-summary-cell:last-child{border-bottom:0!important}
             .result-post-nav span{padding:7px 9px;font-size:11px}
         }
+
+        #vacancyPage .post-poster-area { margin-top: 18px; }
     </style>
 </head>
 <body>
@@ -304,14 +306,6 @@
                 <span id="vacancyPageCategory" style="display:none;"></span>
                 <div class="result-post-intro" id="vacancyPageIntro">Pradeep E Services par is post se judi latest jankari, important dates, eligibility, fee aur application links ki details yahan di gayi hain.</div>
             </div>
-            <div id="postPosterArea" class="post-poster-area">
-                <div class="post-poster-label">📌 Post / Vacancy Poster</div>
-                <img id="postPosterImage" src="" alt="Post Vacancy Poster">
-            </div>
-            <div class="post-ad-area">
-                <div class="post-ad-label">Download Pradeep E Services App / Latest Updates</div>
-                <div id="postAdBanner" style="max-width:760px;margin:auto;"></div>
-            </div>
             <div class="post-social">
                 <a id="postWhatsApp" class="post-wa" href="https://whatsapp.com" target="_blank" rel="noopener">🟢 WhatsApp</a>
                 <a id="postTelegram" class="post-tg" href="https://telegram.org" target="_blank" rel="noopener">🔵 Telegram</a>
@@ -339,6 +333,10 @@
                     <a id="vacancyPagePdf" class="post-pdf" href="#" target="_blank" rel="noopener" style="display:none;">📄 Download Form PDF</a>
                 </div>
                 <div class="post-disclaimer">नोट: आवेदन करने से पहले संबंधित विभाग की आधिकारिक अधिसूचना में पात्रता, आयु, शुल्क, तिथियां और अन्य शर्तें अवश्य जांच लें।</div>
+            <div id="postPosterArea" class="post-poster-area">
+                <div class="post-poster-label">📌 Post / Vacancy Poster</div>
+                <img id="postPosterImage" src="" alt="Post Vacancy Poster">
+            </div>
             </div>
         </div>
     </section>
@@ -483,6 +481,7 @@
             loadBoxItemsIntoSite('yojana');
             loadBoxItemsIntoSite('offline');
             loadBoxItemsIntoSite('news');
+            syncLinkedVacancyStages();
 
             let savedPortals = JSON.parse(localStorage.getItem('custom_portals_list'));
             if(savedPortals && savedPortals.length > 0) {
@@ -507,6 +506,9 @@
                         localStorage.removeItem('box_items_' + cat);
                     }
                     loadBoxItemsIntoSite(cat);
+                    if(cat === 'jobs' || cat === 'admit' || cat === 'result') {
+                        syncLinkedVacancyStages();
+                    }
                     // Firebase data can arrive after the first page load, so check the
                     // shared-post URL again whenever a category finishes syncing.
                     handleSharedPostUrl();
@@ -634,6 +636,56 @@
             setTimeout(()=>URL.revokeObjectURL(url),60000);
         }
 
+        // NEW FEATURE: Automatically show Vacancy posts in Admit Card / Result
+        // sections when their status is marked as released. Manual posts in those
+        // sections remain untouched.
+        function syncLinkedVacancyStages() {
+            const jobs = JSON.parse(localStorage.getItem('box_items_jobs') || '[]');
+
+            // Preserve all existing/manual entries that are not auto-generated.
+            const existingAdmit = JSON.parse(localStorage.getItem('box_items_admit') || '[]');
+            const existingResult = JSON.parse(localStorage.getItem('box_items_result') || '[]');
+            const admitManual = existingAdmit.filter(i => !i.autoLinkedVacancy);
+            const resultManual = existingResult.filter(i => !i.autoLinkedVacancy);
+
+            const autoAdmit = [];
+            const autoResult = [];
+
+            jobs.forEach(job => {
+                if(job.admitCardStatus === 'yes') {
+                    autoAdmit.push({
+                        ...job,
+                        id: 'auto-admit-' + job.id,
+                        autoLinkedVacancy: true,
+                        linkedVacancyId: job.id,
+                        title: job.title,
+                        applyLink: job.admitCardLink || job.applyLink || '',
+                        notificationLink: job.admitCardLink || job.notificationLink || '',
+                        intro: (job.intro || '') + (job.admitCardLink ? '' : ' Admit Card जारी है।'),
+                        updatedAt: job.updatedAt
+                    });
+                }
+                if(job.resultStatus === 'yes') {
+                    autoResult.push({
+                        ...job,
+                        id: 'auto-result-' + job.id,
+                        autoLinkedVacancy: true,
+                        linkedVacancyId: job.id,
+                        title: job.title,
+                        applyLink: job.resultLink || '',
+                        notificationLink: job.resultLink || job.notificationLink || '',
+                        intro: (job.intro || '') + (job.resultLink ? '' : ' Result जारी है।'),
+                        updatedAt: job.updatedAt
+                    });
+                }
+            });
+
+            localStorage.setItem('box_items_admit', JSON.stringify([...autoAdmit, ...admitManual]));
+            localStorage.setItem('box_items_result', JSON.stringify([...autoResult, ...resultManual]));
+            loadBoxItemsIntoSite('admit');
+            loadBoxItemsIntoSite('result');
+        }
+
         function loadBoxItemsIntoSite(boxKey) {
             let items = JSON.parse(localStorage.getItem('box_items_' + boxKey));
             let contentBox = document.getElementById('content-' + boxKey);
@@ -744,16 +796,6 @@
             if(ogDesc) ogDesc.setAttribute('content', safeDescription);
         }
 
-        function renderPostAd() {
-            const postAd = document.getElementById('postAdBanner');
-            if(!postAd) return;
-            let banners = [];
-            try { banners = JSON.parse(localStorage.getItem('custom_ad_banners')) || []; } catch(e) { banners = []; }
-            if(!banners.length) banners = ['93da493e-387b-4805-b014-8f9c326a4326.png'];
-            const src = banners[0];
-            postAd.innerHTML = `<img src="${src}" alt="Pradeep E Services Advertisement" style="width:100%;max-height:170px;object-fit:contain;border:1px solid #ddd;border-radius:4px;" onerror="this.style.display='none'">`;
-        }
-
         function showVacancyDirect(cat, itemId, scrollToTop = true) {
             let items = JSON.parse(localStorage.getItem('box_items_' + cat));
             if(!items) return;
@@ -803,8 +845,6 @@
             }
 
             document.getElementById('vacancyPageDetails').innerText = item.details || 'No additional details provided.';
-            renderPostAd();
-
             document.getElementById('postWhatsApp').href = localStorage.getItem('social_wa') || 'https://whatsapp.com';
             document.getElementById('postTelegram').href = localStorage.getItem('social_tg') || 'https://telegram.org';
 
@@ -1201,6 +1241,26 @@
                         <input type="text" id="newItemTotal" placeholder="Total Posts">
                         <input type="text" id="newItemApply" placeholder="Apply Online Link (URL)">
                         <input type="text" id="newItemNotification" placeholder="Notification URL">
+
+                        <!-- Linked Admit Card / Result fields - NEW FEATURE ONLY -->
+                        <div style="margin:10px 0; border:1px dashed #2457e6; padding:10px; border-radius:6px; background:#f7f9ff;">
+                            <label style="font-weight:bold;font-size:13px;color:#2457e6;">🎫 Admit Card Update (Optional)</label>
+                            <select id="newItemAdmitStatus">
+                                <option value="no">Admit Card अभी जारी नहीं</option>
+                                <option value="yes">Admit Card जारी हो गया</option>
+                            </select>
+                            <input type="text" id="newItemAdmitLink" placeholder="Admit Card / Hall Ticket Link (URL)">
+
+                            <label style="font-weight:bold;font-size:13px;color:#16803c;display:block;margin-top:8px;">📊 Result Update (Optional)</label>
+                            <select id="newItemResultStatus">
+                                <option value="no">Result अभी जारी नहीं</option>
+                                <option value="yes">Result जारी हो गया</option>
+                            </select>
+                            <input type="text" id="newItemResultLink" placeholder="Result Link (URL)">
+                            <div style="font-size:11px;color:#666;margin-top:4px;">
+                                Vacancy में ये status/link भरने पर वही post Admit Card और Result section में अपने आप दिखाई देगी।
+                            </div>
+                        </div>
                     </div>
 
                     <div id="yojanaFieldsContainer" style="display:none;">
@@ -1213,11 +1273,13 @@
                         <input type="file" id="newItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
                     </div>
 
-                    <label style="font-weight:bold;font-size:13px;">Post Intro / Short Description:</label>
-                    <textarea id="newItemIntro" placeholder="Short introduction shown at the top of Vacancy / Post Details page" rows="3"></textarea>
+                    <div id="introEligibilityFieldsContainer">
+                        <label style="font-weight:bold;font-size:13px;">Post Intro / Short Description:</label>
+                        <textarea id="newItemIntro" placeholder="Short introduction shown at the top of Vacancy / Post Details page" rows="3"></textarea>
 
-                    <label style="font-weight:bold;font-size:13px;">Eligibility / Qualification:</label>
-                    <textarea id="newItemEligibility" placeholder="Eligibility / Qualification details" rows="3"></textarea>
+                        <label style="font-weight:bold;font-size:13px;">Eligibility / Qualification:</label>
+                        <textarea id="newItemEligibility" placeholder="Eligibility / Qualification details" rows="3"></textarea>
+                    </div>
 
                     <label style="font-weight:bold;font-size:13px;">Full Details / Description:</label>
                     <textarea id="newItemDetails" placeholder="Full Details / Description" rows="5"></textarea>
@@ -1260,24 +1322,29 @@
             let extraContainer = document.getElementById('extraFieldsContainer');
             let yojanaContainer = document.getElementById('yojanaFieldsContainer');
             let pdfWrapper = document.getElementById('pdfUploadBoxWrapper');
+            let introEligibilityContainer = document.getElementById('introEligibilityFieldsContainer');
             
             if(extraContainer && yojanaContainer && pdfWrapper) {
                 if(cat === 'offline') {
                     extraContainer.style.display = 'none';
                     yojanaContainer.style.display = 'none';
                     pdfWrapper.style.display = 'block';
+                    if(introEligibilityContainer) introEligibilityContainer.style.display = 'none';
                 } else if(cat === 'news') {
                     extraContainer.style.display = 'none';
                     yojanaContainer.style.display = 'none';
                     pdfWrapper.style.display = 'none';
+                    if(introEligibilityContainer) introEligibilityContainer.style.display = 'none';
                 } else if(cat === 'yojana') {
                     extraContainer.style.display = 'none';
                     yojanaContainer.style.display = 'block';
                     pdfWrapper.style.display = 'none';
+                    if(introEligibilityContainer) introEligibilityContainer.style.display = 'none';
                 } else {
                     extraContainer.style.display = 'block';
                     yojanaContainer.style.display = 'none';
                     pdfWrapper.style.display = 'block';
+                    if(introEligibilityContainer) introEligibilityContainer.style.display = 'block';
                 }
             }
         }
@@ -1385,6 +1452,26 @@
                     
                     <label style="font-weight:bold; font-size:13px;">Notification Link:</label>
                     <input type="text" id="editItemNotification" value="${item.notificationLink || ''}">
+
+                    <!-- Linked Admit Card / Result fields - NEW FEATURE ONLY -->
+                    <div style="margin:10px 0; border:1px dashed #2457e6; padding:10px; border-radius:6px; background:#f7f9ff;">
+                        <label style="font-weight:bold;font-size:13px;color:#2457e6;">🎫 Admit Card Update (Optional)</label>
+                        <select id="editItemAdmitStatus">
+                            <option value="no" ${(item.admitCardStatus === 'yes') ? '' : 'selected'}>Admit Card अभी जारी नहीं</option>
+                            <option value="yes" ${(item.admitCardStatus === 'yes') ? 'selected' : ''}>Admit Card जारी हो गया</option>
+                        </select>
+                        <input type="text" id="editItemAdmitLink" value="${item.admitCardLink || ''}" placeholder="Admit Card / Hall Ticket Link (URL)">
+
+                        <label style="font-weight:bold;font-size:13px;color:#16803c;display:block;margin-top:8px;">📊 Result Update (Optional)</label>
+                        <select id="editItemResultStatus">
+                            <option value="no" ${(item.resultStatus === 'yes') ? '' : 'selected'}>Result अभी जारी नहीं</option>
+                            <option value="yes" ${(item.resultStatus === 'yes') ? 'selected' : ''}>Result जारी हो गया</option>
+                        </select>
+                        <input type="text" id="editItemResultLink" value="${item.resultLink || ''}" placeholder="Result Link (URL)">
+                        <div style="font-size:11px;color:#666;margin-top:4px;">
+                            Vacancy में status/link भरने पर वही post Admit Card और Result section में अपने आप दिखाई देगी।
+                        </div>
+                    </div>
                 </div>
 
                 <div id="editYojanaFieldsContainer" style="${isYojanaCat ? 'display:block;' : 'display:none;'}">
@@ -1398,11 +1485,13 @@
                     <input type="file" id="editItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
                 </div>
 
-                <label style="font-weight:bold; font-size:13px;">Post Intro / Short Description:</label>
-                <textarea id="editItemIntro" rows="3" placeholder="Short introduction shown at the top of Vacancy / Post Details page">${item.intro || ''}</textarea>
+                <div id="editIntroEligibilityFieldsContainer" style="${(isSimpleCat || isYojanaCat) ? 'display:none;' : 'display:block;'}">
+                    <label style="font-weight:bold; font-size:13px;">Post Intro / Short Description:</label>
+                    <textarea id="editItemIntro" rows="3" placeholder="Short introduction shown at the top of Vacancy / Post Details page">${item.intro || ''}</textarea>
 
-                <label style="font-weight:bold; font-size:13px;">Eligibility / Qualification:</label>
-                <textarea id="editItemEligibility" rows="3" placeholder="Eligibility / Qualification details">${item.eligibility || ''}</textarea>
+                    <label style="font-weight:bold; font-size:13px;">Eligibility / Qualification:</label>
+                    <textarea id="editItemEligibility" rows="3" placeholder="Eligibility / Qualification details">${item.eligibility || ''}</textarea>
+                </div>
 
                 <label style="font-weight:bold; font-size:13px;">Full Details:</label>
                 <textarea id="editItemDetails" rows="5">${item.details || ''}</textarea>
@@ -1437,10 +1526,18 @@
             }
 
             let applyLinkVal = existing.applyLink || '';
+            let admitCardStatusVal = existing.admitCardStatus || 'no';
+            let admitCardLinkVal = existing.admitCardLink || '';
+            let resultStatusVal = existing.resultStatus || 'no';
+            let resultLinkVal = existing.resultLink || '';
             if(cat === 'yojana') {
                 applyLinkVal = document.getElementById('editItemYojanaApply') ? document.getElementById('editItemYojanaApply').value : '';
             } else if(cat !== 'offline' && cat !== 'news') {
                 applyLinkVal = document.getElementById('editItemApply') ? document.getElementById('editItemApply').value : '';
+                admitCardStatusVal = document.getElementById('editItemAdmitStatus') ? document.getElementById('editItemAdmitStatus').value : (existing.admitCardStatus || 'no');
+                admitCardLinkVal = document.getElementById('editItemAdmitLink') ? document.getElementById('editItemAdmitLink').value.trim() : (existing.admitCardLink || '');
+                resultStatusVal = document.getElementById('editItemResultStatus') ? document.getElementById('editItemResultStatus').value : (existing.resultStatus || 'no');
+                resultLinkVal = document.getElementById('editItemResultLink') ? document.getElementById('editItemResultLink').value.trim() : (existing.resultLink || '');
             }
 
             let pdfId = existing.pdfId || '';
@@ -1465,7 +1562,11 @@
                 total: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemTotal') ? document.getElementById('editItemTotal').value : (existing.total || '')),
                 applyLink: applyLinkVal,
                 notificationLink: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemNotification') ? document.getElementById('editItemNotification').value : (existing.notificationLink || '')),
-                pdfId: pdfId
+                pdfId: pdfId,
+                admitCardStatus: admitCardStatusVal,
+                admitCardLink: admitCardLinkVal,
+                resultStatus: resultStatusVal,
+                resultLink: resultLinkVal
             };
 
             db.ref('box_items_' + cat + '/' + itemId).set(updatedItem).then(() => {
@@ -1560,7 +1661,7 @@
 
             if(!title) { alert('Please enter item title!'); return; }
 
-            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '';
+            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '', admitCardStatus = 'no', admitCardLink = '', resultStatus = 'no', resultLink = '';
 
             if(cat === 'yojana') {
                 applyLink = document.getElementById('newItemYojanaApply').value;
@@ -1576,6 +1677,10 @@
                 total = document.getElementById('newItemTotal').value;
                 applyLink = document.getElementById('newItemApply').value;
                 notificationLink = document.getElementById('newItemNotification').value;
+                admitCardStatus = document.getElementById('newItemAdmitStatus') ? document.getElementById('newItemAdmitStatus').value : 'no';
+                admitCardLink = document.getElementById('newItemAdmitLink') ? document.getElementById('newItemAdmitLink').value.trim() : '';
+                resultStatus = document.getElementById('newItemResultStatus') ? document.getElementById('newItemResultStatus').value : 'no';
+                resultLink = document.getElementById('newItemResultLink') ? document.getElementById('newItemResultLink').value.trim() : '';
 
                 let fileInput = document.getElementById('newItemPdfFileInput');
                 if(fileInput && fileInput.files && fileInput.files[0]) {
@@ -1589,7 +1694,7 @@
                 posterImage = await compressImage(posterInput.files[0]);
             }
 
-            let newItem = { title, textColor, intro, eligibility, dates, fee, age, total, details, applyLink, notificationLink, pdfId, seoTitle, metaDescription, posterImage, updatedAt: new Date().toLocaleDateString("en-IN") };
+            let newItem = { title, textColor, intro, eligibility, dates, fee, age, total, details, applyLink, notificationLink, pdfId, seoTitle, metaDescription, posterImage, admitCardStatus, admitCardLink, resultStatus, resultLink, updatedAt: new Date().toLocaleDateString("en-IN") };
 
             db.ref('box_items_' + cat).push(newItem).then(() => {
                 alert('Successfully added and synced with Firebase!');
