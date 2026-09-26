@@ -928,10 +928,18 @@
             if(item.notificationLink) { notificationBtn.style.display='inline-block'; notificationBtn.href=item.notificationLink; } else { notificationBtn.style.display='none'; }
 
             let pdfBtn = document.getElementById('vacancyPagePdf');
-            if(item.pdfId) {
+            if(item.pdfUrl) {
                 pdfBtn.style.display='inline-block';
+                pdfBtn.href=item.pdfUrl;
+                pdfBtn.target='_blank';
+                pdfBtn.removeAttribute('onclick');
+                pdfBtn.innerText='📄 ' + (item.pdfLabel || 'Download PDF');
+            } else if(item.pdfId) {
+                pdfBtn.style.display='inline-block';
+                pdfBtn.href='#';
+                pdfBtn.innerText='📄 ' + (item.pdfLabel || 'Download PDF');
                 pdfBtn.onclick=function(e){e.preventDefault();openOfflinePdf(item.pdfId);};
-            } else { pdfBtn.style.display='none'; }
+            } else { pdfBtn.style.display='none'; pdfBtn.removeAttribute('href'); }
 
             document.getElementById('appHome').style.display='none';
             document.getElementById('vacancyPage').style.display='block';
@@ -1359,6 +1367,10 @@ Example:
 
                     <div id="yojanaFieldsContainer" style="display:none;">
                         <input type="text" id="newItemYojanaApply" placeholder="Apply Online Link (URL)">
+                        <label style="font-weight:bold;font-size:13px;display:block;margin-top:8px;color:#2a5298;">PDF URL (Sarkari Yojana / Offline Form):</label>
+                        <input type="url" id="newItemPdfUrl" placeholder="PDF ka direct URL (https://...)">
+                        <label style="font-weight:bold;font-size:13px;display:block;color:#2a5298;">User ko dikhne wala Download Button Name:</label>
+                        <input type="text" id="newItemPdfLabel" placeholder="Jaise: Download PDF / आवेदन फॉर्म डाउनलोड" value="Download PDF">
                     </div>
 
                     <!-- Offline Form PDF Upload Box -->
@@ -1610,9 +1622,13 @@ Example:
                 </div>
 
                 <!-- Update PDF for Offline / Jobs -->
-                <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9; display:${(isSimpleCat || isYojanaCat) ? 'none' : 'block'};" id="editPdfBoxWrapper">
+                <div style="margin:10px 0; border:1px dashed #2a5298; padding:10px; border-radius:6px; background:#f9f9f9; display:block;" id="editPdfBoxWrapper">
                     <label style="font-weight:bold; font-size:13px; color:#2a5298;">Update PDF File (Nayi PDF Upload Karein):</label>
                     <input type="file" id="editItemPdfFileInput" accept="application/pdf" style="margin-top:5px;">
+                    <label style="font-weight:bold;font-size:13px;display:block;margin-top:8px;color:#2a5298;">PDF URL (Sarkari Yojana / Offline Form):</label>
+                    <input type="url" id="editItemPdfUrl" value="${item.pdfUrl || ''}" placeholder="PDF ka direct URL (https://...)">
+                    <label style="font-weight:bold;font-size:13px;display:block;">User ko dikhne wala Download Button Name:</label>
+                    <input type="text" id="editItemPdfLabel" value="${item.pdfLabel || 'Download PDF'}" placeholder="Jaise: Download Form PDF">
                 </div>
 
                 <div id="editIntroEligibilityFieldsContainer" style="${(isSimpleCat || isYojanaCat) ? 'display:none;' : 'display:block;'}">
@@ -1682,6 +1698,8 @@ Example:
             }
 
             let pdfId = existing.pdfId || '';
+            let pdfUrl = document.getElementById('editItemPdfUrl') ? document.getElementById('editItemPdfUrl').value.trim() : (existing.pdfUrl || '');
+            let pdfLabel = document.getElementById('editItemPdfLabel') ? document.getElementById('editItemPdfLabel').value.trim() : (existing.pdfLabel || 'Download PDF');
             let fileInput = document.getElementById('editItemPdfFileInput');
             if(fileInput && fileInput.files && fileInput.files[0]) {
                 pdfId = await saveOfflinePdf(fileInput.files[0]);
@@ -1706,6 +1724,8 @@ Example:
                 applyLink: applyLinkVal,
                 notificationLink: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : (document.getElementById('editItemNotification') ? document.getElementById('editItemNotification').value : (existing.notificationLink || '')),
                 pdfId: pdfId,
+                pdfUrl: pdfUrl,
+                pdfLabel: pdfLabel || 'Download PDF',
                 admitCardStatus: admitCardStatusVal,
                 admitCardLink: admitCardLinkVal,
                 resultStatus: resultStatusVal,
@@ -1806,11 +1826,15 @@ Example:
 
             if(!title) { alert('Please enter item title!'); return; }
 
-            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '', admitCardStatus = 'no', admitCardLink = '', resultStatus = 'no', resultLink = '';
+            let dates = '', fee = '', age = '', total = '', applyLink = '', notificationLink = '', pdfId = '', pdfUrl = '', pdfLabel = 'Download PDF', admitCardStatus = 'no', admitCardLink = '', resultStatus = 'no', resultLink = '';
 
             if(cat === 'yojana') {
                 applyLink = document.getElementById('newItemYojanaApply').value;
+                pdfUrl = document.getElementById('newItemPdfUrl') ? document.getElementById('newItemPdfUrl').value.trim() : '';
+                pdfLabel = document.getElementById('newItemPdfLabel') ? document.getElementById('newItemPdfLabel').value.trim() : 'Download PDF';
             } else if(cat === 'offline') {
+                pdfUrl = document.getElementById('newItemPdfUrl') ? document.getElementById('newItemPdfUrl').value.trim() : '';
+                pdfLabel = document.getElementById('newItemPdfLabel') ? document.getElementById('newItemPdfLabel').value.trim() : 'Download PDF';
                 let fileInput = document.getElementById('newItemPdfFileInput');
                 if(fileInput && fileInput.files && fileInput.files[0]) {
                     pdfId = await saveOfflinePdf(fileInput.files[0]);
@@ -1839,7 +1863,7 @@ Example:
                 posterImage = await compressImage(posterInput.files[0]);
             }
 
-            let newItem = { title, textColor, intro, eligibility, onlineFormDetails: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : onlineFormDetails, modeOfSelection: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : modeOfSelection, dates, fee, age, total, details, applyLink, notificationLink, pdfId, seoTitle, metaDescription, posterImage, admitCardStatus, admitCardLink, resultStatus, resultLink, updatedAt: new Date().toLocaleDateString("en-IN") };
+            let newItem = { title, textColor, intro, eligibility, onlineFormDetails: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : onlineFormDetails, modeOfSelection: (cat === 'offline' || cat === 'news' || cat === 'yojana') ? '' : modeOfSelection, dates, fee, age, total, details, applyLink, notificationLink, pdfId, pdfUrl, pdfLabel: pdfLabel || 'Download PDF', seoTitle, metaDescription, posterImage, admitCardStatus, admitCardLink, resultStatus, resultLink, updatedAt: new Date().toLocaleDateString("en-IN") };
 
             db.ref('box_items_' + cat).push(newItem).then(() => {
                 alert('Successfully added and synced with Firebase!');
