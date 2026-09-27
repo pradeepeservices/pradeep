@@ -299,6 +299,7 @@
             <div class="tool-card" onclick="openToolModal('bg')">✨ Background Remove / Change</div>
             <div class="tool-card" onclick="openToolModal('bankid')">💳 Bank Identity Card Maker</div>
             <div class="tool-card" onclick="openToolModal('declaration')" style="background:#eefbf0; border-color:#86efac; color:#166534;">📝 Self Declaration Form (आय / निवास)</div>
+            <div class="tool-card" onclick="openToolModal('resume')" style="background:#f5f3ff;border-color:#c4b5fd;color:#5b21b6;">📄 Resume Maker (रिज्यूमे बनाएं)</div>
         </div>
     </div>
 
@@ -741,7 +742,7 @@
             showVacancyDirect(cat, itemId, true);
         }
 
-        const SHAREABLE_TOOLS = ['crop', 'pdf', 'bg', 'bankid', 'declaration'];
+        const SHAREABLE_TOOLS = ['crop', 'pdf', 'bg', 'bankid', 'declaration', 'resume'];
 
         function updateToolShareUrl(toolType) {
             if(!SHAREABLE_TOOLS.includes(toolType)) return;
@@ -1953,9 +1954,151 @@
                 if(pageBox) pageBox.classList.add('declaration-modal-mode');
                 html = renderDeclarationToolHTML();
                 setTimeout(() => { initDeclarationDates(); }, 50);
+            } else if(toolType === 'resume') {
+                if(pageBox) pageBox.classList.add('declaration-modal-mode');
+                html = renderResumeMakerHTML();
             }
             document.getElementById('modalBodyContent').innerHTML = html; 
             openPageModal();
+        }
+
+
+        // ================= RESUME MAKER TOOL (isolated addition) =================
+        function renderResumeMakerHTML() {
+          return `<div style="max-width:780px;margin:0 auto;background:#fff;padding:16px;color:#263238;font-family:Arial,sans-serif;">
+          <h2 style="text-align:center;font-size:20px;font-weight:500;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #2a5298;color:#263238;">Professional Resume Maker</h2>
+          <div id="resumeFormStep">
+          <div class="bankid-editor-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div class="full" style="grid-column:1/-1"><label>Full Name:</label><input id="resumeName" type="text" placeholder="RAHUL KUMAR" oninput="updateResumePreview()"></div>
+            <div class="full" style="grid-column:1/-1"><label>Address:</label><textarea id="resumeAddress" rows="2" placeholder="VILL: ..., PO: ..., DIST: ..., PIN: ..." oninput="updateResumePreview()"></textarea></div>
+            <div><label>Mobile Number:</label><input id="resumePhone" type="text" placeholder="Mobile number" oninput="updateResumePreview()"></div>
+            <div><label>Email ID:</label><input id="resumeEmail" type="email" placeholder="Email ID" oninput="updateResumePreview()"></div>
+            <div class="full" style="grid-column:1/-1"><label>Career Objective:</label><textarea id="resumeRole" rows="3" oninput="updateResumePreview()" placeholder="Write your career objective">To be associated with an organization where I can use my skills in a professional, dynamic work environment and contribute to the organization's objectives.</textarea></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 6px;"><label style="font-weight:bold;">Educational Qualifications:</label><button type="button" onclick="addResumeEducationRow()" style="background:#239447;color:white;padding:6px 10px;border:0;border-radius:3px;font-size:12px;">+ Add Row</button></div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;min-width:570px;border-collapse:collapse;font-size:12px;" id="resumeEducationInputTable">
+              <thead><tr style="background:#f1f3f5;"><th style="border:1px solid #d4d8dc;padding:7px;">Degree/Cert.</th><th style="border:1px solid #d4d8dc;padding:7px;">Institute</th><th style="border:1px solid #d4d8dc;padding:7px;">Board/Univ.</th><th style="border:1px solid #d4d8dc;padding:7px;">Year</th><th style="border:1px solid #d4d8dc;padding:7px;">Division</th><th style="border:1px solid #d4d8dc;padding:7px;">Action</th></tr></thead>
+              <tbody id="resumeEducationInputBody">
+                <tr><td><input class="resume-edu-cell" aria-label="Degree" value="10th" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Institute" value="XXXX School" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Board" value="U.P. Board" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Year" value="2005" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Division" value="Third" oninput="updateResumePreview()"></td><td style="text-align:center;"><button type="button" onclick="removeResumeEducationRow(this)" style="background:#dc3545;color:white;border:0;border-radius:3px;padding:5px 8px;">×</button></td></tr>
+                <tr><td><input class="resume-edu-cell" aria-label="Degree" value="12th" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Institute" value="XXXX Inter College" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Board" value="U.P. Board" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Year" value="2010" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Division" value="First" oninput="updateResumePreview()"></td><td style="text-align:center;"><button type="button" onclick="removeResumeEducationRow(this)" style="background:#dc3545;color:white;border:0;border-radius:3px;padding:5px 8px;">×</button></td></tr>
+                <tr><td><input class="resume-edu-cell" aria-label="Degree" value="B.A." oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Institute" value="XXXX Degree College" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Board" value="CCS University" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Year" value="2013" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Division" value="First" oninput="updateResumePreview()"></td><td style="text-align:center;"><button type="button" onclick="removeResumeEducationRow(this)" style="background:#dc3545;color:white;border:0;border-radius:3px;padding:5px 8px;">×</button></td></tr>
+                <tr><td><input class="resume-edu-cell" aria-label="Degree" value="ITI (Fitter)" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Institute" value="XXXX ITI College" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Board" value="SCVT" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Year" value="2015" oninput="updateResumePreview()"></td><td><input class="resume-edu-cell" aria-label="Division" value="First" oninput="updateResumePreview()"></td><td style="text-align:center;"><button type="button" onclick="removeResumeEducationRow(this)" style="background:#dc3545;color:white;border:0;border-radius:3px;padding:5px 8px;">×</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;">
+            <div><label>Skills:</label><input id="resumeSkills" value="Basic Computer Knowledge." oninput="updateResumePreview()"></div>
+            <div><label>Strengths (Comma separated):</label><input id="resumeStrengths" value="Confidence, Sincerity, Punctuality, Hard working, Get socialized among a group/team easily." oninput="updateResumePreview()"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div><label>Father's Name:</label><input id="resumeFather" placeholder="Father's Name" oninput="updateResumePreview()"></div><div><label>Date of Birth:</label><input id="resumeDob" placeholder="01 July YYYY" oninput="updateResumePreview()"></div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div><label>Language Known:</label><input id="resumeLanguages" value="English and Hindi." oninput="updateResumePreview()"></div><div><label>Hobbies:</label><input id="resumeHobbies" value="Listening music, Reading Books, Watching Movies." oninput="updateResumePreview()"></div></div>
+            <div><label>City/Place (For Declaration):</label><input id="resumePlace" placeholder="SHARANPUR" oninput="updateResumePreview()"></div>
+            <div><label>Work Experience (Optional):</label><textarea id="resumeExperience" rows="2" placeholder="Company, role, duration" oninput="updateResumePreview()"></textarea></div>
+            <div><label>Photo Upload (Optional):</label><input type="file" id="resumePhotoInput" accept="image/*" onchange="loadResumePhoto(event)"></div>
+            <div><label>Date:</label><input id="resumeDate" placeholder="DD/MM/YYYY" oninput="updateResumePreview()"></div>
+            <div><label>Declaration:</label><textarea id="resumeDeclaration" rows="2" oninput="updateResumePreview()">I hereby declare that the above information is true to the best of my knowledge.</textarea></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+            <button type="button" onclick="showResumePreviewPage()" style="flex:1;background:#1e3c72;">👁️ Preview Resume</button>
+            <button type="button" onclick="downloadResumeFromForm()" style="flex:1;background:#15803d;">⬇️ Download Resume PDF</button>
+          </div>
+          </div>
+          <div id="resumePreviewStep" style="display:none;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 12px;">
+              <button type="button" onclick="editResumeForm()" style="flex:1;background:#64748b;">✏️ Edit Resume</button>
+              <button type="button" onclick="downloadResumePDF()" style="flex:1;background:#15803d;">⬇️ Download Resume PDF</button>
+            </div>
+            <p style="font-size:13px;color:#64748b;">यह आपका तीसरा पेज / Resume Preview है। जानकारी बदलने के लिए Edit Resume दबाएं।</p>
+          <div id="resumePreview" contenteditable="true" style="background:#fff;color:#111;border:1px solid #cbd5e1;padding:24px;max-width:800px;width:100%;margin:14px auto;font-family:Arial,sans-serif;font-size:12px;line-height:1.35;min-height:760px;box-sizing:border-box;">
+            <div style="text-align:center;font-size:17px;font-weight:bold;text-decoration:underline;margin-bottom:18px;">RESUME</div>
+            <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;"><div style="flex:1;min-width:0;"><div id="rpName" style="font-weight:bold;text-transform:uppercase;margin-bottom:4px;">YOUR NAME</div><div id="rpAddressLine">ADDRESS :</div><div id="rpPhoneLine">MOBILE NO :</div><div id="rpEmailLine">EMAIL ID :</div></div><img id="rpPhoto" alt="Resume Photo" style="width:92px;height:110px;object-fit:cover;border:1px solid #aaa;display:none;"></div>
+            <h3 style="font-size:13px;text-decoration:underline;margin:14px 0 3px;">CAREER OBJECTIVE:</h3><p id="rpObjective" style="margin:0;border-bottom:1px solid #aaa;padding-bottom:5px;">To be associated with an organization where I can use my skills in a professional, dynamic work environment.</p>
+            <h3 style="font-size:13px;text-decoration:underline;margin:14px 0 4px;">EDUCATIONAL QUALIFICATION:</h3><table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;" id="rpEducationTable"><thead><tr><th style="border:1px solid #111;padding:4px;text-align:left;">Degree / Certificate</th><th style="border:1px solid #111;padding:4px;text-align:left;">Institute</th><th style="border:1px solid #111;padding:4px;text-align:left;">Board / University</th><th style="border:1px solid #111;padding:4px;text-align:left;">Year</th><th style="border:1px solid #111;padding:4px;text-align:left;">Division</th></tr></thead><tbody></tbody></table>
+            <h3 style="font-size:13px;text-decoration:underline;margin:12px 0 3px;">SKILLS:</h3><div id="rpSkills" style="white-space:pre-wrap;"></div>
+            <h3 style="font-size:13px;text-decoration:underline;margin:12px 0 3px;">STRENGTHS:</h3><ul id="rpStrengths" style="margin:2px 0 8px;padding-left:20px;"></ul>
+            <div id="rpExperienceSection"><h3 style="font-size:13px;text-decoration:underline;margin:12px 0 3px;">WORK EXPERIENCE:</h3><div id="rpExperience" style="white-space:pre-wrap;"></div></div>
+            <h3 style="font-size:13px;text-decoration:underline;margin:12px 0 3px;">PERSONAL DETAILS:</h3><table style="width:100%;border-collapse:collapse;font-size:12px;"><tbody><tr><td style="width:27%;padding:2px 0;font-weight:bold;">Father's Name</td><td style="width:4%;">:</td><td id="rpFather">—</td></tr><tr><td style="padding:2px 0;font-weight:bold;">Date of Birth</td><td>:</td><td id="rpDob">—</td></tr><tr><td style="padding:2px 0;font-weight:bold;">Address</td><td>:</td><td id="rpPersonalAddress">—</td></tr><tr><td style="padding:2px 0;font-weight:bold;">Language Known</td><td>:</td><td id="rpLanguages">—</td></tr><tr><td style="padding:2px 0;font-weight:bold;">Hobbies</td><td>:</td><td id="rpHobbies">—</td></tr></tbody></table>
+            <h3 style="font-size:13px;text-decoration:underline;margin:14px 0 3px;">DECLARATION:</h3><p id="rpDeclaration" style="font-style:italic;margin:0;">I hereby declare that the above information is true to the best of my knowledge.</p>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:32px;gap:20px;"><div><div style="font-weight:bold;">DATE:</div><div id="rpDate">____________</div><div id="rpPlace">PLACE</div></div><div style="text-align:right;min-width:120px;"><div style="border-top:1px solid #111;padding-top:4px;" id="rpSignature">YOUR NAME</div></div></div>
+          </div>
+          </div></div>`;
+        }
+        function showResumePreviewPage() {
+          updateResumePreview();
+          const form=document.getElementById('resumeFormStep');
+          const preview=document.getElementById('resumePreviewStep');
+          if(form)form.style.display='none';
+          if(preview)preview.style.display='block';
+          const modal=document.getElementById('modalBodyContent');
+          if(modal)modal.scrollTop=0;
+        }
+        function editResumeForm() {
+          const form=document.getElementById('resumeFormStep');
+          const preview=document.getElementById('resumePreviewStep');
+          if(preview)preview.style.display='none';
+          if(form)form.style.display='block';
+          const modal=document.getElementById('modalBodyContent');
+          if(modal)modal.scrollTop=0;
+        }
+        async function downloadResumeFromForm() {
+          updateResumePreview();
+          showResumePreviewPage();
+          setTimeout(()=>downloadResumePDF(),150);
+        }
+        function addResumeEducationRow(data={}) {
+          const body=document.getElementById('resumeEducationInputBody'); if(!body)return;
+          const tr=document.createElement('tr');
+          const vals=[data.degree||'',data.institute||'',data.board||'',data.year||'',data.division||''];
+          const labels=['Degree','Institute','Board/University','Year','Division'];
+          vals.forEach((val,i)=>{const td=document.createElement('td');td.style.cssText='border:1px solid #d4d8dc;padding:3px;';const input=document.createElement('input');input.className='resume-edu-cell';input.setAttribute('aria-label',labels[i]);input.value=val;input.oninput=updateResumePreview;td.appendChild(input);tr.appendChild(td);});
+          const action=document.createElement('td');action.style.cssText='border:1px solid #d4d8dc;text-align:center;padding:3px;';const btn=document.createElement('button');btn.type='button';btn.textContent='×';btn.style.cssText='background:#dc3545;color:white;border:0;border-radius:3px;padding:5px 8px;';btn.onclick=function(){removeResumeEducationRow(this);};action.appendChild(btn);tr.appendChild(action);body.appendChild(tr);
+          updateResumePreview();
+        }
+        function removeResumeEducationRow(button) {
+          const body=document.getElementById('resumeEducationInputBody');if(!body)return;
+          const row=button.closest('tr');if(row)row.remove();updateResumePreview();
+        }
+        function loadResumePhoto(event) {
+          const file=event.target.files && event.target.files[0]; if(!file)return;
+          if(!file.type.startsWith('image/')){alert('कृपया image file चुनें।');return;}
+          const reader=new FileReader(); reader.onload=e=>{const p=document.getElementById('rpPhoto');if(p){p.src=e.target.result;p.style.display='block';}};reader.readAsDataURL(file);
+        }
+        function updateResumePreview() {
+          const v=id=>(document.getElementById(id)?.value||'').trim();
+          const set=(id,value,fallback='—')=>{const e=document.getElementById(id);if(e)e.innerText=value||fallback;};
+          set('rpName',v('resumeName'),'YOUR NAME');
+          set('rpAddressLine',v('resumeAddress')?'ADDRESS : '+v('resumeAddress'):'ADDRESS :');
+          set('rpPhoneLine',v('resumePhone')?'MOBILE NO : '+v('resumePhone'):'MOBILE NO :');
+          set('rpEmailLine',v('resumeEmail')?'EMAIL ID : '+v('resumeEmail'):'EMAIL ID :');
+          set('rpObjective',v('resumeRole'),'To be associated with an organization where I can use my skills in a professional, dynamic work environment.');
+          const tbody=document.querySelector('#rpEducationTable tbody');
+          if(tbody){
+            tbody.innerHTML='';
+            const rows=[...(document.querySelectorAll('#resumeEducationInputBody tr'))].map(tr=>[...tr.querySelectorAll('input')].map(i=>i.value.trim())).filter(row=>row.some(Boolean));
+            rows.forEach(row=>{const tr=document.createElement('tr');row.slice(0,5).forEach(cell=>{const td=document.createElement('td');td.style.cssText='border:1px solid #111;padding:4px;';td.textContent=cell;tr.appendChild(td);});tbody.appendChild(tr);});
+            if(!rows.length){const tr=document.createElement('tr');tr.innerHTML='<td colspan="5" style="border:1px solid #111;padding:4px;">Education details</td>';tbody.appendChild(tr);}
+          }
+          set('rpSkills',v('resumeSkills'),'');
+          const strengths=document.getElementById('rpStrengths');
+          if(strengths){strengths.innerHTML='';const items=v('resumeStrengths').split(',').map(x=>x.trim()).filter(Boolean);items.forEach(item=>{const li=document.createElement('li');li.textContent=item;strengths.appendChild(li);});}
+          set('rpExperience',v('resumeExperience'),'');
+          const expSection=document.getElementById('rpExperienceSection');if(expSection)expSection.style.display=v('resumeExperience')?'':'none';
+          set('rpFather',v('resumeFather'));set('rpDob',v('resumeDob'));set('rpPersonalAddress',v('resumeAddress'));
+          set('rpLanguages',v('resumeLanguages'));set('rpHobbies',v('resumeHobbies'));
+          set('rpDeclaration',v('resumeDeclaration'),'I hereby declare that the above information is true to the best of my knowledge.');
+          set('rpDate',v('resumeDate'),'____________');set('rpPlace',v('resumePlace'),'PLACE');set('rpSignature',v('resumeName'),'YOUR NAME');
+        }
+        async function downloadResumePDF() {
+          const area=document.getElementById('resumePreview');if(!area)return;
+          if(!window.html2canvas||!window.jspdf){alert('PDF library load नहीं हुई। Internet connection जांचें।');return;}
+          try {
+            const canvas=await html2canvas(area,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+            const {jsPDF}=window.jspdf;const pdf=new jsPDF('p','mm','a4');
+            const img=canvas.toDataURL('image/jpeg',0.98), margin=8, w=194, h=canvas.height*w/canvas.width;
+            let left=h,pos=margin;pdf.addImage(img,'JPEG',margin,pos,w,h);left-=281;
+            while(left>0){pos=margin-(h-left);pdf.addPage();pdf.addImage(img,'JPEG',margin,pos,w,h);left-=281;}
+            pdf.save('Pradeep-E-Services-Resume.pdf');
+          } catch(err){alert('PDF बनाने में समस्या आई: '+err.message);}
         }
 
         // ================= DECLARATION TOOL LOGIC =================
