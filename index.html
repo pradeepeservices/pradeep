@@ -172,6 +172,15 @@
             .decl-sheet { padding: 10px; font-size: 12px; }
         }
 
+        #printableDeclarationArea { background:#fff; color:#111; font-family:Arial,"Noto Sans Devanagari",sans-serif; font-size:13px; line-height:1.65; }
+        #printableDeclarationArea p, #printableDeclarationArea li { text-align:justify; margin:8px 0; }
+        @media print {
+          body * { visibility:hidden !important; }
+          #printableDeclarationArea, #printableDeclarationArea * { visibility:visible !important; }
+          #printableDeclarationArea { position:absolute;left:0;top:0;width:210mm;max-width:none;min-height:297mm;margin:0;padding:12mm 14mm;box-shadow:none;border:0;font-size:11.5pt; }
+          #declStepTwo > div:first-child { display:none !important; }
+          @page { size:A4; margin:0; }
+        }
         #vacancyPage .post-poster-area { margin-top: 18px; }
     </style>
 </head>
@@ -1952,10 +1961,11 @@
             } else if(toolType === 'declaration') {
                 if(pageBox) pageBox.classList.add('declaration-modal-mode');
                 html = renderDeclarationToolHTML();
-                setTimeout(() => { initDeclarationDates(); }, 50);
+
             }
             document.getElementById('modalBodyContent').innerHTML = html; 
             openPageModal();
+            if(toolType === 'declaration') renderDeclarationFields();
         }
 
         // ================= DECLARATION TOOL LOGIC =================
@@ -2281,6 +2291,131 @@
                 document.getElementById('tools-heading').innerText = '🛠️ Online Utility Tools';
             }
         }
+
+        // Income and domicile declaration generator; limited to this utility only.
+        let declarationPhotoData = '';
+        function renderDeclarationToolHTML() {
+          return `
+          <div id="declStepOne">
+            <h3 style="text-align:center;color:#2a5298;margin:0 0 12px;">आय एवं स्थानीय निवासी घोषणा-पत्र जनरेटर</h3>
+            <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;padding:14px;max-width:820px;margin:auto;">
+              <label>घोषणा-पत्र का प्रकार चुनें</label>
+              <select id="declDocType" onchange="renderDeclarationFields()" style="width:100%;padding:10px;margin:5px 0 12px;">
+                <option value="income">आय प्रमाण-पत्र घोषणा-पत्र</option>
+                <option value="domicile">स्थानीय निवासी (निवास) घोषणा-पत्र</option>
+              </select>
+              <div id="declDynamicFields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;"></div>
+              <div style="margin-top:10px;"><label>आवेदक का फोटो (वैकल्पिक)</label><input id="declPhotoUpload" type="file" accept="image/*" onchange="previewDeclarationPhoto(event)"></div>
+              <button type="button" onclick="generateDeclarationPreview()" style="margin-top:14px;background:#2563eb;">घोषणा-पत्र तैयार करें</button>
+            </div>
+          </div>
+          <div id="declStepTwo" style="display:none;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 auto 12px;max-width:210mm;">
+              <button type="button" onclick="backToDeclarationForm()" style="width:auto;background:#64748b;">✏️ विवरण एडिट करें</button>
+              <button type="button" onclick="window.print()" style="width:auto;background:#16a34a;">🖨️ प्रिंट / PDF सेव करें</button>
+            </div>
+            <div id="printableDeclarationArea" class="decl-sheet" style="min-height:297mm;max-width:210mm;padding:14mm 15mm;margin:auto;">
+              <div id="declGeneratedDocument"></div>
+            </div>
+          </div>`;
+        }
+        function renderDeclarationFields() {
+          const type=document.getElementById('declDocType')?.value || 'income';
+          const common=`
+            <div><label>आवेदक का पूरा नाम</label><input id="declName" placeholder="नाम दर्ज करें"></div>
+            <div><label>पिता / पति का नाम</label><input id="declFather" placeholder="पिता / पति का नाम"></div>
+            <div><label>जन्म दिनांक</label><input id="declDob" type="date"></div>
+            <div><label>आयु (वर्ष)</label><input id="declAge" placeholder="लगभग आयु"></div>
+            <div><label>मोबाइल / फोन नंबर</label><input id="declMobile" maxlength="10" placeholder="मोबाइल नंबर"></div>
+            <div><label>जिला</label><input id="declDistrict" placeholder="जिला"></div>
+            <div><label>तहसील</label><input id="declTehsil" placeholder="तहसील"></div>
+            <div><label>ग्राम / वार्ड / मोहल्ला</label><input id="declVillage" placeholder="ग्राम / वार्ड"></div>
+            <div style="grid-column:1/-1"><label>वर्तमान पूरा पता</label><input id="declAddress" placeholder="ग्राम, पोस्ट, तहसील, जिला"></div>
+            <div><label>दिनांक (घोषणा)</label><input id="declDate" type="date"></div>
+            <div><label>स्थान</label><input id="declPlace" placeholder="स्थान"></div>`;
+          const income=`
+            <div><label>वार्ड नंबर</label><input id="declWard" placeholder="वार्ड नंबर"></div>
+            <div><label>नगर निगम / ग्राम पंचायत</label><input id="declLocalBody" placeholder="स्थानीय निकाय"></div>
+            <div><label>वर्तमान निवास किस वर्ष से</label><input id="declResidenceSince" placeholder="वर्ष"></div>
+            <div><label>किरायेदार / मकान स्वामी</label><select id="declResidenceType"><option>स्वयं का मकान</option><option>किराये का मकान</option><option>अन्य</option></select></div>
+            <div><label>खेती / कृषि भूमि से वार्षिक आय (₹)</label><input id="declAgriculture" placeholder="रुपये"></div>
+            <div><label>कृषि आय (शब्दों में)</label><input id="declAgricultureWords" placeholder="शब्दों में"></div>
+            <div><label>व्यवसाय से वार्षिक आय (₹)</label><input id="declBusiness" placeholder="रुपये"></div>
+            <div><label>व्यवसाय आय (शब्दों में)</label><input id="declBusinessWords" placeholder="शब्दों में"></div>
+            <div><label>अचल संपत्ति से वार्षिक आय (₹)</label><input id="declProperty" placeholder="रुपये"></div>
+            <div><label>अचल संपत्ति आय (शब्दों में)</label><input id="declPropertyWords" placeholder="शब्दों में"></div>
+            <div><label>परिवार के सदस्यों की संख्या</label><input id="declFamilyCount" placeholder="कुल सदस्य"></div>
+            <div style="grid-column:1/-1"><label>परिवार के सदस्य (नाम / संबंध / आयु)</label><textarea id="declFamilyMembers" rows="3" placeholder="सदस्य 1 से 8 तक का विवरण"></textarea></div>
+            <div><label>परिवार की कुल वार्षिक आय (₹)</label><input id="declFamilyIncome" placeholder="रुपये"></div>
+            <div><label>कुल आय (शब्दों में)</label><input id="declFamilyIncomeWords" placeholder="शब्दों में"></div>
+            <div><label>पूर्व आय प्रमाण-पत्र लिया था?</label><select id="declPriorIncome"><option>नहीं</option><option>हाँ</option></select></div>
+            <div><label>पूर्व प्रमाण-पत्र की आय (₹)</label><input id="declPriorAmount" placeholder="यदि लागू हो"></div>
+            <div><label>वर्तमान / परिवर्तित आय (₹)</label><input id="declCurrentAmount" placeholder="रुपये"></div>`;
+          const domicile=`
+            <div><label>पति का नाम (यदि लागू हो)</label><input id="declSpouse" placeholder="पति / पत्नी का नाम"></div>
+            <div><label>आश्रित पुत्र / पुत्री का विवरण</label><textarea id="declDependents" rows="3" placeholder="नाम एवं लगभग आयु"></textarea></div>
+            <div><label>मध्यप्रदेश का मूल निवासी नंबर</label><input id="declResidentNo" placeholder="यदि लागू हो"></div>
+            <div><label>मोहल्ला / ग्राम</label><input id="declLocality" placeholder="मोहल्ला / ग्राम"></div>
+            <div><label>निवास का प्रकार</label><select id="declDomicileBasis"><option>मध्यप्रदेश में 10 वर्ष से निरंतर निवास</option><option>मध्यप्रदेश में जन्म / पैतृक निवास</option><option>अन्य लागू श्रेणी</option></select></div>
+            <div><label>निवास प्रारंभ वर्ष</label><input id="declDomicileSince" placeholder="वर्ष"></div>
+            <div style="grid-column:1/-1"><label>शासकीय सेवा / पद / कार्यालय का विवरण (यदि लागू हो)</label><textarea id="declGovtService" rows="3" placeholder="विभाग, पद, कार्यालय, जिला आदि"></textarea></div>
+            <div><label>भूतपूर्व सैनिक?</label><select id="declExService"><option>नहीं</option><option>हाँ</option></select></div>
+            <div><label>सैनिक / निवास संबंधी अतिरिक्त विवरण</label><input id="declServiceDetails" placeholder="यदि लागू हो"></div>`;
+          document.getElementById('declDynamicFields').innerHTML=common+(type==='income'?income:domicile);
+          const d=document.getElementById('declDate'); if(d && !d.value) d.value=new Date().toISOString().slice(0,10);
+        }
+        function previewDeclarationPhoto(event) {
+          const f=event.target.files?.[0]; if(!f){declarationPhotoData='';return;}
+          const r=new FileReader(); r.onload=()=>{declarationPhotoData=r.result;}; r.readAsDataURL(f);
+        }
+        function declVal(id){return (document.getElementById(id)?.value||'').trim();}
+        function declEsc(v){return String(v||'________________').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+        function generateDeclarationPreview() {
+          const type=declVal('declDocType'), name=declVal('declName'), father=declVal('declFather');
+          if(!name||!father){alert('कृपया आवेदक का नाम और पिता/पति का नाम भरें।');return;}
+          const v=id=>declEsc(declVal(id)||'________________');
+          const photo=declarationPhotoData?`<img src="${declarationPhotoData}" style="position:absolute;right:0;top:0;width:30mm;height:36mm;object-fit:cover;border:1px solid #222;">`:'<div style="position:absolute;right:0;top:0;width:30mm;height:36mm;border:1px solid #222;display:flex;align-items:center;justify-content:center;">फोटो लगाये</div>';
+          let html='';
+          if(type==='income'){
+            html=`<div style="position:relative;text-align:center;border-top:2px solid #222;border-bottom:2px solid #222;padding:8px 35mm 10px;margin-bottom:18px;">
+              ${photo}<div style="font-weight:bold;font-size:17px;">आय हेतु<br>स्व-प्रमाणित घोषणा-पत्र<br>(अटलहित / काजग पत्र)</div></div>
+              <p>वार्ड नं ${v('declWard')} &nbsp; नगर निगम / ग्राम पंचायत ${v('declLocalBody')}</p>
+              <p>मैं <b>${v('declName')}</b> आत्मज/पति श्री <b>${v('declFather')}</b>, जन्म दिनांक ${v('declDob')}, आयु लगभग ${v('declAge')} वर्ष, शपथपूर्वक कथन करता/करती हूँ कि मेरे द्वारा यह आवेदन पत्र केन्द्र शासन की सेवाओं में मांगे जाने पर प्रस्तुत किया जा रहा है:-</p>
+              <p>1. मैं वर्तमान में ${v('declAddress')} में निवासरत हूँ। मोबाइल/फोन नं. ${v('declMobile')}।</p>
+              <p>2. मेरे नाम से ग्राम / स्थान ${v('declVillage')} में ${v('declResidenceType')} है। वर्तमान निवास वर्ष ${v('declResidenceSince')} से है।</p>
+              <p>3. मेरा व्यवसाय ${v('declBusiness')} है, इससे मुझे वार्षिक आय रुपये ${v('declBusiness')} (शब्दों में ${v('declBusinessWords')}) है।</p>
+              <p>4. कृषि / भूमि से मेरी वार्षिक आय रुपये ${v('declAgriculture')} (शब्दों में ${v('declAgricultureWords')}) है।</p>
+              <p>5. अचल संपत्ति से मेरी वार्षिक आय रुपये ${v('declProperty')} (शब्दों में ${v('declPropertyWords')}) है।</p>
+              <p>6. मेरे परिवार में कुल ${v('declFamilyCount')} सदस्य हैं: ${v('declFamilyMembers')}</p>
+              <p>7. मेरे परिवार की कुल वार्षिक आय रुपये ${v('declFamilyIncome')} (शब्दों में ${v('declFamilyIncomeWords')}) है।</p>
+              <p>8. मैंने पूर्व में आय प्रमाण-पत्र ${v('declPriorIncome')} किया है। पूर्व आय रुपये ${v('declPriorAmount')} तथा वर्तमान / परिवर्तित आय रुपये ${v('declCurrentAmount')} है।</p>
+              <p style="margin-top:24px;">मैं यह घोषणा करता/करती हूँ कि उपरोक्त जानकारी सत्य एवं सही है। असत्य जानकारी पाए जाने पर नियमानुसार कार्यवाही के लिए मैं स्वयं उत्तरदायी रहूँगा/रहूँगी।</p>
+              <div style="display:flex;justify-content:space-between;margin-top:38px;"><div>दिनांक: ${v('declDate')}<br>स्थान: ${v('declPlace')}</div><div style="text-align:center;">हस्ताक्षर<br><br>आवेदक</div></div>`;
+          } else {
+            html=`<div style="position:relative;text-align:center;padding:0 35mm 12px 0;margin-bottom:12px;border-bottom:1px solid #222;">
+              ${photo}<h3 style="margin:0;font-size:17px;">कानूनी बाध्यता के कारण स्थानीय निवासी प्रमाण पत्र</h3><h3 style="margin:4px 0;text-decoration:underline;">घोषणा पत्र</h3></div>
+              <p>मैं ${v('declName')} आत्मज/पति श्री ${v('declFather')}, जन्म दिनांक ${v('declDob')}, आयु (लगभग) ${v('declAge')} वर्ष, शपथपूर्वक सत्य कथन करता/करती हूँ कि मेरे द्वारा यह आवेदन पत्र केन्द्र शासन की सेवाओं में मांगे जाने पर प्रस्तुत किया जा रहा है:-</p>
+              <ol><li>मैं वर्तमान में ${v('declAddress')} में निवासरत हूँ। मोबाइल/फोन नं. ${v('declMobile')}।</li>
+              <li>मेरे पति का नाम ${v('declSpouse')} एवं उम्र लगभग ${v('declAge')} वर्ष है।</li>
+              <li>मेरे आश्रित पुत्र/पुत्री का विवरण: ${v('declDependents')}।</li>
+              <li>मध्यप्रदेश शासन के निर्देशों के अंतर्गत मेरी निवासी पात्रता का आधार: ${v('declDomicileBasis')}। मूल निवासी नंबर ${v('declResidentNo')}।</li>
+              <li>मैं मध्यप्रदेश में ग्राम/मोहल्ला ${v('declLocality')}, तहसील ${v('declTehsil')}, जिला ${v('declDistrict')} में ${v('declDomicileSince')} से निवासरत हूँ।</li>
+              <li>शासकीय सेवा / पद / कार्यालय का विवरण (यदि लागू हो): ${v('declGovtService')}।</li>
+              <li>भूतपूर्व सैनिक संबंधी विवरण: ${v('declExService')}। ${v('declServiceDetails')}</li></ol>
+              <p>मैं यह सत्यापित करता/करती हूँ कि घोषणा-पत्र में दी गई जानकारी मेरे ज्ञान एवं विश्वास के आधार पर सत्य है। कोई तथ्य छिपाया नहीं गया है। गलत जानकारी पाए जाने पर नियमानुसार कार्यवाही के लिए मैं उत्तरदायी रहूँगा/रहूँगी।</p>
+              <div style="margin-top:20px;text-align:center;text-decoration:underline;font-weight:bold;">// सत्यापन //</div>
+              <p>मैं ${v('declName')} आत्मज/पति श्री ${v('declFather')} सत्यापन करता/करती हूँ कि उपर्युक्त कथन सत्य हैं।</p>
+              <div style="display:flex;justify-content:space-between;margin-top:30px;"><div>सत्यापन आज दिनांक ${v('declDate')}<br>स्थान: ${v('declPlace')}</div><div style="text-align:center;">हस्ताक्षर<br><br>आवेदक</div></div>`;
+          }
+          document.getElementById('declGeneratedDocument').innerHTML=html;
+          document.getElementById('declStepOne').style.display='none';
+          document.getElementById('declStepTwo').style.display='block';
+        }
+        function backToDeclarationForm(){
+          document.getElementById('declStepTwo').style.display='none';
+          document.getElementById('declStepOne').style.display='block';
+        }
+
     </script>
 </body>
 </html>
