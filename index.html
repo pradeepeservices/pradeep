@@ -299,6 +299,7 @@
             <div class="tool-card" onclick="openToolModal('bg')">✨ Background Remove / Change</div>
             <div class="tool-card" onclick="openToolModal('bankid')">💳 Bank Identity Card Maker</div>
             <div class="tool-card" onclick="openToolModal('declaration')" style="background:#eefbf0; border-color:#86efac; color:#166534;">📝 Self Declaration Form (आय / निवास)</div>
+            <div class="tool-card" onclick="openToolModal('resume')" style="background:#f5f3ff;border-color:#c4b5fd;color:#5b21b6;">📄 Resume Maker (रिज्यूमे बनाएं)</div>
         </div>
     </div>
 
@@ -741,7 +742,7 @@
             showVacancyDirect(cat, itemId, true);
         }
 
-        const SHAREABLE_TOOLS = ['crop', 'pdf', 'bg', 'bankid', 'declaration'];
+        const SHAREABLE_TOOLS = ['crop', 'pdf', 'bg', 'bankid', 'declaration', 'resume'];
 
         function updateToolShareUrl(toolType) {
             if(!SHAREABLE_TOOLS.includes(toolType)) return;
@@ -1953,9 +1954,122 @@
                 if(pageBox) pageBox.classList.add('declaration-modal-mode');
                 html = renderDeclarationToolHTML();
                 setTimeout(() => { initDeclarationDates(); }, 50);
+            } else if(toolType === 'resume') {
+                if(pageBox) pageBox.classList.add('declaration-modal-mode');
+                html = renderResumeMakerHTML();
             }
             document.getElementById('modalBodyContent').innerHTML = html; 
             openPageModal();
+        }
+
+
+        // ================= RESUME MAKER TOOL (isolated addition) =================
+        function renderResumeMakerHTML() {
+          return `<h2 style="color:#1e3c72;margin-top:0;">📄 Resume Maker / रिज्यूमे बनाएं</h2>
+          <p style="font-size:13px;color:#64748b;">सैंपल फोटो के अनुसार प्रोफेशनल रिज्यूमे बनाएं। अपनी जानकारी भरें, फोटो लगाएं और जरूरत हो तो रिज्यूमे में सीधे क्लिक करके बदलाव करें।</p>
+          <div class="bankid-help">Education में हर qualification की जानकारी अलग लाइन में इस क्रम में लिखें: Degree | Institute | Board/University | Year | Division</div>
+          <div class="bankid-editor-grid" style="margin-bottom:18px;">
+            <div><label>पूरा नाम</label><input id="resumeName" type="text" placeholder="RAHUL KUMAR" oninput="updateResumePreview()"></div>
+            <div><label>मोबाइल नंबर</label><input id="resumePhone" type="text" placeholder="Mobile number" oninput="updateResumePreview()"></div>
+            <div><label>ईमेल</label><input id="resumeEmail" type="text" placeholder="Email ID" oninput="updateResumePreview()"></div>
+            <div class="full"><label>पूरा पता</label><input id="resumeAddress" type="text" placeholder="Village, Post, District, State, PIN" oninput="updateResumePreview()"></div>
+            <div class="full"><label>Career Objective</label><textarea id="resumeRole" rows="3" placeholder="अपना Career Objective लिखें" oninput="updateResumePreview()"></textarea></div>
+            <div class="full"><label>Education Qualification (हर योग्यता अलग लाइन में, कॉलम | से अलग करें)</label><textarea id="resumeEducation" rows="5" placeholder="10th | XXXX School | U.P. Board | 2005 | Third&#10;12th | XXXX Inter College | U.P. Board | 2010 | First&#10;B.A. | XXXX Degree College | CCS University | 2013 | First" oninput="updateResumePreview()"></textarea></div>
+            <div><label>Skills / कौशल</label><textarea id="resumeSkills" rows="3" placeholder="Basic Computer Knowledge, Typing..." oninput="updateResumePreview()"></textarea></div>
+            <div><label>Strengths / खूबियां (हर लाइन में एक)</label><textarea id="resumeStrengths" rows="4" placeholder="Confidence&#10;Sincerity&#10;Punctuality&#10;Hard working" oninput="updateResumePreview()"></textarea></div>
+            <div class="full"><label>कार्य अनुभव (यदि हो)</label><textarea id="resumeExperience" rows="3" placeholder="Company, Role, Duration / अनुभव नहीं है तो खाली छोड़ें" oninput="updateResumePreview()"></textarea></div>
+            <div><label>पिता का नाम</label><input id="resumeFather" type="text" placeholder="Father's Name" oninput="updateResumePreview()"></div>
+            <div><label>जन्म तिथि</label><input id="resumeDob" type="text" placeholder="DD Month YYYY" oninput="updateResumePreview()"></div>
+            <div class="full"><label>स्थायी पता (यदि ऊपर दिए पते से अलग हो)</label><input id="resumePersonalAddress" type="text" placeholder="Permanent address" oninput="updateResumePreview()"></div>
+            <div><label>भाषा ज्ञान</label><input id="resumeLanguages" type="text" placeholder="Hindi, English..." oninput="updateResumePreview()"></div>
+            <div><label>Hobbies / रुचियां</label><input id="resumeHobbies" type="text" placeholder="Reading, Music..." oninput="updateResumePreview()"></div>
+            <div class="full"><label>फोटो अपलोड करें</label><input type="file" id="resumePhotoInput" accept="image/*" onchange="loadResumePhoto(event)"></div>
+            <div><label>स्थान (Date के नीचे)</label><input id="resumePlace" type="text" placeholder="SHARANPUR" oninput="updateResumePreview()"></div>
+            <div><label>तारीख</label><input id="resumeDate" type="text" placeholder="DD/MM/YYYY" oninput="updateResumePreview()"></div>
+            <div class="full"><label>Declaration (घोषणा)</label><textarea id="resumeDeclaration" rows="2" oninput="updateResumePreview()">I hereby declare that the above information is true to the best of my knowledge.</textarea></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" onclick="updateResumePreview()" style="flex:1">🔄 Preview Update</button><button type="button" onclick="downloadResumePDF()" style="flex:1;background:#15803d">⬇️ Download Resume PDF</button></div>
+          <p style="font-size:13px;color:#64748b;">नीचे दिख रहे रिज्यूमे में सीधे क्लिक करके भी टेक्स्ट एडिट कर सकते हैं।</p>
+          <div id="resumePreview" contenteditable="true" style="background:#fff;color:#111;border:1px solid #cbd5e1;padding:24px;max-width:800px;width:100%;margin:14px auto;font-family:Arial,sans-serif;font-size:12px;line-height:1.35;min-height:760px;box-sizing:border-box;">
+            <div style="text-align:center;font-size:17px;font-weight:bold;text-decoration:underline;margin-bottom:18px;">RESUME</div>
+            <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;">
+              <div style="flex:1;min-width:0;"><div id="rpName" style="font-weight:bold;text-transform:uppercase;margin-bottom:4px;">YOUR NAME</div><div id="rpAddressLine">ADDRESS :</div><div id="rpPhoneLine">MOBILE NO :</div><div id="rpEmailLine">EMAIL ID :</div></div>
+              <img id="rpPhoto" alt="Resume Photo" style="width:92px;height:110px;object-fit:cover;border:1px solid #aaa;display:none;">
+            </div>
+            <h3 style="font-size:13px;text-decoration:underline;margin:14px 0 3px;">CAREER OBJECTIVE:</h3><p id="rpObjective" style="margin:0;border-bottom:1px solid #aaa;padding-bottom:5px;">To work with a progressive organization and use my skills for the growth of the organization.</p>
+            <h3 style="font-size:13px;text-decoration:underline;margin:14px 0 4px;">EDUCATIONAL QUALIFICATION:</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;" id="rpEducationTable"><thead><tr><th style="border:1px solid #111;padding:4px;text-align:left;">Degree / Certificate</th><th style="border:1px solid #111;padding:4px;text-align:left;">Institute</th><th style="border:1px solid #111;padding:4px;text-align:left;">Board / University</th><th style="border:1px solid #111;padding:4px;text-align:left;">Year</th><th style="border:1px solid #111;padding:4px;text-align:left;">Division</th></tr></thead><tbody><tr><td colspan="5" style="border:1px solid #111;padding:4px;">Add your educational qualifications in the form above.</td></tr></tbody></table>
+            <h3 style="font-size:13px;text-decoration:underline;margin:12px 0 3px;">SKILLS:</h3><div id="rpSkills" style="white-space:pre-wrap;">Add skills.</div>
+            <h3 style="font-size:13px;text-decoration:underline;margin:12px 0 3px;">STRENGTHS:</h3><ul id="rpStrengths" style="margin:2px 0 8px;padding-left:20px;"><li>Confidence</li><li>Sincerity</li><li>Punctuality</li><li>Hard working</li></ul>
+            <div id="rpExperienceSection"><h3 style="font-size:13px;text-decoration:underline;margin:12px 0 3px;">WORK EXPERIENCE:</h3><div id="rpExperience" style="white-space:pre-wrap;"></div></div>
+            <h3 style="font-size:13px;text-decoration:underline;margin:12px 0 3px;">PERSONAL DETAILS:</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;"><tbody>
+              <tr><td style="width:27%;padding:2px 0;font-weight:bold;">Father's Name</td><td style="width:4%;">:</td><td id="rpFather">—</td></tr>
+              <tr><td style="padding:2px 0;font-weight:bold;">Date of Birth</td><td>:</td><td id="rpDob">—</td></tr>
+              <tr><td style="padding:2px 0;font-weight:bold;">Address</td><td>:</td><td id="rpPersonalAddress">—</td></tr>
+              <tr><td style="padding:2px 0;font-weight:bold;">Language Known</td><td>:</td><td id="rpLanguages">—</td></tr>
+              <tr><td style="padding:2px 0;font-weight:bold;">Hobbies</td><td>:</td><td id="rpHobbies">—</td></tr>
+            </tbody></table>
+            <h3 style="font-size:13px;text-decoration:underline;margin:14px 0 3px;">DECLARATION:</h3><p id="rpDeclaration" style="font-style:italic;margin:0;">I hereby declare that the above information is true to the best of my knowledge.</p>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:32px;gap:20px;"><div><div style="font-weight:bold;">DATE:</div><div id="rpDate">____________</div><div id="rpPlace">PLACE</div></div><div style="text-align:right;min-width:120px;"><div style="border-top:1px solid #111;padding-top:4px;" id="rpSignature">YOUR NAME</div></div></div>
+          </div>`;
+        }
+        function loadResumePhoto(event) {
+          const file=event.target.files && event.target.files[0]; if(!file)return;
+          if(!file.type.startsWith('image/')){alert('कृपया image file चुनें।');return;}
+          const reader=new FileReader(); reader.onload=e=>{const p=document.getElementById('rpPhoto');if(p){p.src=e.target.result;p.style.display='block';}};reader.readAsDataURL(file);
+        }
+        function updateResumePreview() {
+          const v=id=>(document.getElementById(id)?.value||'').trim();
+          const set=(id,value,fallback='—')=>{const e=document.getElementById(id);if(e)e.innerText=value||fallback;};
+          set('rpName',v('resumeName'),'YOUR NAME');
+          set('rpAddressLine',v('resumeAddress') ? 'ADDRESS : '+v('resumeAddress') : 'ADDRESS :');
+          set('rpPhoneLine',v('resumePhone') ? 'MOBILE NO : '+v('resumePhone') : 'MOBILE NO :');
+          set('rpEmailLine',v('resumeEmail') ? 'EMAIL ID : '+v('resumeEmail') : 'EMAIL ID :');
+          set('rpObjective',v('resumeRole'),'To work with a progressive organization and use my skills for the growth of the organization.');
+          const tbody=document.querySelector('#rpEducationTable tbody');
+          if(tbody){
+            const rows=v('resumeEducation').split(/
++/).map(line=>line.trim()).filter(Boolean);
+            tbody.innerHTML='';
+            if(!rows.length){const tr=document.createElement('tr');tr.innerHTML='<td colspan="5" style="border:1px solid #111;padding:4px;">Add your educational qualifications in the form above.</td>';tbody.appendChild(tr);}
+            rows.forEach(line=>{
+              const cells=line.split('|').map(x=>x.trim());
+              while(cells.length<5)cells.push('');
+              const tr=document.createElement('tr');
+              cells.slice(0,5).forEach(cell=>{const td=document.createElement('td');td.style.cssText='border:1px solid #111;padding:4px;';td.textContent=cell;tr.appendChild(td);});
+              tbody.appendChild(tr);
+            });
+          }
+          set('rpSkills',v('resumeSkills'),'Add skills.');
+          const strengths=document.getElementById('rpStrengths');
+          if(strengths){
+            const items=v('resumeStrengths').split(/
++/).map(x=>x.trim()).filter(Boolean);
+            strengths.innerHTML='';
+            (items.length?items:['Confidence','Sincerity','Punctuality','Hard working']).forEach(item=>{const li=document.createElement('li');li.textContent=item;strengths.appendChild(li);});
+          }
+          set('rpExperience',v('resumeExperience'),'');
+          const expSection=document.getElementById('rpExperienceSection');
+          if(expSection)expSection.style.display=v('resumeExperience')?'':'none';
+          set('rpFather',v('resumeFather'));set('rpDob',v('resumeDob'));
+          set('rpPersonalAddress',v('resumePersonalAddress')||v('resumeAddress'));
+          set('rpLanguages',v('resumeLanguages'));set('rpHobbies',v('resumeHobbies'));
+          set('rpDeclaration',v('resumeDeclaration'),'I hereby declare that the above information is true to the best of my knowledge.');
+          set('rpDate',v('resumeDate'),'____________');set('rpPlace',v('resumePlace'),'PLACE');
+          set('rpSignature',v('resumeName'),'YOUR NAME');
+        }
+        async function downloadResumePDF() {
+          const area=document.getElementById('resumePreview');if(!area)return;
+          if(!window.html2canvas||!window.jspdf){alert('PDF library load नहीं हुई। Internet connection जांचें।');return;}
+          try {
+            const canvas=await html2canvas(area,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+            const {jsPDF}=window.jspdf;const pdf=new jsPDF('p','mm','a4');
+            const img=canvas.toDataURL('image/jpeg',0.98), margin=8, w=194, h=canvas.height*w/canvas.width;
+            let left=h,pos=margin;pdf.addImage(img,'JPEG',margin,pos,w,h);left-=281;
+            while(left>0){pos=margin-(h-left);pdf.addPage();pdf.addImage(img,'JPEG',margin,pos,w,h);left-=281;}
+            pdf.save('Pradeep-E-Services-Resume.pdf');
+          } catch(err){alert('PDF बनाने में समस्या आई: '+err.message);}
         }
 
         // ================= DECLARATION TOOL LOGIC =================
