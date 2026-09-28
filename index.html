@@ -18,6 +18,7 @@
     <!-- Firebase App & Realtime Database CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
     <style>
         /* Blue / Purple Theme Styling */
@@ -403,6 +404,40 @@
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
+        const auth = firebase.auth();
+        // SECURITY SETUP: Replace the placeholder below with your Firebase Authentication UID.
+        // Only UIDs listed here can open the Admin Panel.
+        const ADMIN_UIDS = ['KvBhucYSD8czshIdAHb9KzUcqP62'];
+        const isAuthorizedAdmin = user => !!user && ADMIN_UIDS.includes(user.uid);
+        let adminRecaptchaVerifier = null;
+        let adminPhoneConfirmation = null;
+        let adminPhoneLinkVerificationId = null;
+
+        // Complete Gmail email-link sign-in after the user returns from their inbox.
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
+        if (auth.isSignInWithEmailLink(window.location.href)) {
+            let emailForSignIn = window.localStorage.getItem('adminEmailForSignIn');
+            if (!emailForSignIn) emailForSignIn = window.prompt('Apna Gmail address enter karein jahan login link bheja gaya tha:');
+            if (emailForSignIn) {
+                auth.signInWithEmailLink(emailForSignIn, window.location.href).then(result => {
+                    window.localStorage.removeItem('adminEmailForSignIn');
+                    if (isAuthorizedAdmin(result.user)) {
+                        // First Gmail sign-in also offers linking the admin mobile to this same UID.
+                        if (result.user.phoneNumber) { openAdminDashboard(); }
+                        else { openLoginModal(); showAdminPhoneLink(); }
+                    } else {
+                        auth.signOut();
+                        alert('Is Firebase UID ko Admin access nahi diya gaya hai.');
+                    }
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }).catch(error => alert('Gmail login failed: ' + error.message));
+            }
+        }
+        auth.onAuthStateChanged(user => {
+            if (user && !isAuthorizedAdmin(user)) {
+                auth.signOut().then(() => alert('Yeh account authorized Admin nahi hai.'));
+            }
+        });
 
         window.onload = function() {
             if(!localStorage.getItem('admin_pass')) { localStorage.setItem('admin_pass', 'guru82'); }
@@ -814,11 +849,6 @@
         }
 
         function showVacancyDirect(cat, itemId, scrollToTop = true) {
-            if(!categoryIsVisible(cat)) {
-                alert('यह सेक्शन फिलहाल वेबसाइट एडमिन द्वारा Hide किया गया है।');
-                goHome();
-                return;
-            }
             let items = JSON.parse(localStorage.getItem('box_items_' + cat));
             if(!items) return;
             let item = items.find(i => i.id === itemId);
@@ -1062,8 +1092,8 @@
             });
         }
 
-        // Public profile click no longer exposes the Admin Login form.
-        // Owner-only shortcut: click the profile icon 3 times quickly to open Admin Login.
+        // Keep Admin Login hidden from normal profile clicks.
+        // Three quick clicks on the profile icon open the existing Firebase UID-authenticated login.
         let profileTapCount = 0;
         let profileTapTimer = null;
         function handleProfileClick() {
@@ -1076,36 +1106,137 @@
                 openLoginModal();
                 return;
             }
-            let html = `
+            document.getElementById('modalBodyContent').innerHTML = `
                 <h2>Profile</h2>
-                <p style="font-size:14px; color:#555;">Welcome to Pradeep E-Services.</p>
+                <p style="font-size:14px;color:#555;">Welcome to Pradeep E-Services.</p>
             `;
-            document.getElementById('modalBodyContent').innerHTML = html;
             openPageModal();
         }
 
         function openLoginModal() {
+            let linkButton = isAuthorizedAdmin(auth.currentUser) && !auth.currentUser.phoneNumber ? `<button type="button" onclick="showAdminPhoneLink()" style="width:100%;margin:8px 0;">Link mobile to this Gmail Admin</button>` : '';
             let html = `
                 <h2>Admin Login</h2>
-                <p style="font-size:13px; color:#666;">Enter admin password to manage posts and site settings.</p>
-                <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password">
-                <button onclick="verifyAdminLogin()">Login</button>
+                <p style="font-size:13px;color:#666;">Admin access ke liye registered mobile OTP ya Gmail login link ka istemal karein.</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">
+                    <button type="button" onclick="showAdminPhoneLogin()" style="flex:1;min-width:140px;">Mobile OTP</button>
+                    <button type="button" onclick="showAdminEmailLogin()" style="flex:1;min-width:140px;">Gmail Login</button>
+                </div>
+                ${linkButton}
+                <div id="adminAuthMethodArea"></div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
             openPageModal();
         }
 
-        function verifyAdminLogin() {
-            let pass = document.getElementById('adminPasswordInput').value;
-            let savedPass = localStorage.getItem('admin_pass') || 'guru82';
-            if(pass === savedPass) {
-                openAdminDashboard();
-            } else {
-                alert('Incorrect Password!');
+        function showAdminPhoneLogin() {
+            document.getElementById('adminAuthMethodArea').innerHTML = `
+                <label for="adminPhoneNumber">Registered mobile number (country code ke saath)</label>
+                <input type="tel" id="adminPhoneNumber" placeholder="+91XXXXXXXXXX" autocomplete="tel">
+                <div id="admin-recaptcha-container" style="margin:12px 0;"></div>
+                <button type="button" onclick="sendAdminPhoneOtp()">Send SMS OTP</button>
+                <div id="adminOtpArea" style="margin-top:12px;"></div>`;
+            if (adminRecaptchaVerifier) { try { adminRecaptchaVerifier.clear(); } catch(e) {} }
+            adminRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('admin-recaptcha-container', {size:'normal'}, auth);
+            adminRecaptchaVerifier.render().catch(err => console.error(err));
+        }
+
+        async function sendAdminPhoneOtp() {
+            const phone = (document.getElementById('adminPhoneNumber')?.value || '').trim();
+            if (!/^\+[1-9]\d{7,14}$/.test(phone)) { alert('Mobile number country code ke saath daalein, jaise +91XXXXXXXXXX.'); return; }
+            try {
+                adminPhoneConfirmation = await auth.signInWithPhoneNumber(phone, adminRecaptchaVerifier);
+                document.getElementById('adminOtpArea').innerHTML = `<label for="adminPhoneOtp">SMS se mila OTP</label><input id="adminPhoneOtp" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit OTP"><button type="button" onclick="verifyAdminPhoneOtp()">Verify OTP & Login</button>`;
+                alert('OTP bhej diya gaya hai.');
+            } catch (error) { alert('OTP send nahi hua: ' + error.message); if(adminRecaptchaVerifier){try{adminRecaptchaVerifier.clear();}catch(e){}} adminRecaptchaVerifier=null; }
+        }
+
+        async function verifyAdminPhoneOtp() {
+            const code = (document.getElementById('adminPhoneOtp')?.value || '').trim();
+            if (!code) { alert('OTP enter karein.'); return; }
+            try {
+                const result = await adminPhoneConfirmation.confirm(code);
+                if (isAuthorizedAdmin(result.user)) { openAdminDashboard(); }
+                else { await auth.signOut(); alert('OTP sahi hai, lekin yeh Firebase UID Admin ke liye authorized nahi hai.'); }
+            } catch (error) { alert('OTP verification failed: ' + error.message); }
+        }
+
+        function showAdminPhoneLink() {
+            if (!isAuthorizedAdmin(auth.currentUser)) {
+                alert('Pehle authorized Gmail login karein.');
+                return;
             }
+            document.getElementById('adminAuthMethodArea').innerHTML = `
+                <p style="font-size:13px;color:#166534;">Gmail login verified. Ab isi Firebase UID ke saath mobile number link karein. Isse Phone OTP aur Gmail dono se wahi Admin account khulega.</p>
+                <label for="adminLinkPhoneNumber">Mobile number (country code ke saath)</label>
+                <input type="tel" id="adminLinkPhoneNumber" placeholder="+91XXXXXXXXXX" autocomplete="tel">
+                <div id="admin-link-recaptcha-container" style="margin:12px 0;"></div>
+                <button type="button" onclick="sendAdminPhoneLinkOtp()">Send OTP & Link Mobile</button>
+                <div id="adminLinkOtpArea" style="margin-top:12px;"></div>`;
+            if (adminRecaptchaVerifier) { try { adminRecaptchaVerifier.clear(); } catch(e) {} }
+            adminRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('admin-link-recaptcha-container', {size:'normal'}, auth);
+            adminRecaptchaVerifier.render().catch(err => console.error(err));
+        }
+
+        async function sendAdminPhoneLinkOtp() {
+            const phone = (document.getElementById('adminLinkPhoneNumber')?.value || '').trim();
+            if (!isAuthorizedAdmin(auth.currentUser)) { alert('Authorized Gmail session nahi hai.'); return; }
+            if (auth.currentUser.phoneNumber) { alert('Is Admin account ke saath mobile pehle se linked hai.'); openAdminDashboard(); return; }
+            if (!/^\+[1-9]\d{7,14}$/.test(phone)) { alert('Mobile number country code ke saath daalein, jaise +91XXXXXXXXXX.'); return; }
+            try {
+                const phoneProvider = new firebase.auth.PhoneAuthProvider();
+                adminPhoneLinkVerificationId = await phoneProvider.verifyPhoneNumber(phone, adminRecaptchaVerifier);
+                document.getElementById('adminLinkOtpArea').innerHTML = `<label for="adminLinkPhoneOtp">SMS se mila OTP</label><input id="adminLinkPhoneOtp" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit OTP"><button type="button" onclick="verifyAdminPhoneLinkOtp()">Verify OTP & Link</button>`;
+                alert('OTP bhej diya gaya hai. OTP verify karne par mobile isi Gmail UID se link ho jayega.');
+            } catch (error) { alert('Mobile link OTP send nahi hua: ' + error.message); if(adminRecaptchaVerifier){try{adminRecaptchaVerifier.clear();}catch(e){}} adminRecaptchaVerifier=null; }
+        }
+
+        async function verifyAdminPhoneLinkOtp() {
+            const code = (document.getElementById('adminLinkPhoneOtp')?.value || '').trim();
+            if (!code || !adminPhoneConfirmation) { alert('SMS OTP enter karein.'); return; }
+            try {
+                const phoneCredential = firebase.auth.PhoneAuthProvider.credential(adminPhoneLinkVerificationId, code);
+                const result = await auth.currentUser.linkWithCredential(phoneCredential);
+                if (isAuthorizedAdmin(result.user) && result.user.uid === ADMIN_UIDS[0]) {
+                    alert('Mobile number isi Gmail Admin UID se link ho gaya hai.');
+                    openAdminDashboard();
+                } else {
+                    await auth.signOut();
+                    alert('Linked account ka UID authorized Admin UID se match nahi hua. Access deny kiya gaya.');
+                }
+            } catch (error) { alert('OTP verify/link failed: ' + error.message); }
+        }
+
+        function showAdminEmailLogin() {
+            document.getElementById('adminAuthMethodArea').innerHTML = `
+                <p style="font-size:13px;color:#666;">Gmail par secure sign-in link bheja jayega. Link kholkar login complete karein. (Yeh email link hai, 6-digit email OTP nahi.)</p>
+                <label for="adminEmailAddress">Admin Gmail</label>
+                <input type="email" id="adminEmailAddress" placeholder="yourname@gmail.com" autocomplete="email">
+                <button type="button" onclick="sendAdminEmailLink()">Send Gmail Login Link</button>`;
+        }
+
+        async function sendAdminEmailLink() {
+            const email = (document.getElementById('adminEmailAddress')?.value || '').trim();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Valid Gmail address enter karein.'); return; }
+            const actionCodeSettings = { url: window.location.origin + window.location.pathname, handleCodeInApp: true };
+            try {
+                await auth.sendSignInLinkToEmail(email, actionCodeSettings);
+                window.localStorage.setItem('adminEmailForSignIn', email);
+                alert('Gmail par sign-in link bhej diya gaya hai. Inbox kholkar link par click karein.');
+            } catch (error) { alert('Gmail login link send nahi hua: ' + error.message); }
+        }
+
+        function verifyAdminLogin() {
+            alert('Ab Admin Login ke liye Mobile OTP ya Gmail Login Link ka upyog karein.');
+            openLoginModal();
         }
 
         function openAdminDashboard() {
+            if (!isAuthorizedAdmin(auth.currentUser)) {
+                alert('Admin Panel ke liye authorized Firebase OTP/Gmail login zaroori hai.');
+                openLoginModal();
+                return;
+            }
             let aboutVal = localStorage.getItem('page_about') || '';
             let termsVal = localStorage.getItem('page_terms') || '';
             let contactVal = localStorage.getItem('page_contact') || '';
@@ -1402,7 +1533,6 @@
                 </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
-            renderCategoryVisibilityControls();
             toggleFormFieldsBasedOnCategory();
         }
 
