@@ -2257,26 +2257,27 @@
         function passDownloadJpg(){let c=passGetPhoto();if(!c)return;let a=document.createElement('a');a.href=c.toDataURL('image/jpeg',.95);a.download='passport-photo.jpg';a.click()}
         function passBuildSheet(withHandles=false){
           const paper=document.getElementById('passPaper').value,c=document.createElement('canvas'),dpi=300;
-          c.width=paper==='a4'?2480:1800;c.height=paper==='a4'?3508:1200;
+          // Portrait 4x6 sheet (4in wide x 6in tall); A4 stays portrait.
+          c.width=paper==='a4'?2480:1200;c.height=paper==='a4'?3508:1800;
           const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
           const requested=Math.max(1,Math.min(12,parseInt(document.getElementById('passPhotoCount')?.value||'6',10)||6));
           const count=paper==='4x6'?Math.min(12,requested):requested;
-          const [cw,ch]=passDims(),margin=45,gap=22,availW=c.width-margin*2,availH=c.height-margin*2;
-          let best=null;
-          for(let cols=1;cols<=count;cols++){
-            const rows=Math.ceil(count/cols),cellW=(availW-gap*(cols-1))/cols,cellH=(availH-gap*(rows-1))/rows;
-            const scale=Math.min(cellW/(cw/2.54*dpi),cellH/(ch/2.54*dpi));
-            if(!best||scale>best.scale)best={cols,rows,cellW,cellH,scale};
-          }
-          const baseW=(cw/2.54*dpi)*best.scale,baseH=(ch/2.54*dpi)*best.scale;
-          const totalW=best.cols*baseW+(best.cols-1)*gap,totalH=best.rows*baseH+(best.rows-1)*gap;
-          const sx=(c.width-totalW)/2,sy=(c.height-totalH)/2;passSheetLayout=[];
+          const [cw,ch]=passDims(),cols=3,rows=4,margin=paper==='a4'?70:28,gap=paper==='a4'?28:14;
+          const availW=c.width-margin*2,availH=c.height-margin*2;
+          // Keep a fixed 3-column x 4-row grid. Photos start at the top;
+          // unused cells remain blank rather than stretching or centering the chosen count.
+          const cellW=(availW-gap*(cols-1))/cols,cellH=(availH-gap*(rows-1))/rows;
+          const naturalW=cw/2.54*dpi,naturalH=ch/2.54*dpi;
+          const fit=Math.min(1,cellW/naturalW,cellH/naturalH);
+          const baseW=naturalW*fit,baseH=naturalH*fit;
+          passSheetLayout=[];
           for(let i=0;i<count;i++){
-            const row=Math.floor(i/best.cols),col=i%best.cols,sc=Math.max(.5,Math.min(1.5,passSheetScales[i]||1));
-            const bw=baseW*sc,bh=baseH*sc,cx=sx+col*(baseW+gap)+baseW/2,cy=sy+row*(baseH+gap)+baseH/2;
-            const x=cx-bw/2,y=cy-bh/2;
+            const row=Math.floor(i/cols),col=i%cols,sc=Math.max(.5,Math.min(1.5,passSheetScales[i]||1));
+            const bw=baseW*sc,bh=baseH*sc;
+            const x=margin+col*(cellW+gap)+(cellW-bw)/2;
+            const y=margin+row*(cellH+gap)+(cellH-bh)/2;
             ctx.fillStyle='#fff';ctx.fillRect(x,y,bw,bh);passDraw(ctx,x,y,bw,bh);
-            passSheetLayout.push({x,y,w:bw,h:bh,cx,cy,baseW,baseH,scale:sc,index:i});
+            passSheetLayout.push({x,y,w:bw,h:bh,cx:x+bw/2,cy:y+bh/2,baseW,baseH,scale:sc,index:i});
           }
           return c;
         }
@@ -2285,7 +2286,7 @@
         function passSheetPointerMove(e){if(!passActiveResize)return;const c=e.currentTarget,r=c.getBoundingClientRect(),x=(e.clientX-r.left)*c.width/r.width,y=(e.clientY-r.top)*c.height/r.height;const dx=x-passActiveResize.startX,dy=y-passActiveResize.startY;const delta=(dx+dy)/(passActiveResize.startW+passActiveResize.startH);passSheetScales[passActiveResize.index]=Math.max(.5,Math.min(1.5,passActiveResize.startScale*(1+delta*1.5)));passRenderSheetPreview();e.preventDefault();}
         function passSheetPointerUp(e){passActiveResize=null;}
         function passResetSheetSizes(){passSheetScales=[];passRenderSheetPreview();}
-        function passDownloadPDF(){if(!passGetPhoto())return;let c=passBuildSheet();if(!window.jspdf?.jsPDF){alert('PDF library load nahi hui. JPG download karein.');return}let pdf=new jspdf.jsPDF({orientation:'portrait',unit:'mm',format:document.getElementById('passPaper').value==='a4'?'a4':[152.4,101.6]});pdf.addImage(c.toDataURL('image/jpeg',.95),'JPEG',0,0,document.getElementById('passPaper').value==='a4'?210:152.4,document.getElementById('passPaper').value==='a4'?297:101.6);pdf.save('passport-photo-sheet.pdf')}
+        function passDownloadPDF(){if(!passGetPhoto())return;let c=passBuildSheet();if(!window.jspdf?.jsPDF){alert('PDF library load nahi hui. JPG download karein.');return}let pdf=new jspdf.jsPDF({orientation:'portrait',unit:'mm',format:document.getElementById('passPaper').value==='a4'?'a4':[101.6,152.4]});pdf.addImage(c.toDataURL('image/jpeg',.95),'JPEG',0,0,document.getElementById('passPaper').value==='a4'?210:101.6,document.getElementById('passPaper').value==='a4'?297:152.4);pdf.save('passport-photo-sheet.pdf')}
         function passPrint(){if(!passGetPhoto())return;let c=passBuildSheet(),w=window.open('','_blank');if(!w){alert('Print ke liye popup allow karein.');return}w.document.write(`<html><head><title>Passport Photo Print</title><style>@page{size:${document.getElementById('passPaper').value==='a4'?'A4':'4in 6in'};margin:0}body{margin:0}img{width:100%;height:100%;object-fit:fill}</style></head><body><img src="${c.toDataURL('image/jpeg',.98)}"><script>window.onload=()=>{window.focus();window.print()}<\/script></body></html>`);w.document.close()}
         async function passRemoveBG(){if(!passportImg)return alert('Pehle photo upload karein.');const btn=document.getElementById('passRemoveBtn'),status=document.getElementById('passRemoveStatus');try{btn.disabled=true;btn.textContent='AI model load/process ho raha hai…';status.textContent='Pehli baar model download ho raha hai. Is tab ko band na karein.';let source=passportImg;let canvas=document.createElement('canvas');canvas.width=source.naturalWidth||source.width;canvas.height=source.naturalHeight||source.height;canvas.getContext('2d').drawImage(source,0,0);let blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Photo read nahi ho paayi')),'image/png'));let file=new File([blob],'passport-source.png',{type:'image/png'});let mod=await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm');let result=await mod.removeBackground(file,{publicPath:'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/dist/',output:{format:'image/png'}});let url=URL.createObjectURL(result);let out=new Image();out.onload=()=>{passportImg=out;passportCutoutUrl=url;passRender();status.textContent='Background AI se remove ho gaya. Ab background color choose karein.';btn.disabled=false;btn.textContent='✂️ AI se Background Remove Karein'};out.onerror=()=>{URL.revokeObjectURL(url);throw new Error('AI result image load nahi hui')};out.src=url;}catch(e){console.error('AI background removal error:',e);status.textContent='AI remover load/process nahi hua. Internet, browser compatibility ya model CDN issue ho sakta hai.';alert('AI background removal nahi ho paaya: '+(e.message||e));btn.disabled=false;btn.textContent='✂️ AI se Background Remove Karein'}}
         function passEnhance(){if(!passportImg)return alert('Pehle photo upload karein.');let c=document.createElement('canvas');c.width=passportImg.width||passportImg.naturalWidth;c.height=passportImg.height||passportImg.naturalHeight;let x=c.getContext('2d');x.filter='brightness(1.06) contrast(1.08) saturate(1.04)';x.drawImage(passportImg,0,0,c.width,c.height);let im=new Image();im.onload=()=>{passportImg=im;passRender()};im.src=c.toDataURL('image/png')}
