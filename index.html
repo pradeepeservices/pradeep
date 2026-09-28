@@ -1099,7 +1099,7 @@
         function handleProfileClick() {
             profileTapCount++;
             clearTimeout(profileTapTimer);
-            profileTapTimer = setTimeout(() => { profileTapCount = 0; }, 2500);
+            profileTapTimer = setTimeout(() => { profileTapCount = 0; }, 5000);
             if (profileTapCount >= 3) {
                 profileTapCount = 0;
                 clearTimeout(profileTapTimer);
@@ -1117,7 +1117,7 @@
             let linkButton = isAuthorizedAdmin(auth.currentUser) && !auth.currentUser.phoneNumber ? `<button type="button" onclick="showAdminPhoneLink()" style="width:100%;margin:8px 0;">Link mobile to this Gmail Admin</button>` : '';
             let html = `
                 <h2>Admin Login</h2>
-                <p style="font-size:13px;color:#666;">Admin access ke liye registered mobile OTP ya Gmail login link ka istemal karein.</p>
+                <p style="font-size:13px;color:#666;">Admin access ke liye apne registered Gmail aur Firebase password se login karein.</p>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">
                     <button type="button" onclick="showAdminPhoneLogin()" style="flex:1;min-width:140px;">Mobile OTP</button>
                     <button type="button" onclick="showAdminEmailLogin()" style="flex:1;min-width:140px;">Gmail Login</button>
@@ -1209,26 +1209,36 @@
 
         function showAdminEmailLogin() {
             document.getElementById('adminAuthMethodArea').innerHTML = `
-                <p style="font-size:13px;color:#666;">Gmail par secure sign-in link bheja jayega. Link kholkar login complete karein. (Yeh email link hai, 6-digit email OTP nahi.)</p>
+                <p style="font-size:13px;color:#666;">Apne Firebase Authentication mein registered Gmail aur uska Firebase password daalein.</p>
                 <label for="adminEmailAddress">Admin Gmail</label>
-                <input type="email" id="adminEmailAddress" placeholder="yourname@gmail.com" autocomplete="email">
-                <button type="button" onclick="sendAdminEmailLink()">Send Gmail Login Link</button>`;
+                <input type="email" id="adminEmailAddress" placeholder="yourname@gmail.com" autocomplete="username">
+                <label for="adminEmailPassword">Firebase Password</label>
+                <input type="password" id="adminEmailPassword" placeholder="Firebase password" autocomplete="current-password">
+                <button type="button" onclick="loginAdminWithPassword()">Gmail & Password se Login</button>`;
         }
 
-        async function sendAdminEmailLink() {
+        async function loginAdminWithPassword() {
             const email = (document.getElementById('adminEmailAddress')?.value || '').trim();
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Valid Gmail address enter karein.'); return; }
-            const actionCodeSettings = { url: window.location.origin + window.location.pathname, handleCodeInApp: true };
+            const password = document.getElementById('adminEmailPassword')?.value || '';
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Sahi Gmail address daalein.'); return; }
+            if (!password) { alert('Firebase password daalein.'); return; }
             try {
-                await auth.sendSignInLinkToEmail(email, actionCodeSettings);
-                window.localStorage.setItem('adminEmailForSignIn', email);
-                alert('Gmail par sign-in link bhej diya gaya hai. Inbox kholkar link par click karein.');
-            } catch (error) { alert('Gmail login link send nahi hua: ' + error.message); }
+                const result = await auth.signInWithEmailAndPassword(email, password);
+                if (isAuthorizedAdmin(result.user) && result.user.uid === ADMIN_UIDS[0]) {
+                    if (result.user.phoneNumber) openAdminDashboard();
+                    else { openLoginModal(); showAdminPhoneLink(); }
+                } else {
+                    await auth.signOut();
+                    alert('Login hua, lekin is account ka Firebase UID Admin UID se match nahi karta. Admin access deny.');
+                }
+            } catch (error) {
+                alert('Gmail/Password login nahi hua: ' + (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential' ? 'Password galat hai ya Email/Password sign-in enable nahi hai.' : error.message));
+            }
         }
 
         function verifyAdminLogin() {
-            alert('Ab Admin Login ke liye Mobile OTP ya Gmail Login Link ka upyog karein.');
             openLoginModal();
+            showAdminEmailLogin();
         }
 
         function openAdminDashboard() {
