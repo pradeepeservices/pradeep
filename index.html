@@ -1225,8 +1225,8 @@
             try {
                 const result = await auth.signInWithEmailAndPassword(email, password);
                 if (isAuthorizedAdmin(result.user) && result.user.uid === ADMIN_UIDS[0]) {
-                    if (result.user.phoneNumber) openAdminDashboard();
-                    else { openLoginModal(); showAdminPhoneLink(); }
+                    // Gmail/password is sufficient for the authorized Admin UID; do not require SMS/phone linking.
+                    openAdminDashboard();
                 } else {
                     await auth.signOut();
                     alert('Login hua, lekin is account ka Firebase UID Admin UID se match nahi karta. Admin access deny.');
