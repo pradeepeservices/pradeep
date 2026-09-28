@@ -222,7 +222,7 @@
     <!-- Main Section Boxes -->
     <div class="container" id="mainBoxesContainer">
         <!-- Latest Jobs -->
-        <div class="box">
+        <div class="box" id="section-jobs">
             <div class="box-header" id="box-jobs">Latest Jobs</div>
             <div class="box-content" id="content-jobs">
                 <ul><li>Sarkari Result & Online Form Updates</li></ul>
@@ -230,7 +230,7 @@
         </div>
 
         <!-- Admit Card -->
-        <div class="box">
+        <div class="box" id="section-admit">
             <div class="box-header" id="box-admit">Admit Card</div>
             <div class="box-content" id="content-admit">
                 <ul><li>Download Hall Tickets & Exam Dates</li></ul>
@@ -238,7 +238,7 @@
         </div>
 
         <!-- Results -->
-        <div class="box">
+        <div class="box" id="section-result">
             <div class="box-header" id="box-result">Results</div>
             <div class="box-content" id="content-result">
                 <ul><li>Check Exam Results & Merit Lists</li></ul>
@@ -246,7 +246,7 @@
         </div>
 
         <!-- Sarkari Yojana -->
-        <div class="box" style="border-color: #28a745;">
+        <div class="box" id="section-yojana" style="border-color: #28a745;">
             <div class="box-header" style="background: linear-gradient(135deg, #134e5e, #71b280);" id="box-yojana">Sarkari Yojana (संबल, ई-श्रम आदि)</div>
             <div class="box-content" id="content-yojana">
                 <ul>
@@ -258,7 +258,7 @@
         </div>
 
         <!-- Offline Forms -->
-        <div class="box" style="border-color: #ff8c00;">
+        <div class="box" id="section-offline" style="border-color: #ff8c00;">
             <div class="box-header" style="background: linear-gradient(135deg, #f2994a, #f2c94c);" id="box-offline">Offline Forms (PDF Download)</div>
             <div class="box-content" id="content-offline">
                 <ul>
@@ -269,7 +269,7 @@
         </div>
 
         <!-- News / सूचना -->
-        <div class="box" style="border-color: #8b5cf6;">
+        <div class="box" id="section-news" style="border-color: #8b5cf6;">
             <div class="box-header" style="background: linear-gradient(135deg, #6d28d9, #8b5cf6);" id="box-news">News / सूचना</div>
             <div class="box-content" id="content-news">
                 <ul>
@@ -545,6 +545,7 @@
             loadBoxItemsIntoSite('offline');
             loadBoxItemsIntoSite('news');
             syncLinkedVacancyStages();
+            applyCategoryVisibility();
 
             let savedPortals = JSON.parse(localStorage.getItem('custom_portals_list'));
             if(savedPortals && savedPortals.length > 0) {
@@ -554,6 +555,57 @@
                     pContainer.innerHTML += `<a href="${p.link}" target="_blank" class="portal-badge">${p.name}</a>`;
                 });
             }
+        }
+
+        const CATEGORY_VISIBILITY_DEFAULTS = {jobs:true, admit:true, result:true, yojana:true, offline:true, news:true};
+
+        function getCategoryVisibility() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('category_visibility') || '{}');
+                return {...CATEGORY_VISIBILITY_DEFAULTS, ...(saved && typeof saved === 'object' ? saved : {})};
+            } catch(e) { return {...CATEGORY_VISIBILITY_DEFAULTS}; }
+        }
+
+        function applyCategoryVisibility() {
+            const visibility = getCategoryVisibility();
+            Object.keys(CATEGORY_VISIBILITY_DEFAULTS).forEach(cat => {
+                const section = document.getElementById('section-' + cat);
+                if(section) section.style.display = visibility[cat] === false ? 'none' : '';
+            });
+        }
+
+        async function toggleCategoryVisibility(cat, isVisible) {
+            if(!isAuthorizedAdmin(auth.currentUser)) {
+                alert('Sirf authorized Admin hi sections hide/unhide kar sakta hai.');
+                return;
+            }
+            if(!Object.prototype.hasOwnProperty.call(CATEGORY_VISIBILITY_DEFAULTS, cat)) return;
+            const visibility = getCategoryVisibility();
+            visibility[cat] = !!isVisible;
+            try {
+                await db.ref('general_settings/categoryVisibility').update({[cat]: !!isVisible});
+                localStorage.setItem('category_visibility', JSON.stringify(visibility));
+                applyCategoryVisibility();
+                const status = document.getElementById('visibilityStatus-' + cat);
+                if(status) status.textContent = isVisible ? 'Visible on website' : 'Hidden from website';
+            } catch(error) {
+                alert('Visibility save nahi hui: ' + (error.message || error));
+                const control = document.getElementById('visibilityToggle-' + cat);
+                if(control) control.checked = !isVisible;
+            }
+        }
+
+        function renderCategoryVisibilityControls() {
+            const names = {jobs:'Latest Jobs', admit:'Admit Card', result:'Results', yojana:'Sarkari Yojana', offline:'Offline Forms', news:'News / सूचना'};
+            const visibility = getCategoryVisibility();
+            return Object.keys(names).map(cat => `
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 10px;border:1px solid #dbe3ef;border-radius:6px;margin:7px 0;background:#fff;flex-wrap:wrap;">
+                    <div><strong>${names[cat]}</strong><br><small id="visibilityStatus-${cat}" style="color:#64748b;">${visibility[cat] === false ? 'Hidden from website' : 'Visible on website'}</small></div>
+                    <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:bold;font-size:13px;margin:0;">
+                        <input type="checkbox" id="visibilityToggle-${cat}" ${visibility[cat] !== false ? 'checked' : ''} onchange="toggleCategoryVisibility('${cat}', this.checked)" style="width:18px;height:18px;">
+                        ${visibility[cat] === false ? 'Unhide' : 'Hide'}
+                    </label>
+                </div>`).join('');
         }
 
         function syncDataFromFirebase() {
@@ -604,6 +656,10 @@
                     if(data.desc) localStorage.setItem('custom_site_desc', data.desc);
                     if(data.logo) localStorage.setItem('custom_site_logo', data.logo);
                     if(data.profilePhoto) localStorage.setItem('custom_profile_photo', data.profilePhoto);
+                    if(data.categoryVisibility && typeof data.categoryVisibility === 'object') {
+                        localStorage.setItem('category_visibility', JSON.stringify(data.categoryVisibility));
+                        applyCategoryVisibility();
+                    }
                     if(data.adBanners) {
                         localStorage.setItem('custom_ad_banners', JSON.stringify(data.adBanners));
                         renderActiveAd();
@@ -1381,6 +1437,12 @@
                     <div style="max-height:220px; overflow-y:auto; border:1px solid #cbd5e1; padding:10px; border-radius:6px; background:#fff;" id="adminFeedbacksListContainer">
                         Loading feedbacks...
                     </div>
+                </div>
+
+                <div class="admin-card" style="border:2px solid #0f766e;background:#f0fdfa;">
+                    <div class="admin-title" style="color:#115e59;">👁️ Website Sections Hide / Unhide</div>
+                    <p style="font-size:12px;color:#475569;margin-top:0;">यहाँ से किसी भी सेक्शन को वेबसाइट पर छिपाएँ या दोबारा दिखाएँ। बदलाव सभी डिवाइस पर Firebase के जरिए लागू होगा।</p>
+                    ${renderCategoryVisibilityControls()}
                 </div>
 
                 <div class="admin-card">
