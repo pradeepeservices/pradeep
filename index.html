@@ -18,6 +18,7 @@
     <!-- Firebase App & Realtime Database CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
     <style>
         /* Blue / Purple Theme Styling */
@@ -403,9 +404,14 @@
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
+        const auth = firebase.auth();
+        const ADMIN_UID = "KvBhucYSD8czshIdAHb9KzUcqP62";
+        let adminRecaptchaVerifier = null;
+        let adminPhoneConfirmation = null;
+        let pendingPhoneNumber = "";
+        let adminPhoneFlow = "";
 
         window.onload = function() {
-            if(!localStorage.getItem('admin_pass')) { localStorage.setItem('admin_pass', 'guru82'); }
 
             // Default Footer Page Contents Setup
             if(!localStorage.getItem('page_about')) {
@@ -1065,21 +1071,102 @@
         function openLoginModal() {
             let html = `
                 <h2>Admin Login</h2>
-                <p style="font-size:13px; color:#666;">Enter admin password to manage posts and site settings.</p>
-                <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password">
-                <button onclick="verifyAdminLogin()">Login</button>
+                <p style="font-size:13px;color:#555">Gmail/password se login karein, ya linked mobile par SMS OTP se login karein. Sirf authorized Admin UID ko access milega.</p>
+                <h3 style="margin-bottom:6px">Gmail Login</h3>
+                <input type="email" id="adminEmailInput" placeholder="Admin Gmail address" autocomplete="username">
+                <input type="password" id="adminEmailPasswordInput" placeholder="Gmail account ka Firebase password" autocomplete="current-password">
+                <button type="button" onclick="adminEmailLogin()">Gmail se Login</button>
+                <hr style="margin:18px 0">
+                <h3 style="margin-bottom:6px">Mobile OTP Login / Link Mobile</h3>
+                <p style="font-size:12px;color:#666">Pehli baar: Gmail se login karein, phir yahan mobile number dekar OTP bhejein. OTP verify hone par phone isi Gmail account se link hoga.</p>
+                <input type="tel" id="adminPhoneInput" placeholder="+91XXXXXXXXXX" autocomplete="tel">
+                <div id="admin-recaptcha-container" style="margin:10px 0"></div>
+                <button type="button" onclick="adminSendPhoneOtp()">SMS OTP Bhejein / Mobile Link Karein</button>
+                <div id="adminOtpVerifyArea" style="display:none;margin-top:12px">
+                  <input type="text" id="adminPhoneOtpInput" placeholder="SMS se 6-digit OTP dalein" inputmode="numeric" autocomplete="one-time-code">
+                  <button type="button" onclick="adminVerifyPhoneOtp()">OTP Verify Karein</button>
+                </div>
+                <p id="adminAuthStatus" style="font-size:13px;color:#b91c1c;margin-top:10px"></p>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
             openPageModal();
+            adminRecaptchaVerifier = null;
+            adminPhoneConfirmation = null;
         }
 
-        function verifyAdminLogin() {
-            let pass = document.getElementById('adminPasswordInput').value;
-            let savedPass = localStorage.getItem('admin_pass') || 'guru82';
-            if(pass === savedPass) {
-                openAdminDashboard();
-            } else {
-                alert('Incorrect Password!');
+        function setAdminAuthStatus(message, isError=true) {
+            const el = document.getElementById('adminAuthStatus');
+            if (el) { el.style.color = isError ? '#b91c1c' : '#166534'; el.textContent = message; }
+        }
+
+        async function requireAuthorizedAdmin(user) {
+            if (!user || user.uid !== ADMIN_UID) {
+                try { if (auth.currentUser) await auth.signOut(); } catch(e) {}
+                setAdminAuthStatus('Is account ko Admin permission nahi hai. UID match nahi hua.');
+                return false;
+            }
+            openAdminDashboard();
+            return true;
+        }
+
+        async function adminEmailLogin() {
+            const email = (document.getElementById('adminEmailInput')?.value || '').trim();
+            const password = document.getElementById('adminEmailPasswordInput')?.value || '';
+            if (!email || !password) { setAdminAuthStatus('Gmail aur Firebase password bharein.'); return; }
+            try {
+                const credential = await auth.signInWithEmailAndPassword(email, password);
+                await requireAuthorizedAdmin(credential.user);
+            } catch (error) {
+                setAdminAuthStatus('Gmail login fail: ' + (error.message || error.code));
+            }
+        }
+
+        async function adminSendPhoneOtp() {
+            const phone = (document.getElementById('adminPhoneInput')?.value || '').trim();
+            if (!phone || !/^\+[1-9]\d{7,14}$/.test(phone)) {
+                setAdminAuthStatus('Country code ke saath mobile number likhein, jaise +919876543210.'); return;
+            }
+            const currentUser = auth.currentUser;
+            try {
+                pendingPhoneNumber = phone;
+                if (!adminRecaptchaVerifier) {
+                    adminRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('admin-recaptcha-container', {size:'normal'});
+                    await adminRecaptchaVerifier.render();
+                }
+                if (currentUser) {
+                    if (currentUser.uid !== ADMIN_UID) { setAdminAuthStatus('Is account ko Admin permission nahi hai.'); return; }
+                    // Link phone credential directly to the already authenticated Gmail account.
+                    adminPhoneFlow = 'link';
+                    adminPhoneConfirmation = await currentUser.linkWithPhoneNumber(phone, adminRecaptchaVerifier);
+                    setAdminAuthStatus('Gmail account par phone-link OTP bhej diya gaya hai. OTP verify karne par phone isi UID se link hoga.', false);
+                } else {
+                    // After phone is linked to the same Firebase account, phone sign-in resolves to that UID.
+                    adminPhoneFlow = 'signin';
+                    adminPhoneConfirmation = await auth.signInWithPhoneNumber(phone, adminRecaptchaVerifier);
+                    setAdminAuthStatus('Mobile OTP bhej diya gaya hai. OTP verify karke Admin UID check hoga.', false);
+                }
+                document.getElementById('adminOtpVerifyArea').style.display = 'block';
+            } catch (error) {
+                setAdminAuthStatus('OTP bhejne mein error: ' + (error.message || error.code));
+                try { if (adminRecaptchaVerifier) { adminRecaptchaVerifier.clear(); adminRecaptchaVerifier=null; } } catch(e) {}
+            }
+        }
+
+        async function adminVerifyPhoneOtp() {
+            const otp = (document.getElementById('adminPhoneOtpInput')?.value || '').trim();
+            if (!adminPhoneConfirmation || !otp) { setAdminAuthStatus('SMS se mila OTP dalein.'); return; }
+            try {
+                const phoneCredential = await adminPhoneConfirmation.confirm(otp);
+                const phoneUser = phoneCredential.user || auth.currentUser;
+                if (phoneUser && phoneUser.uid === ADMIN_UID) {
+                    setAdminAuthStatus('Phone OTP verify ho gaya aur UID match hai.', false);
+                    await requireAuthorizedAdmin(phoneUser);
+                    return;
+                }
+                try { await auth.signOut(); } catch(e) {}
+                setAdminAuthStatus('OTP verify hua, lekin Firebase UID Admin UID se match nahi hua. Access deny kiya gaya. Agar yeh phone kisi doosre Firebase account se linked hai, pehle us account ko resolve karna hoga.');
+            } catch (error) {
+                setAdminAuthStatus('OTP verify fail: ' + (error.message || error.code));
             }
         }
 
