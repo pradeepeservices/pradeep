@@ -1064,6 +1064,12 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
         <p id="header-subtitle">Aapka Apna Cyber Cafe & Online Seva Kendra</p>
     </header>
 
+    <!-- Cash Denomination Calculator Info - requested addition only -->
+    <div id="cashDenomTopInfo" style="width:95%;max-width:1200px;margin:12px auto 0;padding:12px 16px;border:1px solid #bbf7d0;border-radius:12px;background:#f0fdf4;color:#166534;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 3px 10px rgba(15,23,42,.05);font-size:13px;line-height:1.5;">
+        <div><strong>💵 Cash Denomination Calculator:</strong> नोट/सिक्कों की संख्या डालकर कुल Cash Amount और Total Notes तुरंत निकालें।</div>
+        <button type="button" onclick="openToolModal('cashdenom')" style="border:0;border-radius:8px;background:#166534;color:#fff;padding:8px 12px;font-weight:800;cursor:pointer;white-space:nowrap;">Open Tool</button>
+    </div>
+
     <!-- Social Media Banner -->
     <div class="social-banner" id="socialBannerContainer">
         <a href="https://whatsapp.com" target="_blank" class="wa-btn">🟢 WhatsApp</a>
@@ -1080,6 +1086,23 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
     </div>
 
     <!-- Main Section Boxes -->
+    <div id="websiteUpdateFilter" style="width:95%;max-width:1200px;margin:14px auto 10px;padding:12px 14px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 3px 12px rgba(15,23,42,.05);">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:9px;">
+            <strong style="font-size:13px;color:#334155;">🔎 Filter Updates:</strong>
+            <input id="websiteUpdateSearch" type="search" placeholder="Search update..." oninput="filterWebsiteUpdates()" style="flex:1 1 220px;min-width:160px;height:38px;border:1px solid #cbd5e1;border-radius:8px;padding:7px 10px;outline:none;">
+            <select id="websiteUpdateCategory" onchange="filterWebsiteUpdates()" style="height:38px;border:1px solid #cbd5e1;border-radius:8px;padding:7px 10px;background:#fff;color:#334155;font-weight:600;">
+                <option value="all">All Categories</option>
+                <option value="jobs">Latest Jobs</option>
+                <option value="admit">Admit Card</option>
+                <option value="result">Result</option>
+                <option value="yojana">Sarkari Yojana</option>
+                <option value="offline">Offline Forms</option>
+                <option value="news">News / सूचना</option>
+            </select>
+            <button type="button" onclick="clearWebsiteUpdateFilter()" style="height:38px;border:0;border-radius:8px;background:#e2e8f0;color:#334155;padding:0 13px;font-weight:800;cursor:pointer;">Clear</button>
+        </div>
+    </div>
+
     <div class="container" id="mainBoxesContainer">
         <!-- Latest Jobs -->
         <div class="box" id="section-jobs">
@@ -1162,6 +1185,7 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
             <div class="tool-card" onclick="openToolModal('declaration')" style="background:#eefbf0; border-color:#86efac; color:#166534;">📝 Self Declaration Form (आय / निवास)</div>
             <div class="tool-card" onclick="openToolModal('resume')" style="background:#f5f3ff;border-color:#c4b5fd;color:#5b21b6;">📄 Resume Maker (रिज्यूमे बनाएं)</div>
             <div class="tool-card" onclick="openToolModal('passport')" style="background:#eff6ff;border-color:#93c5fd;color:#1d4ed8;">🪪 Passport Photo Maker</div>
+            <div class="tool-card" onclick="openToolModal('cashdenom')" style="background:#f0fdf4;border-color:#86efac;color:#166534;">💵 Cash Denomination Calculator</div>
         </div>
     </div>
 
@@ -3130,12 +3154,228 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
             } else if(toolType === 'passport') {
                 if(pageBox) pageBox.classList.add('declaration-modal-mode');
                 html = renderPassportMakerHTML();
+            } else if(toolType === 'cashdenom') {
+                if(pageBox) pageBox.classList.add('declaration-modal-mode');
+                html = renderCashDenominationHTML();
+                setTimeout(initCashDenomination, 50);
             }
             document.getElementById('modalBodyContent').innerHTML = html; 
             openPageModal();
         }
 
 
+
+
+        // Cash Denomination Calculator - isolated utility addition
+
+        // Website update filter - isolated addition only
+        function filterWebsiteUpdates(){
+            const searchEl = document.getElementById('websiteUpdateSearch');
+            const categoryEl = document.getElementById('websiteUpdateCategory');
+            if(!searchEl || !categoryEl) return;
+            const q = searchEl.value.trim().toLowerCase();
+            const category = categoryEl.value;
+            const sections = [
+                ['jobs','section-jobs'],
+                ['admit','section-admit'],
+                ['result','section-result'],
+                ['yojana','section-yojana'],
+                ['offline','section-offline'],
+                ['news','section-news']
+            ];
+            sections.forEach(([key,id])=>{
+                const el = document.getElementById(id);
+                if(!el) return;
+                const text = (el.innerText || '').toLowerCase();
+                const categoryMatch = category === 'all' || category === key;
+                const textMatch = !q || text.includes(q);
+                el.style.display = (categoryMatch && textMatch) ? '' : 'none';
+            });
+        }
+
+        function clearWebsiteUpdateFilter(){
+            const searchEl = document.getElementById('websiteUpdateSearch');
+            const categoryEl = document.getElementById('websiteUpdateCategory');
+            if(searchEl) searchEl.value = '';
+            if(categoryEl) categoryEl.value = 'all';
+            filterWebsiteUpdates();
+        }
+
+        function renderCashDenominationHTML(){
+            const denoms = [500,200,100,50,20,10,5,2,1];
+            return `<div id="cashDenomTool" class="cash-denom-tool">
+                <style>
+                    #cashDenomTool{font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#172033;background:#f4f7fb;border-radius:18px;padding:16px;max-width:100%;box-sizing:border-box}
+                    #cashDenomTool *{box-sizing:border-box}
+                    #cashDenomTool .cd-hero{background:linear-gradient(135deg,#14532d,#16a34a 58%,#0f766e);color:#fff;border-radius:16px;padding:22px 24px;margin-bottom:16px;box-shadow:0 10px 25px rgba(22,101,52,.18)}
+                    #cashDenomTool .cd-hero h2{font-size:clamp(21px,3vw,29px);font-weight:850;letter-spacing:-.4px;margin:0 0 7px;color:#fff}
+                    #cashDenomTool .cd-hero p{font-size:13px;line-height:1.6;color:#dcfce7;margin:0}
+                    #cashDenomTool .cd-card{background:#fff;border:1px solid #e2e8f0;border-radius:15px;padding:16px;box-shadow:0 5px 18px rgba(15,23,42,.055);margin-bottom:14px}
+                    #cashDenomTool .cd-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+                    #cashDenomTool .cd-filterbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:12px}
+                    #cashDenomTool .cd-filterbar input,#cashDenomTool .cd-filterbar select{height:40px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;padding:8px 10px;color:#0f172a;font-weight:600;outline:none}
+                    #cashDenomTool .cd-filterbar input{flex:1 1 190px;min-width:150px}
+                    #cashDenomTool .cd-filterbar select{flex:0 1 160px}
+                    #cashDenomTool .cd-filterbar input:focus,#cashDenomTool .cd-filterbar select:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.12)}
+                    #cashDenomTool .cd-filter-label{font-size:12px;font-weight:800;color:#475569}
+                    #cashDenomTool .cd-filter-empty{display:none;text-align:center;color:#64748b;font-size:12px;padding:16px;border:1px dashed #cbd5e1;border-radius:10px;background:#f8fafc}
+                    #cashDenomTool .cd-item{display:grid;grid-template-columns:86px 1fr;gap:8px;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:9px}
+                    #cashDenomTool .cd-item label{font-size:13px;font-weight:800;color:#334155}
+                    #cashDenomTool .cd-item input{width:100%;height:40px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;padding:8px 10px;font:600 14px Arial,sans-serif;color:#0f172a;outline:none}
+                    #cashDenomTool .cd-item input:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.12)}
+                    #cashDenomTool .cd-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+                    #cashDenomTool .cd-total{border-radius:13px;padding:15px;background:#f0fdf4;border:1px solid #bbf7d0}
+                    #cashDenomTool .cd-total small{display:block;font-size:11px;color:#64748b;font-weight:700;margin-bottom:5px}
+                    #cashDenomTool .cd-total strong{font-size:24px;color:#166534}
+                    #cashDenomTool .cd-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+                    #cashDenomTool .cd-btn{border:0;border-radius:10px;min-height:43px;padding:10px 16px;font-weight:800;cursor:pointer}
+                    #cashDenomTool .cd-reset{background:#e2e8f0;color:#334155}
+                    #cashDenomTool .cd-print{background:#166534;color:#fff}
+                    #cashDenomTool .cd-breakdown{width:100%;border-collapse:collapse;margin-top:4px}
+                    #cashDenomTool .cd-breakdown th,#cashDenomTool .cd-breakdown td{border-bottom:1px solid #e2e8f0;padding:9px 8px;text-align:right;font-size:12px}
+                    #cashDenomTool .cd-breakdown th:first-child,#cashDenomTool .cd-breakdown td:first-child{text-align:left}
+                    #cashDenomTool .cd-breakdown th{color:#475569;background:#f8fafc}
+                    #cashDenomTool .cd-help{font-size:11px;color:#64748b;line-height:1.5;margin-top:10px}
+                    @media(max-width:700px){#cashDenomTool .cd-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+                    @media(max-width:480px){#cashDenomTool{padding:10px}#cashDenomTool .cd-grid{grid-template-columns:1fr}#cashDenomTool .cd-summary{grid-template-columns:1fr}#cashDenomTool .cd-item{grid-template-columns:78px 1fr}}
+                </style>
+                <div class="cd-hero">
+                    <h2>💵 Cash Denomination Calculator</h2>
+                    <p>हर नोट/सिक्के की संख्या भरें और कुल Cash Amount व Total Notes तुरंत निकालें।</p>
+                </div>
+                <div class="cd-card">
+                    <div class="cd-filterbar">
+                        <span class="cd-filter-label">🔎 Filter:</span>
+                        <input id="cdDenomSearch" type="search" placeholder="Denomination खोजें (जैसे 100)" oninput="filterCashDenominations()">
+                        <select id="cdDenomType" onchange="filterCashDenominations()" aria-label="Denomination type">
+                            <option value="all">All</option>
+                            <option value="note">Notes</option>
+                            <option value="coin">Coins</option>
+                        </select>
+                        <button type="button" class="cd-btn cd-reset" onclick="clearCashDenominationFilter()">Clear Filter</button>
+                    </div>
+                    <div class="cd-grid">
+                        ${denoms.map(d => `<div class="cd-item">
+                            <label>₹${d}</label>
+                            <input type="number" min="0" step="1" inputmode="numeric" data-cd-denom="${d}" placeholder="0" oninput="calculateCashDenomination()">
+                        </div>`).join('')}
+                    </div>
+                    <div id="cdFilterEmpty" class="cd-filter-empty">कोई matching denomination नहीं मिला।</div>
+                    <div class="cd-actions">
+                        <button type="button" class="cd-btn cd-reset" onclick="resetCashDenomination()">↺ Reset</button>
+                        <button type="button" class="cd-btn cd-print" onclick="printCashDenomination()">🖨️ Print</button>
+                    </div>
+                    <div class="cd-help">केवल नोट/सिक्कों की संख्या भरें। खाली field को 0 माना जाएगा।</div>
+                </div>
+                <div class="cd-card">
+                    <div class="cd-summary">
+                        <div class="cd-total"><small>Total Cash Amount</small><strong id="cdTotalAmount">₹0</strong></div>
+                        <div class="cd-total"><small>Total Notes / Coins</small><strong id="cdTotalNotes">0</strong></div>
+                    </div>
+                </div>
+                <div class="cd-card">
+                    <div style="font-size:18px;font-weight:850;color:#166534;margin-bottom:10px;">📋 Cash Denomination Rules</div>
+                    <ul style="margin:0;padding-left:20px;color:#475569;font-size:13px;line-height:1.8;">
+                        <li>हर denomination के सामने केवल <strong>नोट/सिक्कों की संख्या (Quantity)</strong> दर्ज करें।</li>
+                        <li>Quantity हमेशा <strong>पूर्ण संख्या (0, 1, 2, 3...)</strong> में होनी चाहिए; decimal या negative value मान्य नहीं है।</li>
+                        <li>खाली field को calculator अपने आप <strong>0</strong> मानेगा।</li>
+                        <li>कुल Cash Amount = <strong>Denomination × Quantity</strong> का योग होगा।</li>
+                        <li>Calculator में दिए गए denomination के अनुसार ही cash quantity दर्ज करें।</li>
+                        <li>अंतिम राशि का उपयोग करने से पहले दर्ज की गई quantity को अपने वास्तविक cash से मिलाकर जाँच लें।</li>
+                    </ul>
+                </div>
+                <div class="cd-card">
+                    <table class="cd-breakdown">
+                        <thead><tr><th>Denomination</th><th>Quantity</th><th>Amount</th></tr></thead>
+                        <tbody id="cdBreakdownBody"></tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+
+        function initCashDenomination(){
+            calculateCashDenomination();
+        }
+
+        function calculateCashDenomination(){
+            const root = document.getElementById('cashDenomTool');
+            if(!root) return;
+            const inputs = root.querySelectorAll('[data-cd-denom]');
+            let total = 0, notes = 0, rows = '';
+            inputs.forEach(input => {
+                const denom = Number(input.getAttribute('data-cd-denom')) || 0;
+                const qty = Math.max(0, Math.floor(Number(input.value) || 0));
+                const amount = denom * qty;
+                total += amount;
+                notes += qty;
+                rows += `<tr><td>₹${denom}</td><td>${qty}</td><td>₹${amount.toLocaleString('en-IN')}</td></tr>`;
+            });
+            const totalAmount = root.querySelector('#cdTotalAmount');
+            const totalNotes = root.querySelector('#cdTotalNotes');
+            const body = root.querySelector('#cdBreakdownBody');
+            if(totalAmount) totalAmount.textContent = '₹' + total.toLocaleString('en-IN');
+            if(totalNotes) totalNotes.textContent = notes.toLocaleString('en-IN');
+            if(body) body.innerHTML = rows;
+        }
+
+        function filterCashDenominations(){
+            const root = document.getElementById('cashDenomTool');
+            if(!root) return;
+            const search = (root.querySelector('#cdDenomSearch')?.value || '').trim().toLowerCase();
+            const type = root.querySelector('#cdDenomType')?.value || 'all';
+            const items = root.querySelectorAll('.cd-item[data-cd-value]');
+            let visible = 0;
+            items.forEach(item => {
+                const value = String(item.getAttribute('data-cd-value') || '');
+                const itemType = item.getAttribute('data-cd-type') || 'all';
+                const matchesSearch = !search || value.includes(search);
+                const matchesType = type === 'all' || itemType === type;
+                const show = matchesSearch && matchesType;
+                item.style.display = show ? '' : 'grid';
+                if(!show) item.style.display = 'none';
+                if(show) visible++;
+            });
+            const empty = root.querySelector('#cdFilterEmpty');
+            if(empty) empty.style.display = visible ? 'none' : 'block';
+        }
+
+        function clearCashDenominationFilter(){
+            const root = document.getElementById('cashDenomTool');
+            if(!root) return;
+            const search = root.querySelector('#cdDenomSearch');
+            const type = root.querySelector('#cdDenomType');
+            if(search) search.value = '';
+            if(type) type.value = 'all';
+            filterCashDenominations();
+        }
+
+        function resetCashDenomination(){
+            const root = document.getElementById('cashDenomTool');
+            if(!root) return;
+            root.querySelectorAll('[data-cd-denom]').forEach(input => input.value = '');
+            calculateCashDenomination();
+        }
+
+        function printCashDenomination(){
+            const root = document.getElementById('cashDenomTool');
+            if(!root) return;
+            calculateCashDenomination();
+            const amount = root.querySelector('#cdTotalAmount')?.textContent || '₹0';
+            const notes = root.querySelector('#cdTotalNotes')?.textContent || '0';
+            const rows = root.querySelector('#cdBreakdownBody')?.innerHTML || '';
+            const w = window.open('', '_blank');
+            if(!w){ alert('Print ke liye popup allow karein.'); return; }
+            w.document.write(`<html><head><title>Cash Denomination Calculator</title><style>
+                body{font-family:Arial,sans-serif;padding:24px;color:#111}h2{margin:0 0 8px}
+                .summary{display:flex;gap:30px;margin:18px 0;font-weight:bold}
+                table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:8px;text-align:right}
+                th:first-child,td:first-child{text-align:left}th{background:#f3f4f6}
+            </style></head><body><h2>Cash Denomination Calculator</h2>
+            <div class="summary"><div>Total Cash: ${amount}</div><div>Total Notes / Coins: ${notes}</div></div>
+            <table><thead><tr><th>Denomination</th><th>Quantity</th><th>Amount</th></tr></thead><tbody>${rows}</tbody></table>
+            <script>window.onload=()=>{window.focus();window.print()}<\/script></body></html>`);
+            w.document.close();
+        }
 
         // Passport Photo Maker - isolated utility additions
         let passportImg=null, passportCutoutUrl=null;
