@@ -14,6 +14,13 @@
     <!-- jsPDF Library for JPG to PDF / ID Card Conversion -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.13.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@9.8.1/dist/index.iife.min.js"></script>
+    <script src="https://unpkg.com/pdfkit@0.17.2/js/pdfkit.standalone.js"></script>
+    <script src="https://unpkg.com/blob-stream@0.1.3/blob-stream.js"></script>
     
     <!-- Firebase App & Realtime Database CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1190,6 +1197,7 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
             <div class="tool-card" onclick="openToolModal('resume')" style="background:#f5f3ff;border-color:#c4b5fd;color:#5b21b6;">📄 Resume Maker (रिज्यूमे बनाएं)</div>
             <div class="tool-card" onclick="openToolModal('passport')" style="background:#eff6ff;border-color:#93c5fd;color:#1d4ed8;">🪪 Passport Photo Maker</div>
             <div class="tool-card" onclick="openToolModal('cashdenom')" style="background:#f0fdf4;border-color:#86efac;color:#166534;">💵 Cash Denomination Calculator</div><div class="tool-card" onclick="openToolModal('agecalculator')" style="background:#f5f3ff;border-color:#c4b5fd;color:#6d28d9;">🎂 Age Calculator</div>
+            <div class="tool-card" onclick="openToolModal('pdfexcel')" style="background:#fff7ed;border-color:#fdba74;color:#9a3412;">📚 PDF & Excel Tools</div>
         </div>
     </div>
 
@@ -1722,7 +1730,7 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
             showVacancyDirect(cat, itemId, true);
         }
 
-        const SHAREABLE_TOOLS = ['crop', 'pdf', 'bg', 'bankid', 'declaration', 'resume', 'passport'];
+        const SHAREABLE_TOOLS = ['crop', 'pdf', 'bg', 'bankid', 'declaration', 'resume', 'passport', 'pdfexcel'];
 
         function updateToolShareUrl(toolType) {
             if(!SHAREABLE_TOOLS.includes(toolType)) return;
@@ -3162,6 +3170,10 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
                 if(pageBox) pageBox.classList.add('declaration-modal-mode');
                 html = renderCashDenominationHTML();
                 setTimeout(initCashDenomination, 50);
+            } else if(toolType === 'pdfexcel') {
+                if(pageBox) pageBox.classList.add('declaration-modal-mode');
+                html = renderPdfExcelToolsHTML();
+                setTimeout(initPdfExcelTools, 80);
             } else if(toolType === 'agecalculator') {
                 if(pageBox) pageBox.classList.add('declaration-modal-mode');
                 html = renderAgeCalculatorHTML();
@@ -3422,8 +3434,8 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
                     </div>
                     <div id="acTimeCalculator" style="display:none;">
                         <div class="ac-grid">
-                            <div><label>Start Time</label><input id="acStartTime" type="time" step="1"></div>
-                            <div><label>End Time</label><input id="acEndTime" type="time" step="1"></div>
+                            <div><label>Start Time</label><div style="display:flex;gap:7px;align-items:center"><input id="acStartTime" type="time" step="1" style="flex:1"><select id="acStartAmPm" style="width:86px;height:43px;border:1px solid #cbd5e1;border-radius:9px;padding:8px 6px;background:#fff;color:#0f172a;font-weight:700"><option value="AM">AM</option><option value="PM">PM</option></select></div></div>
+                            <div><label>End Time</label><div style="display:flex;gap:7px;align-items:center"><input id="acEndTime" type="time" step="1" style="flex:1"><select id="acEndAmPm" style="width:86px;height:43px;border:1px solid #cbd5e1;border-radius:9px;padding:8px 6px;background:#fff;color:#0f172a;font-weight:700"><option value="AM">AM</option><option value="PM">PM</option></select></div></div>
                             <div><label>Time Difference</label><input id="acTimeResult" type="text" readonly value="0 Hours 0 Minutes 0 Seconds"></div>
                         </div>
                         <div class="ac-actions">
@@ -3432,11 +3444,13 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
                         </div>
                     </div>
                 </div>
-                <div class="ac-card"><div class="ac-result">
-                    <div class="ac-result-box"><small>Years</small><strong id="acYears">0</strong></div>
-                    <div class="ac-result-box"><small>Months</small><strong id="acMonths">0</strong></div>
-                    <div class="ac-result-box"><small>Days</small><strong id="acDays">0</strong></div>
-                </div><div class="ac-extra" id="acExtra">अपनी Date of Birth चुनकर Calculate Age पर क्लिक करें।</div></div>
+                <div class="ac-card" style="padding:0;overflow:hidden">
+                    <div style="background:#4d8425;color:#fff;padding:8px 10px;font-size:20px;font-weight:500">Result</div>
+                    <div style="padding:10px 3px 14px;color:#111827;font-family:Arial,sans-serif">
+                        <div style="font-size:20px;font-weight:700;margin-bottom:1px">Age:</div>
+                        <div id="acAgeResultText" style="font-size:20px;line-height:1.27">अपनी Date of Birth चुनकर Calculate Age पर क्लिक करें।</div>
+                    </div>
+                </div>
             </div>`;
         }
         function initAgeCalculator(){
@@ -3465,10 +3479,15 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
 
         function calculateTimeDifference(){
             const s=document.getElementById('acStartTime'), e=document.getElementById('acEndTime'), r=document.getElementById('acTimeResult');
+            const sp=document.getElementById('acStartAmPm'), ep=document.getElementById('acEndAmPm');
             if(!s||!e||!r||!s.value||!e.value){alert('Please select Start Time and End Time.');return;}
-            const parts=v=>v.split(':').map(Number);
-            const a=parts(s.value), b=parts(e.value);
-            let start=a[0]*3600+a[1]*60+(a[2]||0), end=b[0]*3600+b[1]*60+(b[2]||0);
+            const toSeconds=(v,ampm)=>{
+                const a=v.split(':').map(Number); let h=a[0]||0;
+                if(ampm==='AM' && h===12) h=0;
+                if(ampm==='PM' && h!==12) h+=12;
+                return h*3600+(a[1]||0)*60+(a[2]||0);
+            };
+            let start=toSeconds(s.value,sp?sp.value:'AM'), end=toSeconds(e.value,ep?ep.value:'AM');
             if(end<start) end+=86400;
             let diff=end-start;
             const h=Math.floor(diff/3600); diff%=3600;
@@ -3478,7 +3497,8 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
 
         function resetTimeCalculator(){
             const s=document.getElementById('acStartTime'), e=document.getElementById('acEndTime'), r=document.getElementById('acTimeResult');
-            if(s)s.value='';if(e)e.value='';if(r)r.value='0 Hours 0 Minutes 0 Seconds';
+            const sp=document.getElementById('acStartAmPm'), ep=document.getElementById('acEndAmPm');
+            if(s)s.value='';if(e)e.value='';if(sp)sp.value='AM';if(ep)ep.value='AM';if(r)r.value='0 Hours 0 Minutes 0 Seconds';
         }
 
         function calculateAge(){
@@ -3489,17 +3509,28 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
             let y=as.getFullYear()-dob.getFullYear(),m=as.getMonth()-dob.getMonth(),d=as.getDate()-dob.getDate();
             if(d<0){m--;d+=new Date(as.getFullYear(),as.getMonth(),0).getDate();}
             if(m<0){y--;m+=12;}
-            document.getElementById('acYears').textContent=y.toLocaleString('en-IN');
-            document.getElementById('acMonths').textContent=m.toLocaleString('en-IN');
-            document.getElementById('acDays').textContent=d.toLocaleString('en-IN');
             const total=Math.floor((as-dob)/86400000);
-            document.getElementById('acExtra').textContent=`Total completed days: ${total.toLocaleString('en-IN')}.`;
+            const totalMonths=y*12+m;
+            const totalWeeks=Math.floor(total/7);
+            const weekDays=total%7;
+            const totalHours=total*24;
+            const totalMinutes=totalHours*60;
+            const totalSeconds=totalMinutes*60;
+            const result=document.getElementById('acAgeResultText');
+            if(result){
+                result.innerHTML=`${y.toLocaleString('en-IN')} years ${m.toLocaleString('en-IN')} months ${d.toLocaleString('en-IN')} days<br>`+
+                    `or ${totalMonths.toLocaleString('en-IN')} months ${d.toLocaleString('en-IN')} days<br>`+
+                    `or ${totalWeeks.toLocaleString('en-IN')} weeks ${weekDays.toLocaleString('en-IN')} days<br>`+
+                    `or ${total.toLocaleString('en-IN')} days<br>`+
+                    `or ${totalHours.toLocaleString('en-IN')} hours<br>`+
+                    `or ${totalMinutes.toLocaleString('en-IN')} minutes<br>`+
+                    `or ${totalSeconds.toLocaleString('en-IN')} seconds`;
+            }
         }
         function resetAgeCalculator(){
             const d=document.getElementById('acDob'),a=document.getElementById('acAsOf');
             if(d)d.value='';if(a)a.value=new Date().toISOString().slice(0,10);
-            ['acYears','acMonths','acDays'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='0';});
-            const x=document.getElementById('acExtra');if(x)x.textContent='अपनी Date of Birth चुनकर Calculate Age पर क्लिक करें।';
+            const x=document.getElementById('acAgeResultText');if(x)x.textContent='अपनी Date of Birth चुनकर Calculate Age पर क्लिक करें।';
         }
 
         // Passport Photo Maker - isolated utility additions
@@ -4086,6 +4117,83 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
                 reader.readAsDataURL(file);
             });
         }
+
+        // ================= PDF + EXCEL TOOL SUITE (100% browser-side, no API key) =================
+        function renderPdfExcelToolsHTML(){
+            return `<div id="pePdfExcelTools" style="font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#172033;background:#f7fafc;border-radius:18px;padding:16px">
+                <style>
+                #pePdfExcelTools *{box-sizing:border-box}
+                #pePdfExcelTools .pe-hero{background:linear-gradient(135deg,#7c2d12,#ea580c 55%,#b45309);color:#fff;border-radius:16px;padding:22px 24px;margin-bottom:15px;box-shadow:0 10px 25px rgba(154,52,18,.18)}
+                #pePdfExcelTools .pe-hero h2{margin:0 0 6px;color:#fff;font-size:clamp(21px,3vw,29px)}
+                #pePdfExcelTools .pe-hero p{margin:0;color:#ffedd5;font-size:13px;line-height:1.55}
+                #pePdfExcelTools .pe-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+                #pePdfExcelTools .pe-tab{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:10px;padding:10px 15px;font-weight:800;cursor:pointer}
+                #pePdfExcelTools .pe-tab.active{background:#ea580c;color:#fff;border-color:#ea580c}
+                #pePdfExcelTools .pe-pane{display:none}.pe-pane.active{display:block}
+                #pePdfExcelTools .pe-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+                #pePdfExcelTools .pe-card{background:#fff;border:1px solid #e2e8f0;border-radius:13px;padding:14px;box-shadow:0 4px 14px rgba(15,23,42,.05)}
+                #pePdfExcelTools .pe-card h3{font-size:15px;margin:0 0 5px;color:#172033}.pe-card p{font-size:11px;color:#64748b;line-height:1.45;margin:0 0 9px}
+                #pePdfExcelTools input[type=file],#pePdfExcelTools input[type=text],#pePdfExcelTools input[type=password],#pePdfExcelTools select{width:100%;min-height:40px;border:1px solid #cbd5e1;border-radius:8px;padding:8px;background:#fff;color:#0f172a;margin:5px 0}
+                #pePdfExcelTools button{border:0;border-radius:8px;background:#ea580c;color:#fff;padding:9px 13px;font-weight:800;cursor:pointer;margin:4px 4px 0 0}
+                #pePdfExcelTools button.secondary{background:#e2e8f0;color:#334155}.pe-note{font-size:11px;color:#64748b;margin-top:8px;line-height:1.45}
+                #pePdfExcelTools .pe-preview{max-height:260px;overflow:auto;border:1px solid #e2e8f0;border-radius:8px;margin-top:8px;background:#fff;padding:8px}
+                #pePdfExcelTools table{border-collapse:collapse;width:100%;font-size:12px}#pePdfExcelTools th,#pePdfExcelTools td{border:1px solid #cbd5e1;padding:5px;text-align:left;white-space:nowrap}#pePdfExcelTools th{background:#f1f5f9}
+                @media(max-width:700px){#pePdfExcelTools .pe-grid{grid-template-columns:1fr}.pe-hero{padding:18px!important}}
+                </style>
+                <div class="pe-hero"><h2>📚 PDF & Excel Tools</h2><p>PDF, Word और Excel के common tools — browser में locally process होंगे, किसी API key या upload server की जरूरत नहीं।</p></div>
+                <div class="pe-tabs"><button class="pe-tab active" id="pePdfTab" onclick="switchPdfExcelTab('pdf')">📄 PDF Tools</button><button class="pe-tab" id="peExcelTab" onclick="switchPdfExcelTab('excel')">📊 Excel Tools</button></div>
+                <div id="pePdfPane" class="pe-pane active"><div class="pe-grid">
+                    <div class="pe-card"><h3>🖼️ JPG to PDF</h3><p>Multiple images को एक PDF में बदलें।</p><input id="peJpgPdfInput" type="file" accept="image/*" multiple><button onclick="peJpgToPdf()">Convert PDF</button></div>
+                    <div class="pe-card"><h3>📄 PDF to JPG</h3><p>PDF के हर page को JPG image में export करें।</p><input id="pePdfJpgInput" type="file" accept="application/pdf"><button onclick="pePdfToJpg()">Convert to JPG</button></div>
+                    <div class="pe-card"><h3>🔗 Merge PDF</h3><p>Multiple PDF files को एक PDF में जोड़ें।</p><input id="peMergePdfInput" type="file" accept="application/pdf" multiple><button onclick="peMergePdf()">Merge PDFs</button></div>
+                    <div class="pe-card"><h3>✂️ Split PDF</h3><p>Selected page range को अलग PDF में निकालें।</p><input id="peSplitPdfInput" type="file" accept="application/pdf"><input id="peSplitRange" type="text" placeholder="Pages: 1-3 या 1,3,5"><button onclick="peSplitPdf()">Split PDF</button></div>
+                    <div class="pe-card"><h3>🗜️ Compress PDF</h3><p>PDF pages को optimized image PDF में compress करें। Text selectable नहीं रहेगा।</p><input id="peCompressPdfInput" type="file" accept="application/pdf"><select id="peCompressQuality"><option value="0.55">High Compression</option><option value="0.72" selected>Balanced</option><option value="0.86">Better Quality</option></select><button onclick="peCompressPdf()">Compress PDF</button></div>
+                    <div class="pe-card"><h3>🔓 Unlock PDF</h3><p>Browser में readable/restricted PDF को नई copy के रूप में save करने की कोशिश करें। Strong password-encrypted PDF supported नहीं है।</p><input id="peUnlockPdfInput" type="file" accept="application/pdf"><button onclick="peUnlockPdf()">Unlock / Save Copy</button></div>
+                    <div class="pe-card"><h3>🔐 Lock PDF</h3><p>PDF pages को password-protected PDF में convert करें। Pages image-based होंगे।</p><input id="peLockPdfInput" type="file" accept="application/pdf"><input id="peLockPassword" type="password" placeholder="Password"><button onclick="peLockPdf()">Lock PDF</button></div>
+                    <div class="pe-card"><h3>📝 PDF to Word</h3><p>PDF text को editable DOCX में export करें। Complex layout/images पूरी तरह preserve नहीं हो सकते।</p><input id="pePdfWordInput" type="file" accept="application/pdf"><button onclick="pePdfToWord()">Convert to Word</button></div>
+                    <div class="pe-card"><h3>📝 Word to PDF</h3><p>DOCX को browser में HTML के जरिए PDF में convert करें।</p><input id="peWordPdfInput" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"><button onclick="peWordToPdf()">Convert to PDF</button></div>
+                    <div class="pe-card"><h3>📃 PDF to Text</h3><p>PDF से selectable text निकालकर TXT file बनाएं।</p><input id="pePdfTextInput" type="file" accept="application/pdf"><button onclick="pePdfToText()">Extract Text</button></div>
+                </div></div>
+                <div id="peExcelPane" class="pe-pane"><div class="pe-grid">
+                    <div class="pe-card"><h3>📐 Excel to PDF</h3><p>Excel worksheet को printable PDF table में convert करें।</p><input id="peExcelPdfInput" type="file" accept=".xls,.xlsx,.csv"><button onclick="peExcelToPdf()">Convert to PDF</button></div>
+                    <div class="pe-card"><h3>📊 PDF to Excel</h3><p>PDF के text/table content को browser में Excel worksheet में convert करें।</p><input id="pePdfExcelInput" type="file" accept="application/pdf"><button onclick="pePdfToExcel()">Convert to Excel</button></div>
+                </div></div>
+                <div class="pe-note">नोट: सभी processing आपके browser में होती है। बड़े files में browser memory/CPU की सीमा लागू हो सकती है।</div>
+            </div>`;
+
+        function initPdfExcelTools(){
+            if(window.pdfjsLib){ window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }
+        }
+        function switchPdfExcelTab(tab){
+            const p=document.getElementById('pePdfPane'), e=document.getElementById('peExcelPane'), pt=document.getElementById('pePdfTab'), et=document.getElementById('peExcelTab');
+            if(!p||!e) return;
+            const isPdf=tab==='pdf'; p.classList.toggle('active',isPdf); e.classList.toggle('active',!isPdf); pt?.classList.toggle('active',isPdf); et?.classList.toggle('active',!isPdf);
+        }
+        function peFile(id){return document.getElementById(id)?.files?.[0]||null;}
+        function peFiles(id){return Array.from(document.getElementById(id)?.files||[]);}
+        function peDownloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);}
+        function peReadBuffer(file){return file.arrayBuffer();}
+        function peEscapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+        async function pePdfDoc(file){if(!window.pdfjsLib)throw new Error('PDF engine load नहीं हुई। Internet connection check करें।');return await pdfjsLib.getDocument({data:await peReadBuffer(file)}).promise;}
+        async function peRenderPdfPage(page,scale=1.5){const viewport=page.getViewport({scale});const c=document.createElement('canvas');c.width=Math.ceil(viewport.width);c.height=Math.ceil(viewport.height);const ctx=c.getContext('2d');await page.render({canvasContext:ctx,viewport}).promise;return c;}
+        function peParsePages(spec,count){const set=new Set();String(spec||'').split(',').forEach(part=>{part=part.trim();if(!part)return;if(part.includes('-')){let[a,b]=part.split('-').map(Number);a=Math.max(1,Math.min(count,a));b=Math.max(1,Math.min(count,b));if(a>b)[a,b]=[b,a];for(let i=a;i<=b;i++)set.add(i);}else{const n=Number(part);if(Number.isInteger(n)&&n>=1&&n<=count)set.add(n);}});return [...set].sort((a,b)=>a-b);}
+        async function peJpgToPdf(){try{const fs=peFiles('peJpgPdfInput');if(!fs.length)return alert('Images select करें।');const{jsPDF}=window.jspdf;let doc=null;for(let i=0;i<fs.length;i++){const img=await peFileToDataURL(fs[i]);const dim=await peImageSize(img);const orient=dim.w>dim.h?'landscape':'portrait';if(!doc)doc=new jsPDF({orientation:orient,unit:'mm',format:'a4'});else doc.addPage('a4',orient);const pw=orient==='landscape'?297:210,ph=orient==='landscape'?210:297,m=8,ratio=Math.min((pw-2*m)/dim.w,(ph-2*m)/dim.h);doc.addImage(img,'JPEG', (pw-dim.w*ratio)/2,(ph-dim.h*ratio)/2,dim.w*ratio,dim.h*ratio,'','FAST');}doc.save('JPG_to_PDF.pdf');}catch(e){alert('JPG to PDF error: '+e.message)}}
+        function peFileToDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+        function peImageSize(src){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res({w:im.naturalWidth,h:im.naturalHeight});im.onerror=()=>rej(new Error('Image read नहीं हुई'));im.src=src})}
+        async function pePdfToJpg(){try{const f=peFile('pePdfJpgInput');if(!f)return alert('PDF select करें।');const pdf=await pePdfDoc(f);for(let i=1;i<=pdf.numPages;i++){const c=await peRenderPdfPage(await pdf.getPage(i),1.6);const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.9));peDownloadBlob(blob,'page-'+i+'.jpg');await new Promise(r=>setTimeout(r,120));}alert(pdf.numPages+' pages JPG में convert हो गए।')}catch(e){alert('PDF to JPG error: '+e.message)}}
+        async function peMergePdf(){try{const fs=peFiles('peMergePdfInput');if(fs.length<2)return alert('कम से कम 2 PDF select करें।');const out=await PDFLib.PDFDocument.create();for(const f of fs){const src=await PDFLib.PDFDocument.load(await peReadBuffer(f));const pages=await out.copyPages(src,src.getPageIndices());pages.forEach(p=>out.addPage(p));}peDownloadBlob(new Blob([await out.save()],{type:'application/pdf'}),'Merged_PDF.pdf')}catch(e){alert('Merge PDF error: '+e.message)}}
+        async function peSplitPdf(){try{const f=peFile('peSplitPdfInput');if(!f)return alert('PDF select करें।');const src=await PDFLib.PDFDocument.load(await peReadBuffer(f));const pages=peParsePages(document.getElementById('peSplitRange')?.value,src.getPageCount());if(!pages.length)return alert('Page range दें, जैसे 1-3 या 1,3,5');const out=await PDFLib.PDFDocument.create();const cp=await out.copyPages(src,pages.map(n=>n-1));cp.forEach(p=>out.addPage(p));peDownloadBlob(new Blob([await out.save()],{type:'application/pdf'}),'Split_PDF.pdf')}catch(e){alert('Split PDF error: '+e.message)}}
+        async function peCompressPdf(){try{const f=peFile('peCompressPdfInput');if(!f)return alert('PDF select करें।');const q=Number(document.getElementById('peCompressQuality')?.value||.72),pdf=await pePdfDoc(f),{jsPDF}=window.jspdf;let out=null;for(let i=1;i<=pdf.numPages;i++){const c=await peRenderPdfPage(await pdf.getPage(i),1.15);const data=c.toDataURL('image/jpeg',q);if(!out)out=new jsPDF({orientation:c.width>c.height?'landscape':'portrait',unit:'mm',format:'a4',compress:true});else out.addPage('a4',c.width>c.height?'landscape':'portrait');const pw=c.width>c.height?297:210,ph=c.width>c.height?210:297,m=5,r=Math.min((pw-2*m)/c.width,(ph-2*m)/c.height);out.addImage(data,'JPEG',(pw-c.width*r)/2,(ph-c.height*r)/2,c.width*r,c.height*r,'','FAST');}out.save('Compressed_PDF.pdf');alert('Compressed PDF तैयार है।')}catch(e){alert('Compress PDF error: '+e.message)}}
+        async function peUnlockPdf(){try{const f=peFile('peUnlockPdfInput');if(!f)return alert('PDF select करें।');const src=await PDFLib.PDFDocument.load(await peReadBuffer(f),{ignoreEncryption:true});const out=await PDFLib.PDFDocument.create();const pages=await out.copyPages(src,src.getPageIndices());pages.forEach(p=>out.addPage(p));peDownloadBlob(new Blob([await out.save()],{type:'application/pdf'}),'Unlocked_PDF.pdf');}catch(e){alert('यह PDF strong password encryption से protected है या browser library इसे decrypt नहीं कर पा रही। ऐसे PDF को server/native PDF engine की जरूरत पड़ सकती है।')}}
+        async function peLockPdf(){try{const f=peFile('peLockPdfInput'),pass=document.getElementById('peLockPassword')?.value||'';if(!f)return alert('PDF select करें।');if(!pass)return alert('Password डालें।');if(!window.PDFDocument&&!window.PDFKit)return alert('PDF engine load नहीं हुई।');const pdf=await pePdfDoc(f),doc=new PDFDocument({autoFirstPage:false,userPassword:pass,ownerPassword:pass+'-owner',permissions:{printing:'highResolution',copying:false,modifying:false,annotating:false}}),stream=doc.pipe(blobStream());for(let i=1;i<=pdf.numPages;i++){const c=await peRenderPdfPage(await pdf.getPage(i),1.25);doc.addPage({size:[c.width*0.6,c.height*0.6]});doc.image(c.toDataURL('image/jpeg',.9),0,0,{width:c.width*0.6,height:c.height*0.6});}doc.end();stream.on('finish',()=>{peDownloadBlob(stream.toBlob('application/pdf'),'Locked_PDF.pdf');});}catch(e){alert('Lock PDF error: '+e.message)}}
+        async function pePdfToWord(){try{const f=peFile('pePdfWordInput');if(!f)return alert('PDF select करें।');if(!window.docx)return alert('Word engine load नहीं हुई।');const pdf=await pePdfDoc(f),children=[];for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i),tc=await page.getTextContent(),text=tc.items.map(x=>x.str).join(' ');if(i>1)children.push(new docx.Paragraph({children:[new docx.TextRun({text:'',break:1})]}));children.push(new docx.Paragraph({children:[new docx.TextRun({text})]}));}const d=new docx.Document({sections:[{properties:{},children}]});const b=await docx.Packer.toBlob(d);peDownloadBlob(b,'PDF_to_Word.docx')}catch(e){alert('PDF to Word error: '+e.message)}}
+        async function peWordToPdf(){try{const f=peFile('peWordPdfInput');if(!f)return alert('DOCX select करें।');if(!window.mammoth)return alert('Word engine load नहीं हुई।');const r=await mammoth.convertToHtml({arrayBuffer:await peReadBuffer(f)}),wrap=document.createElement('div');wrap.style.cssText='position:fixed;left:-100000px;top:0;width:794px;background:#fff;padding:40px;font-family:Arial,sans-serif;font-size:14px;line-height:1.5';wrap.innerHTML=r.value;document.body.appendChild(wrap);await new Promise(res=>setTimeout(res,100));const{jsPDF}=window.jspdf;const pdf=new jsPDF({unit:'pt',format:'a4'});await pdf.html(wrap,{margin:[30,30,30,30],autoPaging:'text',html2canvas:{scale:1,useCORS:true},callback:doc=>doc.save('Word_to_PDF.pdf')});wrap.remove()}catch(e){alert('Word to PDF error: '+e.message)}}
+        async function pePdfToText(){try{const f=peFile('pePdfTextInput');if(!f)return alert('PDF select करें।');const pdf=await pePdfDoc(f),parts=[];for(let i=1;i<=pdf.numPages;i++){const tc=await(await pdf.getPage(i)).getTextContent();parts.push(tc.items.map(x=>x.str).join(' '));}peDownloadBlob(new Blob([parts.join('\n\n')],{type:'text/plain;charset=utf-8'}),'PDF_Text.txt')}catch(e){alert('PDF text extraction error: '+e.message)}}
+
+        async function peReadWorkbook(file){const wb=XLSX.read(await peReadBuffer(file),{type:'array'});return wb;}
+        function peFirstSheet(wb){return wb.Sheets[wb.SheetNames[0]];}
+        async function peExcelToPdf(){try{const f=peFile('peExcelPdfInput');if(!f)return alert('Excel file select करें।');const wb=await peReadWorkbook(f),ws=peFirstSheet(wb),data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''}),{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'landscape',unit:'pt',format:'a4'});const maxCols=Math.max(1,...data.map(r=>r.length));const pageW=pdf.internal.pageSize.getWidth(),pageH=pdf.internal.pageSize.getHeight(),margin=24,colW=(pageW-margin*2)/maxCols,rowH=18;let y=margin;data.forEach((row,ri)=>{if(y+rowH>pageH-margin){pdf.addPage('a4','landscape');y=margin;}row.forEach((v,ci)=>{const x=margin+ci*colW;pdf.rect(x,y,colW,rowH);pdf.setFontSize(7);pdf.text(String(v??'').slice(0,45),x+3,y+12,{maxWidth:colW-6});});y+=rowH;});pdf.save('Excel_to_PDF.pdf')}catch(e){alert('Excel to PDF error: '+e.message)}}
+        async function pePdfToExcel(){try{const f=peFile('pePdfExcelInput');if(!f)return alert('PDF select करें।');if(!window.XLSX)throw new Error('Excel engine load नहीं हुई।');const pdf=await pePdfDoc(f),rows=[];for(let pageNo=1;pageNo<=pdf.numPages;pageNo++){const page=await pdf.getPage(pageNo),tc=await page.getTextContent();const items=(tc.items||[]).map(it=>({text:String(it.str||'').trim(),x:Number(it.transform?.[4]||0),y:Number(it.transform?.[5]||0)})).filter(it=>it.text);items.sort((a,b)=>b.y-a.y||a.x-b.x);const pageRows=[];for(const item of items){let row=pageRows.find(r=>Math.abs(r.y-item.y)<=4);if(!row){row={y:item.y,cells:[]};pageRows.push(row);}row.cells.push(item);}pageRows.sort((a,b)=>b.y-a.y);if(pageNo>1)rows.push([]);for(const row of pageRows){row.cells.sort((a,b)=>a.x-b.x);rows.push(row.cells.map(c=>c.text));}}if(!rows.length)return alert('PDF में readable text नहीं मिला।');const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'PDF Data');const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});peDownloadBlob(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),'PDF_to_Excel.xlsx')}catch(e){alert('PDF to Excel error: '+e.message)}}
 
         function changeLanguage() {
             let lang = document.getElementById('languageSwitcher').value;
