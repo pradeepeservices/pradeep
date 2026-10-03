@@ -94,6 +94,143 @@
 
         .admin-card { background:#fff; border:1px solid #e8edf5; border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:0 5px 20px rgba(31,41,55,.04); }
         .admin-title { font-size:18px; font-weight:800; margin:0 0 12px; color:#172554; }
+
+        /* Professional Admin / Login UI - isolated styles */
+        body.admin-open { overflow:hidden; }
+        #pageModal.admin-modal {
+            background:linear-gradient(135deg,rgba(7,15,35,.92),rgba(30,64,175,.88));
+            backdrop-filter:blur(7px);
+            -webkit-backdrop-filter:blur(7px);
+            overflow:hidden;
+        }
+        #pageModal.admin-modal .page-box {
+            width:100%; max-width:none; height:100vh; max-height:none;
+            margin:0; padding:0; border-radius:0; overflow:hidden;
+            background:#f4f7fb; box-shadow:none;
+        }
+        #pageModal.admin-modal .close-btn {
+            position:fixed; z-index:30; right:22px; top:18px;
+            width:40px; height:40px; border-radius:12px;
+            display:flex; align-items:center; justify-content:center;
+            color:#fff; background:rgba(255,255,255,.14);
+            border:1px solid rgba(255,255,255,.24);
+            box-shadow:0 8px 24px rgba(0,0,0,.16);
+            transition:.2s;
+        }
+        #pageModal.admin-modal .close-btn:hover { background:rgba(255,255,255,.25); color:#fff; transform:rotate(90deg); }
+        .admin-login-page {
+            min-height:100vh; display:grid; place-items:center; padding:24px;
+            box-sizing:border-box;
+            background:
+                radial-gradient(circle at 15% 15%,rgba(99,102,241,.18),transparent 30%),
+                radial-gradient(circle at 85% 85%,rgba(37,99,235,.18),transparent 32%),
+                #f4f7fb;
+        }
+        .admin-login-card {
+            width:min(470px,100%); background:#fff; border:1px solid #e6ebf4;
+            border-radius:24px; padding:30px; box-sizing:border-box;
+            box-shadow:0 28px 80px rgba(15,23,42,.18);
+        }
+        .admin-login-brand { text-align:center; margin-bottom:24px; }
+        .admin-login-logo {
+            width:68px; height:68px; margin:0 auto 12px; border-radius:20px;
+            display:grid; place-items:center; background:linear-gradient(135deg,#1e3c72,#6b11ff);
+            color:#fff; font-size:22px; font-weight:900; box-shadow:0 12px 30px rgba(67,56,202,.25);
+            overflow:hidden;
+        }
+        .admin-login-logo img { width:100%; height:100%; object-fit:cover; }
+        .admin-login-title { margin:0; color:#0f172a; font-size:28px; font-weight:900; letter-spacing:-.4px; }
+        .admin-login-sub { margin:7px 0 0; color:#64748b; font-size:13px; line-height:1.55; }
+        .admin-auth-tabs { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:22px 0 14px; }
+        .admin-auth-tab {
+            border:1px solid #dbe3ef !important; background:#f8fafc !important;
+            color:#334155 !important; width:100% !important; margin:0 !important;
+            border-radius:11px !important; padding:11px 10px !important; box-shadow:none !important;
+        }
+        .admin-auth-tab:hover { background:#eef2ff !important; color:#1d4ed8 !important; }
+        .admin-login-card label { display:block; margin:12px 0 6px; color:#334155; font-size:12px; font-weight:800; }
+        .admin-login-card input {
+            width:100% !important; box-sizing:border-box; border:1px solid #d8e0eb !important;
+            border-radius:11px !important; padding:12px 13px !important; background:#fff !important;
+            outline:none; transition:.2s; margin:0 0 2px !important;
+        }
+        .admin-login-card input:focus { border-color:#4f46e5 !important; box-shadow:0 0 0 4px rgba(79,70,229,.10); }
+        .admin-primary-btn {
+            width:100% !important; border:0 !important; border-radius:11px !important;
+            padding:12px 15px !important; margin-top:12px !important;
+            background:linear-gradient(135deg,#1e3c72,#4f46e5,#6b11ff) !important;
+            color:#fff !important; box-shadow:0 10px 24px rgba(67,56,202,.22) !important;
+        }
+        .admin-dashboard {
+            height:100vh; display:flex; flex-direction:column; overflow:hidden;
+            background:#f4f7fb; color:#0f172a;
+        }
+        .admin-topbar {
+            flex:0 0 auto; min-height:72px; padding:12px 64px 12px 22px; box-sizing:border-box;
+            background:linear-gradient(135deg,#111c3d,#1e3c72,#4338ca);
+            color:#fff; display:flex; align-items:center; justify-content:space-between; gap:16px;
+            box-shadow:0 8px 30px rgba(15,23,42,.16);
+        }
+        .admin-brand-wrap { display:flex; align-items:center; gap:12px; min-width:0; }
+        .admin-brand-mark { width:42px; height:42px; border-radius:13px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.2); display:grid; place-items:center; font-weight:900; overflow:hidden; }
+        .admin-brand-mark img { width:100%; height:100%; object-fit:cover; }
+        .admin-brand-name { font-weight:900; font-size:17px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .admin-brand-sub { font-size:11px; opacity:.75; margin-top:2px; }
+        .admin-top-actions { display:flex; align-items:center; gap:8px; }
+        .admin-top-btn { width:auto !important; margin:0 !important; padding:9px 13px !important; border-radius:10px !important; background:rgba(255,255,255,.12) !important; border:1px solid rgba(255,255,255,.18) !important; color:#fff !important; }
+        .admin-content { flex:1; min-height:0; display:flex; overflow:hidden; }
+        .admin-sidebar {
+            width:245px; flex:0 0 245px; background:#fff; border-right:1px solid #e4e9f1;
+            padding:16px 12px; box-sizing:border-box; overflow-y:auto;
+        }
+        .admin-side-label { padding:8px 10px 6px; font-size:10px; font-weight:900; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; }
+        .admin-nav-btn {
+            width:100% !important; margin:3px 0 !important; padding:11px 12px !important;
+            background:transparent !important; color:#475569 !important; border:1px solid transparent !important;
+            border-radius:10px !important; text-align:left; box-shadow:none !important; font-weight:700 !important;
+        }
+        .admin-nav-btn:hover, .admin-nav-btn.active { background:#eef2ff !important; color:#3730a3 !important; border-color:#e0e7ff !important; }
+        .admin-main { flex:1; min-width:0; overflow-y:auto; padding:22px; box-sizing:border-box; }
+        .admin-main-inner { width:min(1180px,100%); margin:0 auto; }
+        .admin-welcome { display:flex; justify-content:space-between; align-items:end; gap:12px; margin:0 0 18px; }
+        .admin-welcome h2 { margin:0; font-size:24px; color:#0f172a; }
+        .admin-welcome p { margin:5px 0 0; color:#64748b; font-size:12px; }
+        .admin-grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+        .admin-grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+        .admin-dashboard .admin-card {
+            border:1px solid #e4e9f1; border-radius:16px; background:#fff; padding:17px;
+            box-shadow:0 8px 25px rgba(15,23,42,.045); margin-bottom:16px;
+        }
+        .admin-dashboard .admin-title { font-size:15px; margin:0 0 11px; color:#172554; }
+        .admin-dashboard .admin-card input,
+        .admin-dashboard .admin-card textarea,
+        .admin-dashboard .admin-card select {
+            border:1px solid #dbe3ef; border-radius:10px; padding:10px 11px; background:#fbfdff;
+        }
+        .admin-dashboard .admin-card input:focus,
+        .admin-dashboard .admin-card textarea:focus,
+        .admin-dashboard .admin-card select:focus {
+            outline:none; border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.09);
+        }
+        .admin-dashboard .admin-card > button,
+        .admin-dashboard .admin-card .admin-primary-btn {
+            border-radius:10px; background:linear-gradient(135deg,#1e3c72,#4f46e5);
+        }
+        @media(max-width:850px){
+            .admin-sidebar{width:190px;flex-basis:190px}
+            .admin-grid-2,.admin-grid-3{grid-template-columns:1fr}
+        }
+        @media(max-width:650px){
+            .admin-topbar{padding-left:14px;padding-right:54px}
+            .admin-brand-sub{display:none}
+            .admin-content{display:block;overflow:auto}
+            .admin-sidebar{width:100%;height:auto;max-height:145px;border-right:0;border-bottom:1px solid #e4e9f1;display:flex;gap:6px;overflow-x:auto;white-space:nowrap}
+            .admin-side-label{display:none}
+            .admin-nav-btn{width:auto !important;flex:0 0 auto}
+            .admin-main{overflow:visible;padding:14px}
+            .admin-welcome{align-items:flex-start;flex-direction:column}
+            .admin-login-card{padding:23px;border-radius:20px}
+        }
         .full-page { display:none; min-height:75vh; padding:26px 16px 50px; }
         .vacancy-shell { width:min(1120px,96%); margin:auto; background:#fff; border:1px solid #e6eaf2; border-radius:24px; overflow:hidden; box-shadow:0 20px 60px rgba(31,41,55,.1); }
         .vacancy-hero { padding:30px; background:linear-gradient(135deg,#14265d,#2457e6,#7139f5); color:#fff; }
@@ -175,6 +312,729 @@
 
         #vacancyPage .post-poster-area { margin-top: 18px; }
     </style>
+
+<style>
+/* Admin dashboard full-screen reinforcement */
+body.admin-open { overflow: hidden !important; }
+body.admin-open .admin-modal {
+  position: fixed !important; inset: 0 !important; width: 100vw !important;
+  height: 100vh !important; max-width: none !important; max-height: none !important;
+  margin: 0 !important; padding: 0 !important; border-radius: 0 !important;
+}
+body.admin-open .admin-dashboard {
+  position: fixed !important; inset: 0 !important; width: 100vw !important;
+  height: 100vh !important; min-height: 100vh !important; max-width: none !important;
+  max-height: none !important; margin: 0 !important; border-radius: 0 !important;
+  overflow: hidden !important;
+}
+body.admin-open .admin-main {
+  min-width: 0 !important; min-height: 0 !important; height: 100% !important;
+  overflow-y: auto !important; overflow-x: hidden !important;
+}
+body.admin-open .admin-sidebar {
+  height: 100% !important; overflow-y: auto !important;
+}
+@media (max-width: 768px) {
+  body.admin-open .admin-dashboard { display:flex !important; flex-direction:column !important; }
+  body.admin-open .admin-sidebar {
+    width:100% !important; max-width:none !important; height:auto !important;
+    max-height:42vh !important; flex:0 0 auto !important;
+  }
+  body.admin-open .admin-main {
+    flex:1 1 auto !important; width:100% !important; height:auto !important; min-height:0 !important;
+  }
+  body.admin-open .admin-topbar { width:100% !important; flex-wrap:wrap !important; }
+}
+</style>
+
+<style>
+
+/* ===== Professional Admin Dashboard Visual Upgrade ONLY ===== */
+body.admin-open .admin-dashboard {
+  background: #f4f7fb !important;
+  color: #172033 !important;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+body.admin-open .admin-topbar {
+  background: linear-gradient(135deg, #111827, #1f2937) !important;
+  color: #fff !important;
+  min-height: 72px !important;
+  padding: 14px 22px !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  box-shadow: 0 4px 18px rgba(15,23,42,.12) !important;
+}
+
+body.admin-open .admin-sidebar {
+  background: #111827 !important;
+  color: #e5e7eb !important;
+  border-right: 1px solid #263244 !important;
+  padding: 18px 12px !important;
+  box-shadow: 4px 0 18px rgba(15,23,42,.08) !important;
+}
+
+body.admin-open .admin-sidebar button,
+body.admin-open .admin-sidebar a {
+  border-radius: 10px !important;
+  margin: 4px 0 !important;
+  padding: 11px 13px !important;
+  transition: .18s ease !important;
+}
+
+body.admin-open .admin-sidebar button:hover,
+body.admin-open .admin-sidebar a:hover {
+  background: rgba(255,255,255,.09) !important;
+  transform: translateX(2px) !important;
+}
+
+body.admin-open .admin-main {
+  background: #f4f7fb !important;
+  padding: 24px !important;
+}
+
+body.admin-open .admin-main > div,
+body.admin-open .admin-main section,
+body.admin-open .admin-main .admin-card,
+body.admin-open .admin-main .card {
+  border-radius: 14px !important;
+}
+
+body.admin-open .admin-main section,
+body.admin-open .admin-main .admin-card,
+body.admin-open .admin-main .card {
+  background: #fff !important;
+  border: 1px solid #e5eaf1 !important;
+  box-shadow: 0 5px 20px rgba(15,23,42,.055) !important;
+}
+
+body.admin-open .admin-main input,
+body.admin-open .admin-main select,
+body.admin-open .admin-main textarea {
+  border: 1px solid #d8e0ea !important;
+  border-radius: 9px !important;
+  background: #fff !important;
+  min-height: 42px !important;
+  padding: 9px 12px !important;
+  transition: border-color .18s, box-shadow .18s !important;
+}
+
+body.admin-open .admin-main input:focus,
+body.admin-open .admin-main select:focus,
+body.admin-open .admin-main textarea:focus {
+  border-color: #4f7cff !important;
+  box-shadow: 0 0 0 3px rgba(79,124,255,.12) !important;
+  outline: none !important;
+}
+
+body.admin-open .admin-main button {
+  border-radius: 9px !important;
+  font-weight: 600 !important;
+  transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease !important;
+}
+
+body.admin-open .admin-main button:hover {
+  transform: translateY(-1px) !important;
+}
+
+body.admin-open .admin-main h1,
+body.admin-open .admin-main h2,
+body.admin-open .admin-main h3 {
+  color: #172033 !important;
+  letter-spacing: -.2px !important;
+}
+
+body.admin-open .admin-main table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #e5eaf1 !important;
+  border-radius: 10px !important;
+}
+
+body.admin-open .admin-main th {
+  background: #f7f9fc !important;
+  color: #526071 !important;
+  font-weight: 700 !important;
+}
+
+body.admin-open .admin-main td,
+body.admin-open .admin-main th {
+  border-bottom: 1px solid #edf0f5 !important;
+  padding: 11px !important;
+}
+
+@media (max-width: 768px) {
+  body.admin-open .admin-main {
+    padding: 14px !important;
+  }
+  body.admin-open .admin-topbar {
+    padding: 12px 14px !important;
+  }
+}
+
+</style>
+<style>
+
+/* ===== Professional Home Page Visual Upgrade ONLY =====
+   Scoped to normal site content; Admin Panel styles remain untouched. */
+body:not(.admin-open) {
+  background: #f5f7fb !important;
+}
+
+body:not(.admin-open) header,
+body:not(.admin-open) .header,
+body:not(.admin-open) .site-header {
+  box-shadow: 0 3px 18px rgba(15,23,42,.08) !important;
+}
+
+body:not(.admin-open) main,
+body:not(.admin-open) .main-content,
+body:not(.admin-open) .container {
+  scroll-behavior: smooth;
+}
+
+body:not(.admin-open) .box,
+body:not(.admin-open) .card,
+body:not(.admin-open) .section,
+body:not(.admin-open) .post-card,
+body:not(.admin-open) .job-card,
+body:not(.admin-open) .update-card,
+body:not(.admin-open) .tool-card,
+body:not(.admin-open) .portal-card {
+  border-radius: 14px !important;
+  border: 1px solid #e6ebf2 !important;
+  box-shadow: 0 5px 18px rgba(15,23,42,.055) !important;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
+}
+
+body:not(.admin-open) .box:hover,
+body:not(.admin-open) .card:hover,
+body:not(.admin-open) .post-card:hover,
+body:not(.admin-open) .job-card:hover,
+body:not(.admin-open) .update-card:hover,
+body:not(.admin-open) .tool-card:hover,
+body:not(.admin-open) .portal-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 9px 25px rgba(15,23,42,.09) !important;
+  border-color: #d9e2ee !important;
+}
+
+body:not(.admin-open) button,
+body:not(.admin-open) .btn,
+body:not(.admin-open) a.button {
+  border-radius: 9px !important;
+  transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease !important;
+}
+
+body:not(.admin-open) button:hover,
+body:not(.admin-open) .btn:hover,
+body:not(.admin-open) a.button:hover {
+  transform: translateY(-1px) !important;
+}
+
+body:not(.admin-open) input,
+body:not(.admin-open) select,
+body:not(.admin-open) textarea {
+  border-radius: 9px !important;
+  border-color: #d9e1eb !important;
+}
+
+body:not(.admin-open) input:focus,
+body:not(.admin-open) select:focus,
+body:not(.admin-open) textarea:focus {
+  outline: none !important;
+  border-color: #4f7cff !important;
+  box-shadow: 0 0 0 3px rgba(79,124,255,.10) !important;
+}
+
+body:not(.admin-open) img {
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  body:not(.admin-open) .box,
+  body:not(.admin-open) .card,
+  body:not(.admin-open) .section,
+  body:not(.admin-open) .post-card,
+  body:not(.admin-open) .job-card,
+  body:not(.admin-open) .update-card,
+  body:not(.admin-open) .tool-card,
+  body:not(.admin-open) .portal-card {
+    border-radius: 11px !important;
+  }
+}
+
+</style>
+<style>
+
+/* ===== Professional Second Page Visual Upgrade ONLY =====
+   Scoped to page-content/page-modal style containers and excludes Admin Panel. */
+body:not(.admin-open) .page-content,
+body:not(.admin-open) .page-modal-content,
+body:not(.admin-open) .second-page,
+body:not(.admin-open) .detail-page,
+body:not(.admin-open) .post-detail,
+body:not(.admin-open) .details-page,
+body:not(.admin-open) .content-page {
+  background: #ffffff !important;
+  border-radius: 14px !important;
+  border: 1px solid #e6ebf2 !important;
+  box-shadow: 0 8px 28px rgba(15,23,42,.07) !important;
+}
+
+body:not(.admin-open) .page-content h1,
+body:not(.admin-open) .page-content h2,
+body:not(.admin-open) .page-content h3,
+body:not(.admin-open) .page-modal-content h1,
+body:not(.admin-open) .page-modal-content h2,
+body:not(.admin-open) .page-modal-content h3,
+body:not(.admin-open) .second-page h1,
+body:not(.admin-open) .second-page h2,
+body:not(.admin-open) .detail-page h1,
+body:not(.admin-open) .detail-page h2,
+body:not(.admin-open) .post-detail h1,
+body:not(.admin-open) .post-detail h2 {
+  color: #172033 !important;
+  letter-spacing: -.2px !important;
+}
+
+body:not(.admin-open) .page-content input,
+body:not(.admin-open) .page-content select,
+body:not(.admin-open) .page-content textarea,
+body:not(.admin-open) .page-modal-content input,
+body:not(.admin-open) .page-modal-content select,
+body:not(.admin-open) .page-modal-content textarea {
+  border-radius: 9px !important;
+  border-color: #d9e1eb !important;
+}
+
+body:not(.admin-open) .page-content button,
+body:not(.admin-open) .page-content .btn,
+body:not(.admin-open) .page-modal-content button,
+body:not(.admin-open) .page-modal-content .btn,
+body:not(.admin-open) .second-page button,
+body:not(.admin-open) .detail-page button {
+  border-radius: 9px !important;
+  font-weight: 600 !important;
+  transition: transform .16s ease, box-shadow .16s ease !important;
+}
+
+body:not(.admin-open) .page-content button:hover,
+body:not(.admin-open) .page-content .btn:hover,
+body:not(.admin-open) .page-modal-content button:hover,
+body:not(.admin-open) .page-modal-content .btn:hover,
+body:not(.admin-open) .second-page button:hover,
+body:not(.admin-open) .detail-page button:hover {
+  transform: translateY(-1px) !important;
+}
+
+body:not(.admin-open) .page-content table,
+body:not(.admin-open) .page-modal-content table,
+body:not(.admin-open) .detail-page table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #e6ebf2 !important;
+  border-radius: 10px !important;
+}
+
+body:not(.admin-open) .page-content th,
+body:not(.admin-open) .page-modal-content th,
+body:not(.admin-open) .detail-page th {
+  background: #f7f9fc !important;
+  color: #526071 !important;
+  font-weight: 700 !important;
+}
+
+body:not(.admin-open) .page-content td,
+body:not(.admin-open) .page-content th,
+body:not(.admin-open) .page-modal-content td,
+body:not(.admin-open) .page-modal-content th,
+body:not(.admin-open) .detail-page td,
+body:not(.admin-open) .detail-page th {
+  border-bottom: 1px solid #edf0f5 !important;
+  padding: 11px !important;
+}
+
+@media (max-width: 768px) {
+  body:not(.admin-open) .page-content,
+  body:not(.admin-open) .page-modal-content,
+  body:not(.admin-open) .second-page,
+  body:not(.admin-open) .detail-page,
+  body:not(.admin-open) .post-detail {
+    border-radius: 10px !important;
+  }
+}
+
+</style>
+<style>
+
+/* =========================================================
+   FINAL TARGETED HOME + SECOND PAGE PROFESSIONAL UI
+   CSS ONLY — no content, IDs, JS, Firebase or functionality changed.
+   ========================================================= */
+
+/* ---------- HOME PAGE ---------- */
+body:not(.admin-open) #appHome {
+  background: #f4f7fb !important;
+  min-height: 100vh !important;
+}
+
+body:not(.admin-open) #appHome header {
+  position: relative !important;
+  overflow: hidden !important;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%) !important;
+  color: #fff !important;
+  padding: 0 0 24px !important;
+  box-shadow: 0 8px 30px rgba(15,23,42,.16) !important;
+}
+
+body:not(.admin-open) #appHome .top-bar {
+  background: rgba(0,0,0,.14) !important;
+  border-bottom: 1px solid rgba(255,255,255,.12) !important;
+  padding: 10px 18px !important;
+}
+
+body:not(.admin-open) #appHome .logo-area {
+  padding-top: 24px !important;
+}
+
+body:not(.admin-open) #appHome .site-logo {
+  box-shadow: 0 8px 22px rgba(0,0,0,.20) !important;
+  border: 2px solid rgba(255,255,255,.75) !important;
+}
+
+body:not(.admin-open) #appHome #header-title {
+  font-weight: 800 !important;
+  letter-spacing: -.5px !important;
+  text-shadow: 0 2px 10px rgba(0,0,0,.16) !important;
+}
+
+body:not(.admin-open) #appHome #header-subtitle {
+  opacity: .92 !important;
+  font-weight: 500 !important;
+}
+
+body:not(.admin-open) #appHome .social-banner {
+  max-width: 1180px !important;
+  margin: 16px auto !important;
+  padding: 10px !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  border: 1px solid #e4eaf2 !important;
+  box-shadow: 0 5px 20px rgba(15,23,42,.06) !important;
+}
+
+body:not(.admin-open) #appHome .dynamic-ad-container {
+  max-width: 1180px !important;
+  margin: 0 auto 20px !important;
+}
+
+body:not(.admin-open) #appHome .ad-banner-box {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 28px rgba(15,23,42,.10) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+body:not(.admin-open) #appHome #mainBoxesContainer {
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+  gap: 18px !important;
+}
+
+body:not(.admin-open) #appHome #mainBoxesContainer .box {
+  background: #fff !important;
+  border: 1px solid #e3e9f1 !important;
+  border-radius: 15px !important;
+  overflow: hidden !important;
+  box-shadow: 0 6px 22px rgba(15,23,42,.055) !important;
+  transition: transform .18s ease, box-shadow .18s ease !important;
+}
+
+body:not(.admin-open) #appHome #mainBoxesContainer .box:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 12px 30px rgba(15,23,42,.10) !important;
+}
+
+body:not(.admin-open) #appHome #mainBoxesContainer .box-header {
+  border-radius: 0 !important;
+  padding: 14px 16px !important;
+  font-weight: 750 !important;
+  letter-spacing: .1px !important;
+}
+
+body:not(.admin-open) #appHome #mainBoxesContainer .box-content {
+  padding: 14px 16px !important;
+  background: #fff !important;
+}
+
+body:not(.admin-open) #appHome #mainBoxesContainer .box-content li {
+  padding: 9px 4px !important;
+  border-bottom: 1px solid #edf1f6 !important;
+}
+
+body:not(.admin-open) #appHome #mainBoxesContainer .box-content li:last-child {
+  border-bottom: 0 !important;
+}
+
+body:not(.admin-open) #appHome .portals-section,
+body:not(.admin-open) #appHome .tools-section {
+  max-width: 1180px !important;
+  margin: 22px auto !important;
+  padding: 20px !important;
+  background: #fff !important;
+  border: 1px solid #e3e9f1 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 6px 22px rgba(15,23,42,.055) !important;
+}
+
+body:not(.admin-open) #appHome .portals-section h3,
+body:not(.admin-open) #appHome .tools-section h3 {
+  font-weight: 800 !important;
+  color: #172033 !important;
+  margin-bottom: 15px !important;
+}
+
+body:not(.admin-open) #appHome .portal-badge,
+body:not(.admin-open) #appHome .tool-card {
+  border-radius: 11px !important;
+  border: 1px solid #e1e8f1 !important;
+  box-shadow: none !important;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
+}
+
+body:not(.admin-open) #appHome .portal-badge:hover,
+body:not(.admin-open) #appHome .tool-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 20px rgba(15,23,42,.09) !important;
+  border-color: #cbd7e6 !important;
+}
+
+body:not(.admin-open) #appHome footer {
+  margin-top: 28px !important;
+  border-top: 1px solid #e2e8f0 !important;
+  background: #111827 !important;
+  color: #dbe3ee !important;
+  padding: 25px 16px !important;
+}
+
+body:not(.admin-open) #appHome footer .footer-links {
+  gap: 16px !important;
+}
+
+/* ---------- SECOND / VACANCY DETAIL PAGE ---------- */
+body:not(.admin-open) #vacancyPage {
+  background: #f3f6fa !important;
+  min-height: 100vh !important;
+  padding: 18px 14px 40px !important;
+}
+
+body:not(.admin-open) #vacancyPage .result-post-shell {
+  max-width: 1080px !important;
+  margin: 0 auto !important;
+  background: #fff !important;
+  border: 1px solid #e1e7ef !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 35px rgba(15,23,42,.08) !important;
+}
+
+body:not(.admin-open) #vacancyPage .result-post-nav {
+  background: #111827 !important;
+  color: #e5e7eb !important;
+  padding: 11px 16px !important;
+  border-bottom: 1px solid #273244 !important;
+}
+
+body:not(.admin-open) #vacancyPage .result-post-nav span {
+  opacity: .9 !important;
+  font-weight: 600 !important;
+}
+
+body:not(.admin-open) #vacancyPage .result-post-top {
+  padding: 24px !important;
+  background: linear-gradient(135deg, #f8fafc, #eef4ff) !important;
+  border-bottom: 1px solid #e3e9f1 !important;
+}
+
+body:not(.admin-open) #vacancyPage #vacancyPageTitle {
+  color: #172033 !important;
+  font-weight: 800 !important;
+  letter-spacing: -.4px !important;
+}
+
+body:not(.admin-open) #vacancyPage .result-post-updated {
+  color: #64748b !important;
+  font-size: 13px !important;
+}
+
+body:not(.admin-open) #vacancyPage .result-post-intro {
+  color: #475569 !important;
+  line-height: 1.7 !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-social {
+  padding: 14px 24px !important;
+  background: #fff !important;
+  border-bottom: 1px solid #edf1f5 !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-wa,
+body:not(.admin-open) #vacancyPage .post-tg {
+  border-radius: 9px !important;
+  box-shadow: 0 3px 10px rgba(15,23,42,.07) !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-section-title {
+  margin: 20px 24px 0 !important;
+  padding: 13px 15px !important;
+  border-radius: 10px !important;
+  background: #f7f9fc !important;
+  border: 1px solid #e5eaf1 !important;
+  color: #172033 !important;
+  font-weight: 800 !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-section-subtitle {
+  margin: 8px 24px !important;
+  color: #64748b !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-summary-table {
+  margin: 14px 24px !important;
+  gap: 12px !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-summary-cell {
+  background: #fff !important;
+  border: 1px solid #e1e8f0 !important;
+  border-radius: 12px !important;
+  padding: 15px !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.045) !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-summary-cell h3 {
+  color: #526071 !important;
+  font-size: 13px !important;
+  margin-bottom: 7px !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-content-wrap {
+  margin: 18px 24px 24px !important;
+  padding: 0 !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-details-title {
+  margin-top: 18px !important;
+  padding: 12px 14px !important;
+  border-radius: 9px !important;
+  background: #f7f9fc !important;
+  border: 1px solid #e5eaf1 !important;
+  color: #172033 !important;
+  font-weight: 800 !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-detail-table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #e1e7ef !important;
+  border-radius: 11px !important;
+  margin-top: 10px !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-detail-table th {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  font-weight: 750 !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-detail-table td,
+body:not(.admin-open) #vacancyPage .post-detail-table th {
+  padding: 12px !important;
+  border-bottom: 1px solid #edf1f5 !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-details-text {
+  color: #374151 !important;
+  line-height: 1.75 !important;
+  padding: 14px 4px !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-actions {
+  gap: 10px !important;
+  padding-top: 18px !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-apply,
+body:not(.admin-open) #vacancyPage .post-notify,
+body:not(.admin-open) #vacancyPage .post-pdf {
+  border-radius: 9px !important;
+  box-shadow: 0 4px 12px rgba(15,23,42,.07) !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-disclaimer {
+  margin-top: 18px !important;
+  padding: 12px 14px !important;
+  border-radius: 9px !important;
+  background: #fff8e8 !important;
+  border: 1px solid #f2dfae !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-poster-area {
+  margin-top: 22px !important;
+  padding: 14px !important;
+  border-radius: 12px !important;
+  background: #f8fafc !important;
+  border: 1px solid #e1e8f0 !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-poster-label {
+  font-weight: 750 !important;
+  color: #475569 !important;
+  margin-bottom: 10px !important;
+}
+
+body:not(.admin-open) #vacancyPage .post-poster-area img {
+  max-width: 100% !important;
+  border-radius: 9px !important;
+  box-shadow: 0 5px 18px rgba(15,23,42,.08) !important;
+}
+
+@media (max-width: 768px) {
+  body:not(.admin-open) #appHome .social-banner,
+  body:not(.admin-open) #appHome .dynamic-ad-container,
+  body:not(.admin-open) #appHome #mainBoxesContainer,
+  body:not(.admin-open) #appHome .portals-section,
+  body:not(.admin-open) #appHome .tools-section {
+    width: calc(100% - 20px) !important;
+  }
+
+  body:not(.admin-open) #vacancyPage {
+    padding: 8px 6px 25px !important;
+  }
+
+  body:not(.admin-open) #vacancyPage .result-post-top,
+  body:not(.admin-open) #vacancyPage .post-social {
+    padding: 16px !important;
+  }
+
+  body:not(.admin-open) #vacancyPage .post-section-title,
+  body:not(.admin-open) #vacancyPage .post-section-subtitle,
+  body:not(.admin-open) #vacancyPage .post-summary-table,
+  body:not(.admin-open) #vacancyPage .post-content-wrap {
+    margin-left: 12px !important;
+    margin-right: 12px !important;
+  }
+
+  body:not(.admin-open) #vacancyPage .result-post-shell {
+    border-radius: 11px !important;
+  }
+}
+
+</style>
 </head>
 <body>
 
@@ -1097,6 +1957,9 @@
             document.getElementById('pageModal').style.display = 'none';
             const pageBox = document.getElementById('pageBoxInner');
             if(pageBox) pageBox.classList.remove('declaration-modal-mode');
+            const modal = document.getElementById('pageModal');
+            if(modal) modal.classList.remove('admin-modal');
+            document.body.classList.remove('admin-open');
             if((window.location.hash || '').toLowerCase().startsWith('#tool-')) {
                 history.replaceState({ page: 'home' }, '', window.location.pathname + window.location.search);
             }
@@ -1170,27 +2033,38 @@
         }
 
         function openLoginModal() {
-            let linkButton = isAuthorizedAdmin(auth.currentUser) && !auth.currentUser.phoneNumber ? `<button type="button" onclick="showAdminPhoneLink()" style="width:100%;margin:8px 0;">Link mobile to this Gmail Admin</button>` : '';
+            let linkButton = isAuthorizedAdmin(auth.currentUser) && !auth.currentUser.phoneNumber ? `<button type="button" onclick="showAdminPhoneLink()" class="admin-primary-btn">Link mobile to this Gmail Admin</button>` : '';
+            let savedLogo = localStorage.getItem('custom_site_logo') || '';
+            let logoHtml = savedLogo ? `<img src="${savedLogo}" alt="Pradeep E Services">` : 'PE';
             let html = `
-                <h2>Admin Login</h2>
-                <p style="font-size:13px;color:#666;">Admin access ke liye apne registered Gmail aur Firebase password se login karein.</p>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">
-                    <button type="button" onclick="showAdminPhoneLogin()" style="flex:1;min-width:140px;">Mobile OTP</button>
-                    <button type="button" onclick="showAdminEmailLogin()" style="flex:1;min-width:140px;">Gmail Login</button>
+                <div class="admin-login-page">
+                    <div class="admin-login-card">
+                        <div class="admin-login-brand">
+                            <div class="admin-login-logo">${logoHtml}</div>
+                            <h2 class="admin-login-title">Admin Control Panel</h2>
+                            <p class="admin-login-sub">Secure administrator access • Pradeep E Services</p>
+                        </div>
+                        <div class="admin-auth-tabs">
+                            <button type="button" class="admin-auth-tab" onclick="showAdminPhoneLogin()">📱 Mobile OTP</button>
+                            <button type="button" class="admin-auth-tab" onclick="showAdminEmailLogin()">✉️ Gmail Login</button>
+                        </div>
+                        ${linkButton}
+                        <div id="adminAuthMethodArea"></div>
+                    </div>
                 </div>
-                ${linkButton}
-                <div id="adminAuthMethodArea"></div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
+            document.getElementById('pageModal').classList.add('admin-modal');
+            document.body.classList.add('admin-open');
             openPageModal();
         }
 
         function showAdminPhoneLogin() {
             document.getElementById('adminAuthMethodArea').innerHTML = `
-                <label for="adminPhoneNumber">Registered mobile number (country code ke saath)</label>
+                <label for="adminPhoneNumber">Registered mobile number</label>
                 <input type="tel" id="adminPhoneNumber" placeholder="+91XXXXXXXXXX" autocomplete="tel">
-                <div id="admin-recaptcha-container" style="margin:12px 0;"></div>
-                <button type="button" onclick="sendAdminPhoneOtp()">Send SMS OTP</button>
+                <div id="admin-recaptcha-container" style="margin:14px 0;"></div>
+                <button type="button" class="admin-primary-btn" onclick="sendAdminPhoneOtp()">Send SMS OTP</button>
                 <div id="adminOtpArea" style="margin-top:12px;"></div>`;
             if (adminRecaptchaVerifier) { try { adminRecaptchaVerifier.clear(); } catch(e) {} }
             adminRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('admin-recaptcha-container', {size:'normal'}, auth);
@@ -1265,12 +2139,12 @@
 
         function showAdminEmailLogin() {
             document.getElementById('adminAuthMethodArea').innerHTML = `
-                <p style="font-size:13px;color:#666;">Apne Firebase Authentication mein registered Gmail aur uska Firebase password daalein.</p>
+                <p style="font-size:12px;color:#64748b;line-height:1.5;">Firebase Authentication में registered Gmail और password का उपयोग करें.</p>
                 <label for="adminEmailAddress">Admin Gmail</label>
                 <input type="email" id="adminEmailAddress" placeholder="yourname@gmail.com" autocomplete="username">
                 <label for="adminEmailPassword">Firebase Password</label>
                 <input type="password" id="adminEmailPassword" placeholder="Firebase password" autocomplete="current-password">
-                <button type="button" onclick="loginAdminWithPassword()">Gmail & Password se Login</button>`;
+                <button type="button" class="admin-primary-btn" onclick="loginAdminWithPassword()">🔐 Gmail & Password se Login</button>`;
         }
 
         async function loginAdminWithPassword() {
@@ -1388,6 +2262,8 @@
 
                 let totalCountElem = document.getElementById('adminTotalVisitorCount');
                 if(totalCountElem) totalCountElem.innerText = visitorCount;
+                let totalCountTopElem = document.getElementById('adminTotalVisitorCountTop');
+                if(totalCountTopElem) totalCountTopElem.innerText = visitorCount;
 
                 let visitorListElem = document.getElementById('adminVisitorListContainer');
                 if(visitorListElem) visitorListElem.innerHTML = visitorListHtml;
@@ -1418,61 +2294,99 @@
             });
 
             let html = `
-                <h2>Admin Control Panel</h2>
-                <hr style="margin:10px 0 15px 0;">
-
-                <div class="admin-card" style="border: 2px solid #2563eb; background: #eff6ff;">
-                    <div class="admin-title" style="color: #1e40af; display: flex; justify-content: space-between; align-items: center;">
-                        <span>📊 Website Visitor Statistics & Locations</span>
-                        <span style="background: #2563eb; color: white; padding: 4px 12px; border-radius: 999px; font-size: 14px;">Total Visits: <strong id="adminTotalVisitorCount">0</strong></span>
+                <div class="admin-dashboard">
+                    <div class="admin-topbar">
+                        <div class="admin-brand-wrap">
+                            <div class="admin-brand-mark">${localStorage.getItem('custom_site_logo') ? `<img src="${localStorage.getItem('custom_site_logo')}" alt="">` : 'PE'}</div>
+                            <div>
+                                <div class="admin-brand-name">Pradeep E Services</div>
+                                <div class="admin-brand-sub">Administrator Dashboard</div>
+                            </div>
+                        </div>
+                        <div class="admin-top-actions">
+                            <button type="button" class="admin-top-btn" onclick="goHome()">🏠 Website</button>
+                            <button type="button" class="admin-top-btn" onclick="auth.signOut().then(()=>goHome())">↪ Logout</button>
+                        </div>
                     </div>
-                    <p style="font-size:12px; color:#1e3c72; margin-top:0;">यहाँ आप उन सभी यूजर्स की लिस्ट और उनकी लाइव लोकेशन देख सकते हैं जिन्होंने आपकी वेबसाइट विजिट की है:</p>
-                    <div style="max-height:220px; overflow-y:auto; border:1px solid #cbd5e1; padding:10px; border-radius:6px; background:#fff;" id="adminVisitorListContainer">
-                        Loading visitor logs...
-                    </div>
-                </div>
-                
-                <div class="admin-card">
-                    <div class="admin-title">💬 User Feedbacks Received</div>
-                    <div style="max-height:220px; overflow-y:auto; border:1px solid #cbd5e1; padding:10px; border-radius:6px; background:#fff;" id="adminFeedbacksListContainer">
-                        Loading feedbacks...
-                    </div>
-                </div>
+                    <div class="admin-content">
+                        <aside class="admin-sidebar">
+                            <div class="admin-side-label">Control Panel</div>
+                            <button type="button" class="admin-nav-btn active" onclick="document.getElementById('adminMainScroll').scrollTo({top:0,behavior:'smooth'})">📊 Dashboard</button>
+                            <button type="button" class="admin-nav-btn" onclick="document.getElementById('adminPostsSection').scrollIntoView({behavior:'smooth'})">📋 Posts Manager</button>
+                            <button type="button" class="admin-nav-btn" onclick="document.getElementById('adminAppearanceSection').scrollIntoView({behavior:'smooth'})">🎨 Appearance</button>
+                            <button type="button" class="admin-nav-btn" onclick="document.getElementById('adminLinksSection').scrollIntoView({behavior:'smooth'})">🔗 Links & Social</button>
+                            <button type="button" class="admin-nav-btn" onclick="document.getElementById('adminFooterSection').scrollIntoView({behavior:'smooth'})">📄 Footer Pages</button>
+                        </aside>
+                        <main class="admin-main" id="adminMainScroll">
+                            <div class="admin-main-inner">
+                                <div class="admin-welcome">
+                                    <div>
+                                        <h2>Admin Control Panel</h2>
+                                        <p>Website content, visibility, posts, media और settings manage करें.</p>
+                                    </div>
+                                </div>
 
-                <div class="admin-card" style="border:2px solid #0f766e;background:#f0fdfa;">
-                    <div class="admin-title" style="color:#115e59;">👁️ Website Sections Hide / Unhide</div>
-                    <p style="font-size:12px;color:#475569;margin-top:0;">यहाँ से किसी भी सेक्शन को वेबसाइट पर छिपाएँ या दोबारा दिखाएँ। बदलाव सभी डिवाइस पर Firebase के जरिए लागू होगा।</p>
-                    ${renderCategoryVisibilityControls()}
-                </div>
+                                <div class="admin-grid-2">
+                                    <div class="admin-card" style="border:1px solid #c7d2fe;background:linear-gradient(135deg,#eef2ff,#fff);">
+                                        <div class="admin-title" style="color:#3730a3;">📊 Website Visitor Statistics</div>
+                                        <div style="font-size:28px;font-weight:900;color:#1e3a8a;"><span id="adminTotalVisitorCount">0</span></div>
+                                        <div style="font-size:11px;color:#64748b;">Total recorded visits</div>
+                                    </div>
+                                    <div class="admin-card" style="border:1px solid #bbf7d0;background:linear-gradient(135deg,#f0fdf4,#fff);">
+                                        <div class="admin-title" style="color:#166534;">👁️ Section Visibility</div>
+                                        <div style="font-size:12px;color:#475569;">Latest Jobs, Admit Card, Results और अन्य sections को hide/unhide करें.</div>
+                                    </div>
+                                </div>
 
-                <div class="admin-card">
-                    <div class="admin-title">📷 Upload Header Logo (Auto-Compressed)</div>
-                    <input type="file" id="adminLogoFileInput" accept="image/*" style="margin-bottom:8px;">
-                    <button type="button" onclick="uploadLogoFromAdmin()">Update Website Logo</button>
-                </div>
+                                <div class="admin-card" style="border:1px solid #c7d2fe;background:#f8faff;">
+                                    <div class="admin-title" style="color:#1e40af;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span>📍 Recent Visitor Locations</span>
+                                        <span style="background:#2563eb;color:#fff;padding:5px 11px;border-radius:999px;font-size:12px;">Total: <strong id="adminTotalVisitorCountTop">0</strong></span>
+                                    </div>
+                                    <div style="max-height:220px;overflow-y:auto;border:1px solid #dbe3ef;padding:10px;border-radius:10px;background:#fff;" id="adminVisitorListContainer">Loading visitor logs...</div>
+                                </div>
 
-                <div class="admin-card">
-                    <div class="admin-title">👤 Upload Single Profile Photo (Auto-Compressed)</div>
-                    <p style="font-size:12px; color:#666; margin-top:0;">यहाँ से आप केवल लॉगिन/प्रोफाइल आइकॉन फोटो बदल सकते हैं।</p>
-                    <input type="file" id="adminProfileFileInput" accept="image/*" style="margin-bottom:8px;">
-                    <button type="button" onclick="uploadProfilePhotoFromAdmin()">Update Profile Photo</button>
-                </div>
+                                <div class="admin-card">
+                                    <div class="admin-title">💬 User Feedbacks Received</div>
+                                    <div style="max-height:220px;overflow-y:auto;border:1px solid #dbe3ef;padding:10px;border-radius:10px;background:#fff;" id="adminFeedbacksListContainer">Loading feedbacks...</div>
+                                </div>
 
-                <div class="admin-card">
-                    <div class="admin-title">🖼️ Advertisement Banner Manager (Slider)</div>
-                    <p style="font-size:12px; color:#666; margin-top:0;">आप एक साथ 3 से 4 बैनर फोटो चुन सकते हैं जो वेबसाइट पर स्लाइडर में दिखेंगे।</p>
-                    <input type="file" id="adminAdFileInput" accept="image/*" multiple style="margin-bottom:8px;">
-                    <button type="button" onclick="uploadAdBannerFromAdmin()">Update Ad Banners (Slider)</button>
-                </div>
+                                <div class="admin-card" style="border:1px solid #99f6e4;background:#f0fdfa;">
+                                    <div class="admin-title" style="color:#115e59;">👁️ Website Sections Hide / Unhide</div>
+                                    <p style="font-size:12px;color:#475569;margin-top:0;">किसी भी section को वेबसाइट पर छिपाएँ या दोबारा दिखाएँ. बदलाव Firebase के जरिए sync होगा.</p>
+                                    ${renderCategoryVisibilityControls()}
+                                </div>
 
-                <div class="admin-card" style="border:2px solid #2457e6;">
+                                <div id="adminAppearanceSection" class="admin-grid-2">
+                                    <div class="admin-card">
+                                        <div class="admin-title">📷 Upload Header Logo</div>
+                                        <input type="file" id="adminLogoFileInput" accept="image/*" style="margin-bottom:8px;">
+                                        <button type="button" onclick="uploadLogoFromAdmin()">Update Website Logo</button>
+                                    </div>
+
+                                    <div class="admin-card">
+                                        <div class="admin-title">👤 Upload Profile Photo</div>
+                                        <p style="font-size:12px;color:#64748b;margin-top:0;">Login/profile icon ke liye photo update karein.</p>
+                                        <input type="file" id="adminProfileFileInput" accept="image/*" style="margin-bottom:8px;">
+                                        <button type="button" onclick="uploadProfilePhotoFromAdmin()">Update Profile Photo</button>
+                                    </div>
+
+                                    <div class="admin-card" style="grid-column:1/-1;">
+                                        <div class="admin-title">🖼️ Advertisement Banner Manager</div>
+                                        <p style="font-size:12px;color:#64748b;margin-top:0;">3–4 banner images select karke website slider update karein.</p>
+                                        <input type="file" id="adminAdFileInput" accept="image/*" multiple style="margin-bottom:8px;">
+                                        <button type="button" onclick="uploadAdBannerFromAdmin()">Update Ad Banners (Slider)</button>
+                                    </div>
+                                </div>
+
+                <div id="adminPostsSection" class="admin-card" style="border:1px solid #c7d2fe;">
                     <div class="admin-title" style="color:#173a9c;">📋 Vacancy / Post Details Manager</div>
                     <div style="max-height:260px;overflow-y:auto;border:1px solid #cbd5e1;padding:10px;border-radius:6px;background:#fff;">
                         ${manageItemsHtml}
                     </div>
                 </div>
 
-                <div class="admin-card">
+                <div id="adminFooterSection" class="admin-card">
                     <div class="admin-title">📄 Footer Pages Content Manager</div>
                     <label style="font-weight:bold; font-size:13px;">About Us Content:</label>
                     <textarea id="editPageAbout" rows="3">${aboutVal}</textarea>
@@ -1584,7 +2498,7 @@
                     <button type="button" onclick="saveGeneralSettingsToFirebase()">Save General Settings</button>
                 </div>
 
-                <div class="admin-card">
+                <div id="adminLinksSection" class="admin-card">
                     <div class="admin-title">🌐 Manage Important Portals Links</div>
                     <div style="max-height:180px; overflow-y:auto; border:1px solid #cbd5e1; padding:10px; border-radius:6px; background:#fff; margin-bottom:10px;">
                         ${managePortalsHtml}
@@ -1603,8 +2517,14 @@
                     <input type="text" id="adminIgLink" placeholder="Instagram URL">
                     <button type="button" onclick="saveSocialLinksToFirebase()">Save Social Links</button>
                 </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = html;
+            document.getElementById('pageModal').classList.add('admin-modal');
+            document.body.classList.add('admin-open');
             toggleFormFieldsBasedOnCategory();
         }
 
@@ -2221,7 +3141,7 @@
         let passportImg=null, passportCutoutUrl=null;
         function renderPassportMakerHTML(){return `<div class="pmaker" style="max-width:1120px;margin:0 auto;color:#172033;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif">
         <style>
-        .pmaker *{box-sizing:border-box}.pmaker .pm-hero{background:linear-gradient(135deg,#172554,#1d4ed8 58%,#0e7490);color:#fff;border-radius:20px;padding:22px 24px;margin-bottom:18px;box-shadow:0 12px 28px rgba(30,64,175,.18)}.pmaker .pm-hero h2{font-size:clamp(22px,3vw,30px);margin:0 0 7px;font-weight:800;letter-spacing:-.5px}.pmaker .pm-hero p{margin:0;color:#dbeafe;line-height:1.55;font-size:14px}.pmaker .pm-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 5px 18px rgba(15,23,42,.055)}.pmaker .pm-section-title{font-size:16px;font-weight:800;color:#0f172a;margin:0 0 14px;display:flex;align-items:center;gap:9px}.pmaker .pm-section-title span{display:inline-grid;place-items:center;background:#eff6ff;color:#1d4ed8;width:32px;height:32px;border-radius:10px}.pmaker .pm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}.pmaker .pm-field label{display:block;font-size:12px;font-weight:750;color:#475569;margin:0 0 7px}.pmaker input:not([type=checkbox]):not([type=range]):not([type=file]),.pmaker select{width:100%;min-height:43px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;padding:10px 12px;color:#0f172a;font:inherit;font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s}.pmaker input:focus,.pmaker select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.13)}.pmaker input[type=file]{display:block;width:100%;padding:13px;border:1px dashed #93c5fd;border-radius:12px;background:#eff6ff;color:#1e40af}.pmaker input[type=range]{width:100%;accent-color:#2563eb}.pmaker .pm-help{display:block;color:#64748b;font-size:11px;line-height:1.45;margin-top:7px}.pmaker .pm-check{display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;padding:12px 14px;font-size:13px;font-weight:700;color:#334155}.pmaker .pm-check input{width:17px;height:17px;accent-color:#2563eb}.pmaker .pm-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.pmaker .pm-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:0!important;border-radius:11px;padding:11px 17px!important;font-size:13px!important;font-weight:800!important;cursor:pointer;box-shadow:0 3px 8px rgba(15,23,42,.10);transition:transform .15s,filter .15s}.pmaker .pm-btn:hover{transform:translateY(-1px);filter:brightness(1.04)}.pmaker .pm-primary{background:#2563eb!important;color:#fff!important}.pmaker .pm-success{background:#059669!important;color:#fff!important}.pmaker .pm-dark{background:#172554!important;color:#fff!important}.pmaker .pm-soft{background:#e2e8f0!important;color:#334155!important}.pmaker .pm-preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px;align-items:stretch}.pmaker .pm-preview-panel{background:#f8fafc;border:1px solid #e2e8f0;border-radius:15px;padding:15px;min-width:0;text-align:center}.pmaker .pm-preview-head{font-size:14px;font-weight:800;color:#0f172a;margin-bottom:7px}.pmaker .pm-preview-sub{font-size:12px;color:#64748b;line-height:1.5;margin:0 0 12px}.pmaker #passCanvas{display:block;max-width:100%;max-height:360px;width:auto;height:auto;margin:12px auto;border:1px solid #cbd5e1;border-radius:7px;background:#fff;box-shadow:0 3px 12px rgba(15,23,42,.07)}.pmaker #passSheetPreview{display:block;width:100%;max-width:440px;max-height:500px;object-fit:contain;margin:10px auto;border:1px solid #cbd5e1;border-radius:8px;background:#fff;box-shadow:0 3px 12px rgba(15,23,42,.07);touch-action:none;cursor:crosshair}.pmaker .pm-note{font-size:12px;color:#64748b;line-height:1.5}.pmaker .pm-divider{height:1px;background:#e2e8f0;margin:18px 0}.pmaker .pm-ai-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.pmaker .pm-ai-status{font-size:12px;color:#64748b;margin-top:8px}@media(max-width:560px){.pmaker .pm-hero{padding:18px;border-radius:15px}.pmaker .pm-card{padding:13px}.pmaker .pm-actions .pm-btn{flex:1 1 100%}}
+        .pmaker *{box-sizing:border-box}.pmaker .pm-hero{background:linear-gradient(135deg,#172554,#1d4ed8 58%,#0e7490);color:#fff;border-radius:20px;padding:22px 24px;margin-bottom:18px;box-shadow:0 12px 28px rgba(30,64,175,.18)}.pmaker .pm-hero h2{font-size:clamp(22px,3vw,30px);margin:0 0 7px;font-weight:800;letter-spacing:-.5px}.pmaker .pm-hero p{margin:0;color:#dbeafe;line-height:1.55;font-size:14px}.pmaker .pm-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 5px 18px rgba(15,23,42,.055)}.pmaker .pm-section-title{font-size:16px;font-weight:800;color:#0f172a;margin:0 0 14px;display:flex;align-items:center;gap:9px}.pmaker .pm-section-title span{display:inline-grid;place-items:center;background:#eff6ff;color:#1d4ed8;width:32px;height:32px;border-radius:10px}.pmaker .pm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}.pmaker .pm-field label{display:block;font-size:12px;font-weight:750;color:#475569;margin:0 0 7px}.pmaker input:not([type=checkbox]):not([type=range]):not([type=file]),.pmaker select{width:100%;min-height:43px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;padding:10px 12px;color:#0f172a;font:inherit;font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s}.pmaker input:focus,.pmaker select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.13)}.pmaker input[type=file]{display:block;width:100%;padding:13px;border:1px dashed #93c5fd;border-radius:12px;background:#eff6ff;color:#1e40af}.pmaker input[type=range]{width:100%;accent-color:#2563eb}.pmaker .pm-help{display:block;color:#64748b;font-size:11px;line-height:1.45;margin-top:7px}.pmaker .pm-check{display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;padding:12px 14px;font-size:13px;font-weight:700;color:#334155}.pmaker .pm-check input{width:17px;height:17px;accent-color:#2563eb}.pmaker .pm-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.pmaker .pm-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:0!important;border-radius:11px;padding:11px 17px!important;font-size:13px!important;font-weight:800!important;cursor:pointer;box-shadow:0 3px 8px rgba(15,23,42,.10);transition:transform .15s,filter .15s}.pmaker .pm-btn:hover{transform:translateY(-1px);filter:brightness(1.04)}.pmaker .pm-primary{background:#2563eb!important;color:#fff!important}.pmaker .pm-success{background:#059669!important;color:#fff!important}.pmaker .pm-dark{background:#172554!important;color:#fff!important}.pmaker .pm-soft{background:#e2e8f0!important;color:#334155!important}.pmaker .pm-preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px;align-items:stretch}.pmaker .pm-preview-panel{background:#f8fafc;border:1px solid #e2e8f0;border-radius:15px;padding:15px;min-width:0;text-align:center}.pmaker .pm-preview-head{font-size:14px;font-weight:800;color:#0f172a;margin-bottom:7px}.pmaker .pm-preview-sub{font-size:12px;color:#64748b;line-height:1.5;margin:0 0 12px}.pmaker #passCanvas{display:block;max-width:100%;max-height:360px;width:auto;height:auto;margin:12px auto;border:1px solid #cbd5e1;border-radius:7px;background:#fff;box-shadow:0 3px 12px rgba(15,23,42,.07)}.pmaker #passSheetPreview{display:block;width:100%;max-width:440px;max-height:500px;object-fit:contain;margin:10px auto;border:1px solid #cbd5e1;border-radius:8px;background:#fff;box-shadow:0 3px 12px rgba(15,23,42,.07);touch-action:none;cursor:crosshair}.pmaker .pm-note{font-size:12px;color:#64748b;line-height:1.5}.pmaker .pm-divider{height:1px;background:#e2e8f0;margin:18px 0}.pmaker .pm-ai-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.pmaker .pm-ai-status{font-size:12px;color:#64748b;margin-top:8px}.pmaker .pm-crop-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.9fr);gap:15px;align-items:start}.pmaker .pm-crop-stage{background:#111827;border:1px solid #cbd5e1;border-radius:14px;padding:12px;min-width:0}.pmaker #passCropCanvas{display:block;width:100%;max-height:540px;object-fit:contain;margin:0 auto;border-radius:8px;background:#1f2937;touch-action:none;cursor:crosshair}.pmaker .pm-crop-controls{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px}.pmaker .pm-crop-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}.pmaker .pm-crop-actions .pm-btn{flex:1 1 150px}.pmaker .pm-crop-tip{font-size:11px;line-height:1.5;color:#64748b;background:#fff;border:1px dashed #cbd5e1;border-radius:10px;padding:10px;margin-top:11px}.pmaker .pm-photo-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:430px;margin:10px auto 14px}.pmaker .pm-photo-card{background:#fff;border:1px solid #dbe2ea;border-radius:8px;padding:8px;box-shadow:0 4px 12px rgba(15,23,42,.09);text-align:center}.pmaker .pm-photo-card canvas{display:block;width:100%;height:auto;aspect-ratio:3.1/3.7;object-fit:contain;background:#fff;border:1px solid #e5e7eb}.pmaker .pm-photo-card .pm-card-name{font-size:10px;font-weight:800;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px}.pmaker .pm-photo-card .pm-card-date{font-size:9px;color:#64748b;margin-top:2px}.pmaker #passCanvas{display:none}@media(max-width:760px){.pmaker .pm-crop-layout{grid-template-columns:1fr}.pmaker .pm-photo-cards{grid-template-columns:repeat(2,minmax(0,1fr));max-width:360px}}@media(max-width:560px){.pmaker .pm-hero{padding:18px;border-radius:15px}.pmaker .pm-card{padding:13px}.pmaker .pm-actions .pm-btn{flex:1 1 100%}}
         </style>
         <header class="pm-hero"><h2>🪪 Passport Photo Studio</h2><p>Passport-size photo banayein, background aur name/date set karein, print sheet ko preview mein adjust karein aur high-quality JPG/PDF print karein.</p></header>
         <section class="pm-card"><h3 class="pm-section-title"><span>01</span> Photo & print settings</h3>
@@ -2236,10 +3156,27 @@
         </div></section>
         <section class="pm-card"><h3 class="pm-section-title"><span>02</span> Name & date (optional)</h3><label class="pm-check"><input type="checkbox" id="passAddText" onchange="passRender()"> Photo ke neeche name aur date print karein</label><div class="pm-grid" style="margin-top:13px"><div class="pm-field"><label>Name</label><input id="passName" placeholder="Enter name (optional)" oninput="passRender()"></div><div class="pm-field"><label>Date</label><input id="passDate" type="date" onchange="passRender()"></div></div></section>
         <section class="pm-card"><h3 class="pm-section-title"><span>03</span> Background & photo enhancement</h3><p class="pm-preview-sub">Browser AI se background remove karein ya photo enhance karein. AI model ko pehli baar load hone mein thoda samay lag sakta hai.</p><div class="pm-ai-row"><button type="button" class="pm-btn pm-primary" id="passRemoveBtn" onclick="passRemoveBG()">✂️ Remove Background</button><button type="button" class="pm-btn pm-dark" onclick="passEnhance()">✨ Enhance Photo</button><button type="button" class="pm-btn pm-soft" onclick="passResetCutout()">↺ Reset Original</button></div><div id="passRemoveStatus" class="pm-ai-status"></div></section>
-        <section class="pm-card"><h3 class="pm-section-title"><span>04</span> Preview & print adjustment</h3><div class="pm-preview-grid"><div class="pm-preview-panel"><div class="pm-preview-head">Passport photo preview</div><p class="pm-preview-sub">Single photo preview with selected size and optional name/date.</p><canvas id="passCanvas"></canvas><div id="passPreviewNote" class="pm-note">Upload photo to begin.</div></div><div class="pm-preview-panel"><div class="pm-preview-head">Print sheet preview</div><p class="pm-preview-sub">Har photo ke corner ko mouse ya finger se drag karke size adjust karein before printing.</p><canvas id="passSheetPreview" onpointerdown="passSheetPointerDown(event)" onpointermove="passSheetPointerMove(event)" onpointerup="passSheetPointerUp(event)" onpointercancel="passSheetPointerUp(event)"></canvas><div id="passSheetNote" class="pm-note">Photo upload karein, phir print sheet yahan dikhegi.</div><button type="button" class="pm-btn pm-soft" onclick="passResetSheetSizes()" style="margin-top:12px">↺ Reset photo sizes</button></div></div></section>
-        <canvas id="passSheet" style="display:none"></canvas><section class="pm-card"><h3 class="pm-section-title"><span>05</span> Export your photo sheet</h3><div class="pm-actions"><button type="button" class="pm-btn pm-primary" onclick="passDownloadJpg()">⬇ Download Photo JPG</button><button type="button" class="pm-btn pm-success" onclick="passDownloadPDF()">▤ Create PDF</button><button type="button" class="pm-btn pm-dark" onclick="passPrint()">🖨️ Print / Select Printer</button></div><p class="pm-help" style="margin-top:12px">Print par click karne se browser ka print dialog khulega. Wahan printer aur same paper size select karein. Passport requirements issuing authority se verify karein.</p></section></div>`}
+        <section class="pm-card pm-crop-card"><h3 class="pm-section-title"><span>04</span> Free Crop / Photo Size</h3><p class="pm-preview-sub">Photo ko screenshot ki tarah crop box se freely select karein. Corner handles se width-height badlein, box ko drag karke position badlein, aur crop ke waqt size preset ya custom size bhi choose karein.</p><div class="pm-crop-layout"><div class="pm-crop-stage"><canvas id="passCropCanvas" onpointerdown="passCropPointerDown(event)" onpointermove="passCropPointerMove(event)" onpointerup="passCropPointerUp(event)" onpointercancel="passCropPointerUp(event)"></canvas><div id="passCropNote" class="pm-note">Pehle photo upload karein.</div></div><div class="pm-crop-controls"><div class="pm-grid"><div class="pm-field"><label>Crop size</label><select id="passCropPreset" onchange="passCropPresetChange()"><option value="free">Free Size</option><option value="35x45">35 × 45 mm</option><option value="31x37">3.1 × 3.7 cm</option><option value="35x45cm">3.5 × 4.5 cm</option><option value="2x2">2 × 2 inch</option><option value="custom">Custom Size</option></select></div><div class="pm-field"><label>Width (mm)</label><input id="passCropW" type="number" value="35" min="5" max="500" step="0.1" oninput="passCropSizeInput('w')"></div><div class="pm-field"><label>Height (mm)</label><input id="passCropH" type="number" value="45" min="5" max="500" step="0.1" oninput="passCropSizeInput('h')"></div></div><div class="pm-crop-actions"><button type="button" class="pm-btn pm-primary" onclick="passApplyCrop()">✓ Apply Crop</button><button type="button" class="pm-btn pm-soft" onclick="passResetCrop()">↺ Reset Crop</button></div><div class="pm-crop-tip">Free Size mein aap kisi bhi proportion mein crop kar sakte hain. Preset select karne par selected ratio maintain rahega.</div></div></div></section>
+        
+        
+        <section class="pm-card"><h3 class="pm-section-title"><span>05</span> Preview & print adjustment</h3><div class="pm-preview-grid"><div class="pm-preview-panel"><div class="pm-preview-head">Passport photo preview</div><p class="pm-preview-sub">Crop ke baad selected size ke hisaab se photo cards yahan preview honge.</p><div id="passPreviewCards" class="pm-photo-cards"></div><canvas id="passCanvas"></canvas><div id="passPreviewNote" class="pm-note">Upload photo to begin.</div></div><div class="pm-preview-panel"><div class="pm-preview-head">Print sheet preview</div><p class="pm-preview-sub">Har photo ke corner ko mouse ya finger se drag karke size adjust karein before printing.</p><canvas id="passSheetPreview" onpointerdown="passSheetPointerDown(event)" onpointermove="passSheetPointerMove(event)" onpointerup="passSheetPointerUp(event)" onpointercancel="passSheetPointerUp(event)"></canvas><div id="passSheetNote" class="pm-note">Photo upload karein, phir print sheet yahan dikhegi.</div><button type="button" class="pm-btn pm-soft" onclick="passResetSheetSizes()" style="margin-top:12px">↺ Reset photo sizes</button></div></div></section>
+        <canvas id="passSheet" style="display:none"></canvas><section class="pm-card"><h3 class="pm-section-title"><span>06</span> Export your photo sheet</h3><div class="pm-actions"><button type="button" class="pm-btn pm-primary" onclick="passDownloadJpg()">⬇ Download Photo JPG</button><button type="button" class="pm-btn pm-success" onclick="passDownloadPDF()">▤ Create PDF</button><button type="button" class="pm-btn pm-dark" onclick="passPrint()">🖨️ Print / Select Printer</button></div><p class="pm-help" style="margin-top:12px">Print par click karne se browser ka print dialog khulega. Wahan printer aur same paper size select karein. Passport requirements issuing authority se verify karein.</p></section></div>`}
 
-        function passLoad(e){const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith('image/'))return alert('Image file select karein.');const r=new FileReader();r.onload=ev=>{const im=new Image();im.onload=()=>{passportImg=im;passportCutoutUrl=null;passSheetScales=[];passRender()};im.src=ev.target.result};r.readAsDataURL(f)}
+        function passLoad(e){const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith('image/'))return alert('Image file select karein.');const r=new FileReader();r.onload=ev=>{const im=new Image();im.onload=()=>{passportImg=im;passportCutoutUrl=null;passSheetScales=[];passCropImage=im;passCropRect=null;passCropPresetChange(true);passRender();passCropDraw()};im.src=ev.target.result};r.readAsDataURL(f)}
+        // Free-size crop editor for Passport Photo Maker (isolated addition)
+        let passCropImage=null,passCropRect=null,passCropDrag=null,passCropPresetLock=false;
+        function passCropCanvasMetrics(){const c=document.getElementById('passCropCanvas');if(!c||!passCropImage)return null;const maxW=900,maxH=540,scale=Math.min(maxW/passCropImage.width,maxH/passCropImage.height,1);const w=Math.max(1,Math.round(passCropImage.width*scale)),h=Math.max(1,Math.round(passCropImage.height*scale));c.width=w;c.height=h;return {c,scale,w,h};}
+        function passCropPresetChange(fromLoad=false){const sel=document.getElementById('passCropPreset'),wEl=document.getElementById('passCropW'),hEl=document.getElementById('passCropH');if(!sel||!wEl||!hEl)return;const v=sel.value;const presets={"35x45":[35,45],"31x37":[31,37],"35x45cm":[35,45],"2x2":[50.8,50.8]};if(v==='free'){passCropPresetLock=false;}else if(v==='custom'){passCropPresetLock=false;}else if(presets[v]){wEl.value=presets[v][0];hEl.value=presets[v][1];passCropPresetLock=true;}if(passCropImage){if(!passCropRect||fromLoad)passCropResetRect();else passCropDraw();}}
+        function passCropResetRect(){if(!passCropImage)return;const m=passCropCanvasMetrics();if(!m)return;let ratio=null;if(passCropPresetLock){const w=parseFloat(document.getElementById('passCropW')?.value)||35,h=parseFloat(document.getElementById('passCropH')?.value)||45;ratio=w/h;}let rw=m.w*.68,rh=ratio?rw/ratio:m.h*.72;if(rh>m.h*.82){rh=m.h*.82;rw=ratio?rh*ratio:rw;}if(rw>m.w*.86){rw=m.w*.86;rh=ratio?rw/ratio:rh;}if(rh>m.h*.86){rh=m.h*.86;rw=ratio?rh*ratio:rw;}passCropRect={x:(m.w-rw)/2,y:(m.h-rh)/2,w:rw,h:rh};passCropDraw();}
+        function passCropSizeInput(which){const sel=document.getElementById('passCropPreset');if(sel&&sel.value!=='free'&&sel.value!=='custom')return;const wEl=document.getElementById('passCropW'),hEl=document.getElementById('passCropH');let w=Math.max(5,parseFloat(wEl?.value)||35),h=Math.max(5,parseFloat(hEl?.value)||45);if(passCropPresetLock&&which==='w')hEl.value=(w/(parseFloat(wEl.value)||w)*h).toFixed(1);if(passCropPresetLock&&which==='h')wEl.value=(h/(parseFloat(hEl.value)||h)*w).toFixed(1);if(passCropImage){if(passCropPresetLock)passCropResetRect();else passCropDraw();}}
+        function passCropDraw(){const m=passCropCanvasMetrics();if(!m)return;const ctx=m.c.getContext('2d');ctx.clearRect(0,0,m.w,m.h);ctx.drawImage(passCropImage,0,0,m.w,m.h);if(!passCropRect)passCropResetRect();const r=passCropRect;ctx.save();ctx.fillStyle='rgba(0,0,0,.52)';ctx.fillRect(0,0,m.w,m.h);ctx.clearRect(r.x,r.y,r.w,r.h);ctx.drawImage(passCropImage,r.x,r.y,r.w,r.h,r.x,r.y,r.w,r.h);ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;ctx.strokeRect(r.x,r.y,r.w,r.h);ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=1;for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(r.x+r.w*i/3,r.y);ctx.lineTo(r.x+r.w*i/3,r.y+r.h);ctx.moveTo(r.x,r.y+r.h*i/3);ctx.lineTo(r.x+r.w,r.y+r.h*i/3);ctx.stroke();}ctx.restore();const hs=10;ctx.fillStyle='#fff';ctx.strokeStyle='#2563eb';ctx.lineWidth=2;[[r.x,r.y],[r.x+r.w,r.y],[r.x,r.y+r.h],[r.x+r.w,r.y+r.h]].forEach(([x,y])=>{ctx.beginPath();ctx.rect(x-hs/2,y-hs/2,hs,hs);ctx.fill();ctx.stroke();});const note=document.getElementById('passCropNote');if(note)note.textContent=`Crop: ${Math.round(r.w/m.scale)} × ${Math.round(r.h/m.scale)} px${passCropPresetLock?' • selected size ratio locked':' • Free Size'}`;}
+        function passCropPoint(e){const c=e.currentTarget,r=c.getBoundingClientRect();return {x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height};}
+        function passCropHitHandle(p){if(!passCropRect)return null;const r=passCropRect,hs=18;const handles={nw:[r.x,r.y],ne:[r.x+r.w,r.y],sw:[r.x,r.y+r.h],se:[r.x+r.w,r.y+r.h]};for(const k in handles){const [x,y]=handles[k];if(Math.abs(p.x-x)<=hs&&Math.abs(p.y-y)<=hs)return k;}return null;}
+        function passCropPointerDown(e){if(!passCropImage||!passCropRect)return;const p=passCropPoint(e),handle=passCropHitHandle(p);if(handle){passCropDrag={mode:handle,startX:p.x,startY:p.y,rect:{...passCropRect}};}else if(p.x>=passCropRect.x&&p.x<=passCropRect.x+passCropRect.w&&p.y>=passCropRect.y&&p.y<=passCropRect.y+passCropRect.h){passCropDrag={mode:'move',startX:p.x,startY:p.y,rect:{...passCropRect}};}else return;try{e.currentTarget.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault();}
+        function passCropPointerMove(e){if(!passCropDrag||!passCropImage)return;const m=passCropCanvasMetrics();if(!m)return;const p=passCropPoint(e),d=passCropDrag,base=d.rect;let min=25,nw=base.x,ny=base.y,ww=base.w,hh=base.h;if(d.mode==='move'){nw=Math.max(0,Math.min(m.w-base.w,base.x+p.x-d.startX));ny=Math.max(0,Math.min(m.h-base.h,base.y+p.y-d.startY));}else{let left=base.x,top=base.y,right=base.x+base.w,bottom=base.y+base.h;if(d.mode.includes('w'))left=Math.max(0,Math.min(right-min,p.x));if(d.mode.includes('e'))right=Math.min(m.w,Math.max(left+min,p.x));if(d.mode.includes('n'))top=Math.max(0,Math.min(bottom-min,p.y));if(d.mode.includes('s'))bottom=Math.min(m.h,Math.max(top+min,p.y));if(passCropPresetLock){const ratio=(parseFloat(document.getElementById('passCropW')?.value)||35)/(parseFloat(document.getElementById('passCropH')?.value)||45);if(d.mode.includes('e')||d.mode.includes('w')){ww=Math.max(min,right-left);hh=ww/ratio;}else{hh=Math.max(min,bottom-top);ww=hh*ratio;}if(d.mode==='nw'){left=base.x+base.w-ww;top=base.y+base.h-hh;}else if(d.mode==='ne'){top=base.y+base.h-hh;}else if(d.mode==='sw'){left=base.x+base.w-ww;}right=left+ww;bottom=top+hh;if(left<0){left=0;right=Math.min(m.w,left+ww);}if(top<0){top=0;bottom=Math.min(m.h,top+hh);}if(right>m.w){right=m.w;left=Math.max(0,right-ww);}if(bottom>m.h){bottom=m.h;top=Math.max(0,bottom-hh);} }nw=left;ny=top;ww=right-left;hh=bottom-top;}passCropRect={x:nw,y:ny,w:ww,h:hh};passCropDraw();e.preventDefault();}
+        function passCropPointerUp(){passCropDrag=null;}
+        function passApplyCrop(){if(!passCropImage||!passCropRect)return alert('Pehle photo upload karein.');const m=passCropCanvasMetrics(),r=passCropRect, sx=passCropImage.width/m.w,sy=passCropImage.height/m.h;const c=document.createElement('canvas');c.width=Math.max(1,Math.round(r.w*sx));c.height=Math.max(1,Math.round(r.h*sy));c.getContext('2d').drawImage(passCropImage,Math.round(r.x*sx),Math.round(r.y*sy),c.width,c.height,0,0,c.width,c.height);const im=new Image();im.onload=()=>{passportImg=im;passportCutoutUrl=null;passSheetScales=[];passCropImage=im;passCropRect=null;passCropPresetChange(true);passRender();passCropDraw();const n=document.getElementById('passCropNote');if(n)n.textContent='Crop applied. Aap chahein to dobara crop bhi kar sakte hain.'};im.src=c.toDataURL('image/png');}
+        function passResetCrop(){if(!passCropImage)return;passCropRect=null;passCropPresetChange(true);passCropDraw();}
         function passDims(){return [Math.max(1,parseFloat(document.getElementById('passW')?.value)||3.1),Math.max(1,parseFloat(document.getElementById('passH')?.value)||3.7)]}
         function passDraw(ctx,x,y,w,h){
           const addText=!!document.getElementById('passAddText')?.checked;
@@ -2269,7 +3206,8 @@
           }
         }
         let passSheetScales=[],passSheetLayout=[],passActiveResize=null;
-        function passRender(){const c=document.getElementById('passCanvas');if(!c)return;let [w,h]=passDims();c.width=Math.round(w/2.54*150);c.height=Math.round(h/2.54*150);passDraw(c.getContext('2d'),0,0,c.width,c.height);document.getElementById('passPreviewNote').textContent=passportImg?'Preview ready.':'Upload photo to begin.';passRenderSheetPreview();}
+        function passRender(){const c=document.getElementById('passCanvas');if(!c)return;let [w,h]=passDims();c.width=Math.round(w/2.54*150);c.height=Math.round(h/2.54*150);passDraw(c.getContext('2d'),0,0,c.width,c.height);const note=document.getElementById('passPreviewNote');if(note)note.textContent=passportImg?'Preview ready.':'Upload photo to begin.';passRenderPhotoCards();passRenderSheetPreview();}
+        function passRenderPhotoCards(){const wrap=document.getElementById('passPreviewCards');if(!wrap)return;wrap.innerHTML='';if(!passportImg)return;const count=Math.max(1,Math.min(12,parseInt(document.getElementById('passPhotoCount')?.value||'6',10)||6));const [w,h]=passDims();const dateRaw=document.getElementById('passDate')?.value||'',name=(document.getElementById('passName')?.value||'').trim();let dateText='';if(dateRaw){const p=dateRaw.split('-');dateText=p.length===3?`${p[2]}-${p[1]}-${p[0]}`:dateRaw;}for(let i=0;i<count;i++){const card=document.createElement('div');card.className='pm-photo-card';const cv=document.createElement('canvas');cv.width=Math.round(w/2.54*120);cv.height=Math.round(h/2.54*120);passDraw(cv.getContext('2d'),0,0,cv.width,cv.height);card.appendChild(cv);const nm=document.createElement('div');nm.className='pm-card-name';nm.textContent=name||'Preview';const dt=document.createElement('div');dt.className='pm-card-date';dt.textContent=dateText;card.append(nm,dt);wrap.appendChild(card);}} 
         function passGetPhoto(){if(!passportImg){alert('Pehle photo upload karein.');return null}let c=document.getElementById('passCanvas');return c}
         function passDownloadJpg(){let c=passGetPhoto();if(!c)return;let a=document.createElement('a');a.href=c.toDataURL('image/jpeg',.95);a.download='passport-photo.jpg';a.click()}
         function passPaperInfo(){
