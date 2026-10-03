@@ -1035,6 +1035,10 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
 }
 
 </style>
+
+    <!-- Google AdSense Auto Ads -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5879965927648496"
+         crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -1185,7 +1189,7 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
             <div class="tool-card" onclick="openToolModal('declaration')" style="background:#eefbf0; border-color:#86efac; color:#166534;">📝 Self Declaration Form (आय / निवास)</div>
             <div class="tool-card" onclick="openToolModal('resume')" style="background:#f5f3ff;border-color:#c4b5fd;color:#5b21b6;">📄 Resume Maker (रिज्यूमे बनाएं)</div>
             <div class="tool-card" onclick="openToolModal('passport')" style="background:#eff6ff;border-color:#93c5fd;color:#1d4ed8;">🪪 Passport Photo Maker</div>
-            <div class="tool-card" onclick="openToolModal('cashdenom')" style="background:#f0fdf4;border-color:#86efac;color:#166534;">💵 Cash Denomination Calculator</div>
+            <div class="tool-card" onclick="openToolModal('cashdenom')" style="background:#f0fdf4;border-color:#86efac;color:#166534;">💵 Cash Denomination Calculator</div><div class="tool-card" onclick="openToolModal('agecalculator')" style="background:#f5f3ff;border-color:#c4b5fd;color:#6d28d9;">🎂 Age Calculator</div>
         </div>
     </div>
 
@@ -3158,6 +3162,10 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
                 if(pageBox) pageBox.classList.add('declaration-modal-mode');
                 html = renderCashDenominationHTML();
                 setTimeout(initCashDenomination, 50);
+            } else if(toolType === 'agecalculator') {
+                if(pageBox) pageBox.classList.add('declaration-modal-mode');
+                html = renderAgeCalculatorHTML();
+                setTimeout(initAgeCalculator, 50);
             }
             document.getElementById('modalBodyContent').innerHTML = html; 
             openPageModal();
@@ -3375,6 +3383,123 @@ body:not(.admin-open) #vacancyPage .post-poster-area img {
             <table><thead><tr><th>Denomination</th><th>Quantity</th><th>Amount</th></tr></thead><tbody>${rows}</tbody></table>
             <script>window.onload=()=>{window.focus();window.print()}<\/script></body></html>`);
             w.document.close();
+        }
+
+        // Age Calculator - isolated utility addition
+        function renderAgeCalculatorHTML(){
+            return `<div id="ageCalculatorTool" style="font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#172033;background:#f5f7fb;border-radius:18px;padding:16px">
+                <style>
+                #ageCalculatorTool *{box-sizing:border-box}
+                #ageCalculatorTool .ac-hero{background:linear-gradient(135deg,#4c1d95,#7c3aed 58%,#2563eb);color:#fff;border-radius:16px;padding:22px 24px;margin-bottom:16px}
+                #ageCalculatorTool h2{margin:0 0 7px;color:#fff;font-size:clamp(21px,3vw,29px)}
+                #ageCalculatorTool .ac-hero p{margin:0;color:#ede9fe;font-size:13px}
+                #ageCalculatorTool .ac-card{background:#fff;border:1px solid #e2e8f0;border-radius:15px;padding:16px;margin-bottom:14px}
+                #ageCalculatorTool .ac-grid,#ageCalculatorTool .ac-result{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+                #ageCalculatorTool label{display:block;font-size:12px;font-weight:800;color:#475569;margin-bottom:6px}
+                #ageCalculatorTool input{width:100%;height:43px;border:1px solid #cbd5e1;border-radius:9px;padding:8px 10px;background:#fff;color:#0f172a}
+                #ageCalculatorTool .ac-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+                #ageCalculatorTool button{border:0;border-radius:10px;min-height:43px;padding:10px 16px;font-weight:800;cursor:pointer}
+                #ageCalculatorTool .ac-calc{background:#6d28d9;color:#fff}.ac-reset{background:#e2e8f0;color:#334155}
+                #ageCalculatorTool .ac-result-box{background:#faf5ff;border:1px solid #ddd6fe;border-radius:12px;padding:14px}
+                #ageCalculatorTool .ac-result-box small{display:block;color:#64748b;font-size:11px;font-weight:700;margin-bottom:5px}
+                #ageCalculatorTool .ac-result-box strong{font-size:22px;color:#6d28d9}
+                #ageCalculatorTool .ac-extra{margin-top:12px;padding:12px;border-radius:10px;background:#f8fafc;border:1px solid #e2e8f0;color:#475569;font-size:12px}
+                @media(max-width:700px){#ageCalculatorTool .ac-grid,#ageCalculatorTool .ac-result{grid-template-columns:1fr}}
+                </style>
+                <div class="ac-hero"><h2>🎂 Age Calculator</h2><p>Date of Birth डालकर exact age Years, Months और Days में calculate करें।</p></div>
+                <div class="ac-card"><div class="ac-grid">
+                    <div><label>Date of Birth</label><input id="acDob" type="date"></div>
+                    <div><label>Calculate As Of</label><input id="acAsOf" type="date"></div>
+                    <div><label>Today</label><input id="acToday" type="text" readonly></div>
+                </div><div class="ac-actions">
+                    <button type="button" class="ac-calc" onclick="calculateAge()">Calculate Age</button>
+                    <button type="button" class="ac-reset" onclick="resetAgeCalculator()">↺ Reset</button>
+                </div></div>
+                <div class="ac-card">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+                        <button type="button" class="ac-calc" id="acAgeTab" onclick="switchAgeToolTab('age')">🎂 Age Calculator</button>
+                        <button type="button" class="ac-reset" id="acTimeTab" onclick="switchAgeToolTab('time')">⏱️ Time Calculator</button>
+                    </div>
+                    <div id="acTimeCalculator" style="display:none;">
+                        <div class="ac-grid">
+                            <div><label>Start Time</label><input id="acStartTime" type="time" step="1"></div>
+                            <div><label>End Time</label><input id="acEndTime" type="time" step="1"></div>
+                            <div><label>Time Difference</label><input id="acTimeResult" type="text" readonly value="0 Hours 0 Minutes 0 Seconds"></div>
+                        </div>
+                        <div class="ac-actions">
+                            <button type="button" class="ac-calc" onclick="calculateTimeDifference()">Calculate Time</button>
+                            <button type="button" class="ac-reset" onclick="resetTimeCalculator()">↺ Reset</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="ac-card"><div class="ac-result">
+                    <div class="ac-result-box"><small>Years</small><strong id="acYears">0</strong></div>
+                    <div class="ac-result-box"><small>Months</small><strong id="acMonths">0</strong></div>
+                    <div class="ac-result-box"><small>Days</small><strong id="acDays">0</strong></div>
+                </div><div class="ac-extra" id="acExtra">अपनी Date of Birth चुनकर Calculate Age पर क्लिक करें।</div></div>
+            </div>`;
+        }
+        function initAgeCalculator(){
+            const iso=new Date().toISOString().slice(0,10);
+            const a=document.getElementById('acAsOf'), t=document.getElementById('acToday');
+            if(a)a.value=iso;if(t)t.value=iso;
+        }
+        function switchAgeToolTab(tab){
+            const ageResult=document.querySelector('#ageCalculatorTool .ac-result');
+            const ageCard=document.getElementById('acTimeCalculator');
+            const ageTab=document.getElementById('acAgeTab');
+            const timeTab=document.getElementById('acTimeTab');
+            if(!ageResult||!ageCard||!ageTab||!timeTab) return;
+            if(tab==='time'){
+                ageResult.style.display='none';
+                ageCard.style.display='block';
+                ageTab.className='ac-reset';
+                timeTab.className='ac-calc';
+            }else{
+                ageResult.style.display='grid';
+                ageCard.style.display='none';
+                ageTab.className='ac-calc';
+                timeTab.className='ac-reset';
+            }
+        }
+
+        function calculateTimeDifference(){
+            const s=document.getElementById('acStartTime'), e=document.getElementById('acEndTime'), r=document.getElementById('acTimeResult');
+            if(!s||!e||!r||!s.value||!e.value){alert('Please select Start Time and End Time.');return;}
+            const parts=v=>v.split(':').map(Number);
+            const a=parts(s.value), b=parts(e.value);
+            let start=a[0]*3600+a[1]*60+(a[2]||0), end=b[0]*3600+b[1]*60+(b[2]||0);
+            if(end<start) end+=86400;
+            let diff=end-start;
+            const h=Math.floor(diff/3600); diff%=3600;
+            const m=Math.floor(diff/60), sec=diff%60;
+            r.value=`${h} Hours ${m} Minutes ${sec} Seconds`;
+        }
+
+        function resetTimeCalculator(){
+            const s=document.getElementById('acStartTime'), e=document.getElementById('acEndTime'), r=document.getElementById('acTimeResult');
+            if(s)s.value='';if(e)e.value='';if(r)r.value='0 Hours 0 Minutes 0 Seconds';
+        }
+
+        function calculateAge(){
+            const de=document.getElementById('acDob'), ae=document.getElementById('acAsOf');
+            if(!de||!ae||!de.value||!ae.value){alert('Please select Date of Birth and Calculate As Of date.');return;}
+            const dob=new Date(de.value+'T00:00:00'), as=new Date(ae.value+'T00:00:00');
+            if(isNaN(dob)||isNaN(as)||as<dob){alert('Calculate As Of date must be on or after Date of Birth.');return;}
+            let y=as.getFullYear()-dob.getFullYear(),m=as.getMonth()-dob.getMonth(),d=as.getDate()-dob.getDate();
+            if(d<0){m--;d+=new Date(as.getFullYear(),as.getMonth(),0).getDate();}
+            if(m<0){y--;m+=12;}
+            document.getElementById('acYears').textContent=y.toLocaleString('en-IN');
+            document.getElementById('acMonths').textContent=m.toLocaleString('en-IN');
+            document.getElementById('acDays').textContent=d.toLocaleString('en-IN');
+            const total=Math.floor((as-dob)/86400000);
+            document.getElementById('acExtra').textContent=`Total completed days: ${total.toLocaleString('en-IN')}.`;
+        }
+        function resetAgeCalculator(){
+            const d=document.getElementById('acDob'),a=document.getElementById('acAsOf');
+            if(d)d.value='';if(a)a.value=new Date().toISOString().slice(0,10);
+            ['acYears','acMonths','acDays'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='0';});
+            const x=document.getElementById('acExtra');if(x)x.textContent='अपनी Date of Birth चुनकर Calculate Age पर क्लिक करें।';
         }
 
         // Passport Photo Maker - isolated utility additions
